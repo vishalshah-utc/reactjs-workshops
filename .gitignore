@@ -1,0 +1,16 @@
+node_modules/
+dist/
+build/
+coverage/
+.env
+.env.local
+*.local
+.DS_Store
+.vscode/
+.idea/
+*.log
+npm-debug.log*
+.turbo/
+.vite/
+playwright-report/
+test-results/
