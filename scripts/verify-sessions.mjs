@@ -139,6 +139,56 @@ for (const session of sessions) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Repo-wide history scan.
+//
+// Two rules, and they differ:
+//
+//   TRAINER.md  — must never appear in ANY commit, ever. It is trainer-only
+//                 for the life of the repo.
+//   solution/   — must not appear in any commit for a session whose solution
+//                 is NOT yet released. Once released it is public and its
+//                 presence in later commits is entirely normal.
+//
+// This exists because checking HEAD alone is not enough, and I got it wrong
+// once: a `git filter-branch` with the pathspec `sessions/*/solution` silently
+// matched nothing — git matches pathspecs against full FILE paths, and no
+// index entry ends at `solution` — so the content survived inside commits that
+// were still ancestors of main. HEAD looked clean. `git log` did not.
+// ---------------------------------------------------------------------------
+console.log('\nhistory');
+try {
+  const commits = execFileSync('git', ['rev-list', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim().split('\n').filter(Boolean);
+
+  const unreleased = new Set(
+    sessions.filter((s2) => !existsSync(join(SESSIONS, s2, 'solution', 'package.json'))),
+  );
+
+  const trainerHits = [];
+  const solutionHits = [];
+  for (const c of commits) {
+    const files = execFileSync('git', ['ls-tree', '-r', '--name-only', c], { cwd: ROOT, encoding: 'utf8' }).split('\n');
+    for (const f of files) {
+      if (/(^|\/)TRAINER\.md$/.test(f)) trainerHits.push(`${c.slice(0, 8)}:${f}`);
+      const m = f.match(/^sessions\/([^/]+)\/solution\//);
+      if (m && unreleased.has(m[1])) solutionHits.push(`${c.slice(0, 8)}:${m[1]}`);
+    }
+  }
+
+  trainerHits.length
+    ? fail(`TRAINER.md exists in history (${trainerHits.length} paths, e.g. ${trainerHits[0]}) — purge it, participants can read it`)
+    : ok(`no TRAINER.md in any of ${commits.length} commits`);
+
+  const bySession = [...new Set(solutionHits.map((h) => h.split(':')[1]))];
+  bySession.length
+    ? fail(`unreleased solution(s) present in history for: ${bySession.join(', ')} — purge, or release properly`)
+    : ok(unreleased.size
+        ? `no unreleased solution content in history (${[...unreleased].join(', ')} still held back)`
+        : 'all solutions released');
+} catch (err) {
+  ok(`not a git checkout — skipping history scan (${err.code ?? 'n/a'})`);
+}
+
 console.log('');
 if (failures) {
   console.error(`${failures} check(s) failed.`);
