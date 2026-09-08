@@ -33,21 +33,25 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' 'localhost:4000/api/products?_fail=422')" = 422
           test "$(curl -s -o /dev/null -w '%{http_code}' localhost:4000/api/admin/products)" = 401
 
+  # Builds every app folder that exists — starters always, and solutions once
+  # they have been released from the private companion repo after a session.
   apps:
-    name: ${{ matrix.session }} / ${{ matrix.variant }}
+    name: Build apps
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        session: ['01-foundations']
-        variant: [starter, solution]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '22' }
-      - working-directory: sessions/${{ matrix.session }}/${{ matrix.variant }}
+      - name: typecheck, lint and build each app
         run: |
-          npm install --no-audit --no-fund
-          npm run typecheck
-          npm run lint
-          npm run build
+          set -e
+          found=0
+          for app in sessions/*/starter sessions/*/solution; do
+            [ -f "$app/package.json" ] || continue
+            found=$((found+1))
+            echo "::group::$app"
+            ( cd "$app" && npm install --no-audit --no-fund && npm run typecheck && npm run lint && npm run build )
+            echo "::endgroup::"
+          done
+          echo "built $found app(s)"
+          test "$found" -gt 0

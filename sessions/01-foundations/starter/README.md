@@ -31,9 +31,11 @@ and you can see the effect of every change immediately.
 
 ## Stuck?
 
-`../solution/` has the finished version of every file. Copy the one you are
-stuck on and keep going. Falling behind on Lab 2 and missing Lab 3 is much
-worse than copying a file.
+Ask your trainer — they have the finished version of every file and will paste
+you the one you need. Falling behind on Lab 2 and missing Lab 3 is much worse
+than asking.
+
+The full solution lands in this repo at `../solution/` right after the session.
 
 ## Commands
 

@@ -47,17 +47,31 @@ for (const session of sessions) {
   const solution = join(dir, 'solution');
 
   // 1. Required documents
-  for (const doc of ['README.md', 'TRAINER.md', 'CHEATSHEET.md', 'HOMEWORK.md']) {
+  for (const doc of ['README.md', 'CHEATSHEET.md', 'HOMEWORK.md']) {
     existsSync(join(dir, doc)) ? ok(doc) : fail(`missing ${doc}`);
   }
-  for (const app of [starter, solution]) {
-    const name = app.endsWith('starter') ? 'starter' : 'solution';
-    if (!existsSync(app)) { fail(`missing ${name}/`); continue; }
+
+  // TRAINER.md must NEVER appear here. It lives in the private companion repo
+  // because it is written assuming the reader has not seen it — a participant
+  // who has read the script knows the punchline of every demo.
+  existsSync(join(dir, 'TRAINER.md'))
+    ? fail('TRAINER.md is in the PUBLIC repo — it belongs in reactjs-workshops-trainer')
+    : ok('no trainer script leaked');
+
+  if (!existsSync(starter)) { fail('missing starter/'); continue; }
+
+  // solution/ is held back until the session has actually run, then published
+  // from the companion repo with `node scripts/release-solution.mjs <session>`.
+  const released = existsSync(join(solution, 'package.json'));
+  released ? ok('solution released') : ok('solution not yet released (expected before the session runs)');
+
+  const apps = released ? [starter, solution] : [starter];
+  const nameOf = (app) => (app.endsWith('starter') ? 'starter' : 'solution');
+  for (const app of apps) {
     for (const f of ['package.json', '.stackblitzrc', 'index.html', 'README.md']) {
-      existsSync(join(app, f)) ? ok(`${name}/${f}`) : fail(`missing ${name}/${f}`);
+      existsSync(join(app, f)) ? ok(`${nameOf(app)}/${f}`) : fail(`missing ${nameOf(app)}/${f}`);
     }
   }
-  if (!existsSync(starter) || !existsSync(solution)) continue;
 
   // 2. Every TODO the guide names must exist in the starter, and vice versa
   const guide = readFileSync(join(dir, 'README.md'), 'utf8');
@@ -71,16 +85,18 @@ for (const session of sessions) {
     ok(`${inGuide.size} TODO markers match the guide`);
   }
 
-  // 3. A solution with TODOs left in it is not a solution
-  const leftovers = walk(join(solution, 'src')).filter((f) => markers(readFileSync(f, 'utf8')).length);
-  leftovers.length
-    ? fail(`solution still contains TODO markers: ${leftovers.map((f) => f.replace(solution, '')).join(', ')}`)
-    : ok('solution has no TODO markers');
+  // 3. A released solution with TODOs left in it is not a solution
+  if (released) {
+    const leftovers = walk(join(solution, 'src')).filter((f) => markers(readFileSync(f, 'utf8')).length);
+    leftovers.length
+      ? fail(`solution still contains TODO markers: ${leftovers.map((f) => f.replace(solution, '')).join(', ')}`)
+      : ok('solution has no TODO markers');
+  }
 
   // 4. Exact version pins. A `^` means two participants can resolve different
   //    versions of React, and only one of them hits the bug.
-  for (const app of [starter, solution]) {
-    const name = app.endsWith('starter') ? 'starter' : 'solution';
+  for (const app of apps) {
+    const name = nameOf(app);
     const pkg = JSON.parse(readFileSync(join(app, 'package.json'), 'utf8'));
     const loose = Object.entries({ ...pkg.dependencies, ...pkg.devDependencies })
       .filter(([, v]) => /^[\^~>=<*]/.test(v) || v === 'latest');
@@ -91,18 +107,19 @@ for (const session of sessions) {
 
   // 5. Starter and solution must agree on dependencies, or the starter installs
   //    a tree the solution was never tested against.
-  const sp = JSON.parse(readFileSync(join(starter, 'package.json'), 'utf8'));
-  const lp = JSON.parse(readFileSync(join(solution, 'package.json'), 'utf8'));
-  for (const field of ['dependencies', 'devDependencies']) {
-    const a = JSON.stringify(sp[field] ?? {});
-    const b = JSON.stringify(lp[field] ?? {});
-    a === b ? ok(`${field} identical across starter/solution`)
-            : fail(`${field} differ between starter and solution`);
+  if (released) {
+    const sp = JSON.parse(readFileSync(join(starter, 'package.json'), 'utf8'));
+    const lp = JSON.parse(readFileSync(join(solution, 'package.json'), 'utf8'));
+    for (const field of ['dependencies', 'devDependencies']) {
+      JSON.stringify(sp[field] ?? {}) === JSON.stringify(lp[field] ?? {})
+        ? ok(`${field} identical across starter/solution`)
+        : fail(`${field} differ between starter and solution`);
+    }
   }
 
   // 6. StackBlitz needs both of these to boot straight into a running app
-  for (const app of [starter, solution]) {
-    const name = app.endsWith('starter') ? 'starter' : 'solution';
+  for (const app of apps) {
+    const name = nameOf(app);
     const rc = JSON.parse(readFileSync(join(app, '.stackblitzrc'), 'utf8'));
     rc.installDependencies === true && typeof rc.startCommand === 'string'
       ? ok(`${name}/.stackblitzrc valid`)
@@ -112,8 +129,8 @@ for (const session of sessions) {
   // 7. node_modules must not be TRACKED. It will exist locally for anyone who
   //    has run npm install — that is fine. What must never happen is it being
   //    committed, which would make the repo unusable.
-  for (const app of [starter, solution]) {
-    const name = app.endsWith('starter') ? 'starter' : 'solution';
+  for (const app of apps) {
+    const name = nameOf(app);
     const rel = app.replace(ROOT, '').replace(/^\//, '');
     const tracked = execFileSync('git', ['ls-files', `${rel}/node_modules`], { cwd: ROOT, encoding: 'utf8' }).trim();
     tracked

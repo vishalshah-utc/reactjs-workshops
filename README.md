@@ -24,7 +24,7 @@ events and file upload.
 
 | # | Session | What you ship | Open |
 |---|---|---|---|
-| 1 | **[Foundations & the Component Model](./sessions/01-foundations/)** | Storefront shell + product grid | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/sessions/01-foundations/starter) · [solution](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/sessions/01-foundations/solution) |
+| 1 | **[Foundations & the Component Model](./sessions/01-foundations/)** | Storefront shell + product grid | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/sessions/01-foundations/starter) |
 | 2 | State, Events & Controlled UI | Facets, sort, local CRUD, the cart reducer | *coming soon* |
 | 3 | Effects, the Network & Custom Hooks | Real API, loading/error/empty states | *coming soon* |
 | 4 | Routing & Application Architecture | Multi-page, shareable filtered URLs | *coming soon* |
@@ -35,9 +35,14 @@ events and file upload.
 | 9 | Performance & Advanced Patterns | Virtualized admin grid, generic DataTable | *coming soon* |
 | 10 | Testing, Quality Gates & Shipping | Tests, CI, Docker, capstone | *coming soon* |
 
-Each session folder holds a **participant guide**, a **trainer script**, a
-one-page **cheat sheet**, **homework**, and a self-contained **starter** and
-**solution**.
+Each session folder holds a **participant guide**, a one-page **cheat sheet**,
+**homework**, and a self-contained **starter**.
+
+**Solutions are published here right after each session runs.** They are held
+back until then on purpose — several labs are built around discovering
+something for yourself, and reading ahead spends that for nothing. Once a
+session has happened its solution stays up, for the homework and for diffing
+against your own work.
 
 ## How to open a session
 
@@ -94,12 +99,13 @@ TanStack Query v5 · React Hook Form + Zod · Zustand · Vitest + Testing Librar
 
 ## For trainers
 
-Each session's `TRAINER.md` is a minute-by-minute script with `SAY` / `DO` /
-`ASK THE ROOM` / `TEACH` markers, timing checkpoints, the failure modes to
-watch for, and a documented recovery plan for running late.
+Trainer scripts and unreleased solutions live in a **separate private repo**,
+`reactjs-workshops-trainer`. They are not here, and they must not be added
+here — `scripts/verify-sessions.mjs` fails the build if a `TRAINER.md` appears
+in this repo.
 
-Run the structure checks before any session:
+If you are running a session and do not have access, ask Vishal.
 
 ```bash
-node scripts/verify-sessions.mjs
+node scripts/verify-sessions.mjs   # structure checks, run before any session
 ```

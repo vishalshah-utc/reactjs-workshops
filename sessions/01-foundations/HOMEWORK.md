@@ -1,7 +1,11 @@
 # Session 1 Homework
 
-**~45 minutes.** Reference solutions are in `solution/` — try first. Task 2 is
-the one that teaches the most; do that one even if you skip the others.
+**~45 minutes.** Task 2 is the one that teaches the most; do that one even if
+you skip the others.
+
+The Session 1 solution is published to this repo right after the session, so
+you can diff your work against it — but these three tasks go beyond it, so it
+will not simply contain the answers.
 
 Work in your own copy of the starter, on top of what you built in the session.
 

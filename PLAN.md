@@ -415,46 +415,64 @@ half-built between sessions.
 
 **Repo:** `reactjs-workshops`, public.
 
+**Two repos, on purpose.**
+
+| Repo | Visibility | Holds |
+|---|---|---|
+| `vishalshah-utc/reactjs-workshops` | **public** | participant guides, cheat sheets, homework, **starters**, the API, released solutions |
+| `vishalshah-utc/reactjs-workshops-trainer` | **private** | **trainer scripts**, the series handbook, and **solutions before they are released** |
+
+The public repo has to be public: participants open its starters directly in
+StackBlitz with no account and no auth, so anything in it is readable by
+anyone. That is right for starters and guides. It is wrong for the trainer
+script, which is written assuming the reader has not seen it — a participant
+who has read it knows the punchline of every demo, and the demos are how the
+material lands.
+
+There is no way to keep one folder of a public GitHub repo private: not with a
+branch, not with a submodule. Two repos is the only mechanism that works.
+
+**Solutions are released after each session**, with
+`node scripts/release-solution.mjs <session>` in the private repo. Held back
+before, permanent after — participants need them for homework and for diffing
+against their own work.
+
 ```
-reactjs-workshops/
-├── README.md                     # landing page: the 20 StackBlitz buttons
-├── SETUP_GUIDE.md                # StackBlitz path, local path, troubleshooting
-├── PARTICIPANT_HANDBOOK.md       # how the course works, conventions, glossary
-├── TRAINER_HANDBOOK.md           # running the series, timing, recovery plans
-├── PLAN.md                       # this file
+reactjs-workshops/                       # PUBLIC
+├── README.md                            # landing page: the StackBlitz buttons
+├── SETUP_GUIDE.md
+├── PARTICIPANT_HANDBOOK.md
+├── PLAN.md
 │
-├── api/                          # canonical backend — single source of truth
-│   ├── src/{routes,domain,seed,ws,middleware}/
-│   ├── openapi.yaml
-│   └── README.md                 # every endpoint, with curl examples
+├── api/                                 # the ShopCrew backend
 │
 ├── sessions/
 │   ├── 01-foundations/
-│   │   ├── README.md             # participant guide for this session
-│   │   ├── TRAINER.md            # minute-by-minute (SAY / DO / ASK / TEACH)
-│   │   ├── CHEATSHEET.md         # one page, printable, also the pre-work
+│   │   ├── README.md                    # participant guide
+│   │   ├── CHEATSHEET.md                # one page, printable, also the pre-work
 │   │   ├── HOMEWORK.md
-│   │   ├── starter/              # ← self-contained, opens in StackBlitz
-│   │   │   ├── package.json
-│   │   │   ├── .stackblitzrc
-│   │   │   ├── server/           # synced copy of ../../../api
-│   │   │   └── src/              # with // TODO(lab-3.1): markers
-│   │   └── solution/             # ← self-contained, opens in StackBlitz
-│   ├── 02-state-and-events/
-│   │   └── … through …
-│   └── 10-testing-and-shipping/
+│   │   ├── starter/                     # ← self-contained, opens in StackBlitz
+│   │   └── solution/                    # ← appears AFTER the session runs
+│   └── … 02 through 10 …
 │
-├── docs/
-│   ├── concepts/                 # the self-study deep dives
-│   ├── design-system.md          # Tailwind tokens + how to add shadcn components
-│   ├── CODE_REVIEW_CHECKLIST.md
-│   └── SLIDE_PROMPTS.md
-│
+├── docs/concepts/                       # self-study deep dives
 ├── scripts/
-│   ├── sync-api.mjs              # api/ → every sessions/*/{starter,solution}/server
-│   ├── verify-continuity.mjs     # asserts solution(N) ≡ starter(N+1) baseline
-│   └── verify-builds.mjs         # install + typecheck + build all 20 folders
-│
+│   ├── sync-api.mjs
+│   ├── verify-continuity.mjs
+│   └── verify-sessions.mjs              # fails if a TRAINER.md appears here
+└── .github/workflows/ci.yml
+
+
+reactjs-workshops-trainer/               # PRIVATE
+├── README.md
+├── SERIES_HANDBOOK.md                   # running the series across all ten
+├── sessions/
+│   └── <NN>-<name>/
+│       ├── TRAINER.md                   # minute-by-minute (SAY/DO/ASK/TEACH)
+│       └── solution/                    # source of truth until released
+├── scripts/
+│   ├── release-solution.mjs             # publish a solution to the public repo
+│   └── verify-trainer.mjs               # keeps the two repos in step
 └── .github/workflows/ci.yml
 ```
 
@@ -532,9 +550,11 @@ in the tree.
 
 ## 7. Deliverables
 
-**Per session (×10):** starter app · solution app · participant README ·
-trainer script · one-page cheat sheet · homework brief + reference
-solution · slide prompts.
+**Per session (×10), public:** starter app · participant guide · one-page
+cheat sheet · homework brief · the solution, released after the session.
+
+**Per session (×10), private:** trainer script · the solution before release ·
+slide prompts.
 
 **Once:** the backend API + OpenAPI docs · README with all 20 StackBlitz
 links · setup guide · participant handbook · trainer handbook ·
@@ -587,7 +607,7 @@ alone — say the word and I'll delete it.
 | # | Item | Status |
 |---|---|---|
 | 1 | Product domain | **Settled — ShopCrew** (§2) |
-| 2 | Repo | **Settled — `vishalshah-utc/reactjs-workshops`, public, not a template** (§6) |
+| 2 | Repos | **Settled — public `reactjs-workshops` + private `reactjs-workshops-trainer`** (§6) |
 | 3 | `gh auth login` | **Blocked on you** — needed before I can create branches / push / open PRs |
 | 4 | Veto anything in §4's "what the 2-hour format costs" table | Open — say the word and I'll swap it against a lab |
 | 5 | Product name "ShopCrew" | Cosmetic; trivially renamed later |

@@ -73,9 +73,15 @@ Every lab has the same shape:
 Starter files carry numbered markers — `// TODO(lab-1.2)` — so you always know
 where you are. Search for them (`Ctrl/Cmd+Shift+F`) if you get lost.
 
-If you fall behind: `solution/` next door has the finished version of every
-file. Copy the one you're stuck on and keep moving. Falling behind on Lab 2
-and missing Lab 3 is much worse than copying one file.
+**If you fall behind, say so.** Your trainer has the finished version of every
+file and will paste you the one you're stuck on. Falling behind on Lab 2 and
+missing Lab 3 is much worse than asking. Do not sit quietly and lose the
+session.
+
+The full solution is published to this repo **straight after the session** —
+you'll have it for the homework and for diffing against your own work. It is
+held back until then on purpose: the labs are built around discovering a
+couple of things for yourself, and reading ahead spends that for nothing.
 
 ---
 
@@ -982,8 +988,10 @@ on the wishlist?". Where should that state actually live?
 
 ## Homework
 
-[HOMEWORK.md](./HOMEWORK.md) — three tasks, about 45 minutes. Reference
-solutions are in `solution/`, but try first.
+[HOMEWORK.md](./HOMEWORK.md) — three tasks, about 45 minutes.
+
+The session solution is published to this repo right after we finish, so you
+can check your work against it. Try first.
 
 ## Next session
 
