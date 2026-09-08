@@ -24,12 +24,17 @@ export function createApp() {
   app.use(cors);
   app.use(express.json({ limit: '2mb' }));
 
-  // Images and uploads sit BEFORE the teaching hooks so a global ?_delay in
-  // the address bar doesn't accidentally stall every image on the page.
+  // attachUser is cheap and never rejects — it only populates req.user when a
+  // valid token is present. It must come before EVERY authenticated route,
+  // uploads included.
+  app.use(attachUser);
+
+  // Images and uploads mount before the teaching hooks so that a global
+  // ?_delay or ?_fail in the address bar does not stall or break every image
+  // on the page along with the request you actually wanted to slow down.
   app.use('/api/images', imageRoutes);
   app.use('/api', uploadRoutes);
 
-  app.use(attachUser);
   app.use('/api', teachingHooks);
 
   app.get('/api/flaky', flaky);
