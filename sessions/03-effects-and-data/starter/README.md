@@ -47,13 +47,12 @@ They also work on the app itself — `http://localhost:5173/?_delay=3000`.
 
 ## What you build
 
-Search for `TODO(lab-` — eight markers.
+Search for `TODO(lab-` — seven markers.
 
 | Marker | File |
 |---|---|
 | `lab-1.1` | `src/hooks/useProducts.ts` — the `empty` state |
 | `lab-1.2` | `src/components/ProductBoard.tsx`, `src/App.tsx` — split error from empty |
-| `lab-2.1` | `src/hooks/useProducts.ts` — the infinite loop |
 | `lab-2.2` | `src/hooks/useDebounce.ts` — the missing cleanup |
 | `lab-2.3` | `src/App.tsx` — cancel the categories request |
 | `lab-3.1` | `src/hooks/useProducts.ts` — `AbortController` |
@@ -62,6 +61,10 @@ Search for `TODO(lab-` — eight markers.
 
 **The app runs from the first minute**, and several of these are *bugs you can
 watch happen* before you fix them. Open the network tab early.
+
+Lab 2 also has you deliberately break one working line for sixty seconds, to
+watch an infinite fetch loop happen and then undo it. That one is not a TODO —
+the code is correct as shipped.
 
 ## Already done
 

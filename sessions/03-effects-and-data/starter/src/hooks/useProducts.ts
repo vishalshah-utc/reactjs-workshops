@@ -32,22 +32,27 @@ export function useProducts(query: ProductQuery): UseProductsResult {
   const refetch = useCallback(() => setReloadToken((n) => n + 1), []);
 
   /**
+   * The query is serialised, and THAT string is the dependency.
+   *
+   * This one line is load-bearing. `query` is an object literal built during
+   * the parent's render, so it is a brand-new object every time. An effect
+   * depending on `[query]` compares by reference, sees a change on every
+   * render, fetches, sets state, re-renders, builds a new object, and fetches
+   * again — forever.
+   *
+   * Lab 2 has you break this deliberately for thirty seconds so you can watch
+   * it happen. Do not skip it: it is the most common infinite-fetch bug in
+   * React and you want to recognise it on sight.
+   *
+   * Remember the name `queryKey`. Session 5 replaces this whole hook with
+   * TanStack Query, whose central idea is exactly a serialisable key.
+   */
+  const queryKey = JSON.stringify(query);
+
+  /**
    * TODO(lab-1.1): set `status` to 'empty' when the response has no rows.
    * Right now everything that succeeds is 'success', so a search with no
-   * matches renders an empty grid instead of a designed empty state.
-   *
-   * TODO(lab-2.1): the dependency array below is `[query, reloadToken]` and
-   * that is an INFINITE LOOP. `query` is an object literal built during the
-   * parent's render, so it is a new object every time and the effect can
-   * never see it as unchanged: fetch → setState → render → new object →
-   * fetch. Open the network tab and watch.
-   *
-   *   Fix it by depending on the query's VALUE rather than its identity:
-   *     const queryKey = JSON.stringify(query);
-   *   then depend on [queryKey, reloadToken] and JSON.parse inside.
-   *
-   *   Remember that name. Session 5 replaces this whole hook with TanStack
-   *   Query, whose central idea is exactly a serialisable key.
+   * matches renders a blank grid instead of a designed empty state.
    *
    * TODO(lab-3.1): there is no cancellation. Type fast in the search box and
    * an earlier, slower response can land after a later one and overwrite it.
@@ -58,6 +63,7 @@ export function useProducts(query: ProductQuery): UseProductsResult {
    *   and rendering an error for it flashes a red banner on every keystroke.
    */
   useEffect(() => {
+    const parsed = JSON.parse(queryKey) as ProductQuery;
     /* eslint-disable-next-line react-hooks/set-state-in-effect --
      * The linter is right, and it is worth reading rather than silencing.
      * Setting state synchronously in an effect costs a second render pass.
@@ -68,7 +74,7 @@ export function useProducts(query: ProductQuery): UseProductsResult {
     setStatus('loading');
     setError(null);
 
-    getProducts(query)
+    getProducts(parsed)
       .then((response) => {
         setProducts(response.data);
         setTotal(response.meta.total);
@@ -78,7 +84,7 @@ export function useProducts(query: ProductQuery): UseProductsResult {
         setError(caught instanceof Error ? caught : new Error('Something went wrong'));
         setStatus('error');
       });
-  }, [query, reloadToken]);
+  }, [queryKey, reloadToken]);
 
   return { products, total, status, error, refetch };
 }

@@ -248,8 +248,8 @@ Open the network tab and type "laptop" in the search box, slowly.
 **Six requests.** One per keystroke. On a real product that is six times the
 server load for one search, and the first five results are thrown away.
 
-Worse is waiting for you in `useProducts`. Look at its dependency array:
-`[query, reloadToken]`. Open the network tab and just *sit there*.
+And there is a far worse version of the same problem that you are about to
+cause on purpose.
 
 ### Concept
 
@@ -314,18 +314,32 @@ StrictMode — it just found something.
 
 ### Steps
 
-**A. `src/hooks/useProducts.ts` — `TODO(lab-2.1)`.** Fix the infinite loop:
+**A. Break it on purpose — 60 seconds.** Open `src/hooks/useProducts.ts` and
+find the effect's dependency array:
 
 ```tsx
-const queryKey = JSON.stringify(query);
-
-useEffect(() => {
-  const parsed = JSON.parse(queryKey) as ProductQuery;
-  // …use `parsed`, not `query`
 }, [queryKey, reloadToken]);
 ```
 
-Watch the network tab settle.
+Change it to depend on the object itself:
+
+```tsx
+}, [query, reloadToken]);          // ← don't leave this
+```
+
+Open the network tab and **touch nothing.**
+
+Requests forever. The grid flickers between skeletons and products as fast as
+the server can answer. Nobody clicked anything.
+
+That is the loop, and every part of it is visible now: `query` is rebuilt on
+every render → the effect sees a new value → it fetches → it sets state → that
+re-renders → `query` is rebuilt → forever.
+
+**Put `queryKey` back.** The network tab goes quiet.
+
+> Do this once, deliberately, in a controlled 60 seconds. You will meet it for
+> real one day, and the only way to recognise it fast is to have caused it.
 
 **B. `src/hooks/useDebounce.ts` — `TODO(lab-2.2)`.** The timer is set and never
 cleared, so *every* keystroke's timer fires — six requests, just later.
@@ -375,7 +389,8 @@ has already gone.
 ### Verify
 
 Network tab: typing "laptop" makes **one** request. Sitting idle makes
-**none**. Reloading makes **one** cancelled and one live call to `/categories`.
+**none** — if anything is still firing on its own, you left `[query]` in
+place. Reloading makes one cancelled and one live call to `/categories`.
 
 ### Watch out
 
