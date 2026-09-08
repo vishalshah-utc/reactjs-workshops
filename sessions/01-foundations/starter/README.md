@@ -29,6 +29,14 @@ Search the project for `TODO(lab-` — there are twelve, numbered by lab.
 version, not an empty shell — you improve things rather than fill in blanks,
 and you can see the effect of every change immediately.
 
+## ⚠️ Don't re-click the starter link
+
+Each click of a `/fork/` link creates a **fresh copy** — it does not reopen
+your work. Once your project loads, the URL becomes `stackblitz.com/edit/…`;
+bookmark that and return via the bookmark.
+
+Nothing is created on GitHub. `/fork/` is a StackBlitz concept only.
+
 ## Stuck?
 
 Ask your trainer — they have the finished version of every file and will paste

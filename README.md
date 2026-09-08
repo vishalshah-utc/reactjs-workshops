@@ -49,6 +49,14 @@ against your own work.
 **One click, no account:** use the ▶ starter link above. It boots straight into
 a running app.
 
+> ⚠️ **Click it once per session, then bookmark the tab.** Every click of a
+> `/fork/` link creates a *fresh copy* of the starter — it does not reopen your
+> earlier work. After it loads, the address bar becomes `stackblitz.com/edit/…`;
+> that URL is your project, so bookmark it and return through the bookmark.
+>
+> Nothing is created on GitHub. `/fork/` is a StackBlitz-only concept — no
+> repository is forked and your GitHub account is untouched.
+
 **Want your work to persist between sessions?** Sign in to StackBlitz with
 GitHub first (free, unlimited public projects), then use the same link.
 

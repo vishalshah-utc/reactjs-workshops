@@ -31,6 +31,18 @@ By the end you will be able to answer, without hesitating:
    The first `npm install` takes 2–4 minutes. Doing that in the room, thirty
    times at once, costs us a lab.
 
+   > ⚠️ **Click that link once, then bookmark the tab.**
+   >
+   > Every click of a `/fork/` link gives you a **brand-new copy of the
+   > starter** — not the work you did earlier. Re-click it mid-session and you
+   > start Lab 1 again from scratch.
+   >
+   > Once it loads, the address bar changes to a `stackblitz.com/edit/…` URL.
+   > **That** is your project. Bookmark it, and use the bookmark to come back.
+   >
+   > It creates nothing on GitHub. `/fork/` is a StackBlitz-only idea — your
+   > GitHub account is never touched and no repository is forked.
+
 2. **Read [CHEATSHEET.md](./CHEATSHEET.md).** One page. Skim it; don't memorise it.
 
 3. **Install React DevTools** in your browser
