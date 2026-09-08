@@ -230,30 +230,55 @@ looks like a React error and is really a missing import.
    default, `display: flex` from the `md` breakpoint up. We fix the mobile
    case in Lab 4.
 
-3. **`TODO(lab-1.3)` — add the search box.** **Replace the bare
-   `<SearchIcon … />` placeholder.** Add the import first:
+3. **`TODO(lab-1.3)` — add the search box.** Add the import first:
 
    ```tsx
    import { Input } from '@/components/ui/input';
    ```
 
-   The wrapper is `relative` and the icon is `absolute` — that is how you
-   overlay an icon on an input:
+   **You are adding a NEW `<div>` inside the one that is already there.** The
+   outer `<div className="ml-auto flex items-center gap-2">` does not change —
+   it is the right-hand group that holds search, account and cart. Only the
+   lone `<SearchIcon />` gets replaced.
+
+   Before:
 
    ```tsx
-   <div className="relative hidden sm:block">
-     <SearchIcon className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
-     <Input
-       type="search"
-       placeholder="Search products"
-       aria-label="Search products"
-       className="w-44 pl-8 lg:w-64"
-     />
-   </div>
+   <div className="ml-auto flex items-center gap-2">     {/* ← leave this alone */}
+     {/* TODO(lab-1.3) … */}
+     <SearchIcon className="text-muted-foreground hidden size-4 sm:block" />   {/* ← replace this line */}
+
+     <Button variant="ghost" size="icon" aria-label="Your account">
    ```
 
-   `pointer-events-none` on the icon matters: without it, clicking the
-   magnifying glass hits the icon instead of focusing the input underneath.
+   After:
+
+   ```tsx
+   <div className="ml-auto flex items-center gap-2">     {/* ← unchanged */}
+     <div className="relative hidden sm:block">          {/* ← NEW wrapper */}
+       <SearchIcon className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+       <Input
+         type="search"
+         placeholder="Search products"
+         aria-label="Search products"
+         className="w-44 pl-8 lg:w-64"
+       />
+     </div>
+
+     <Button variant="ghost" size="icon" aria-label="Your account">
+   ```
+
+   Three things the new wrapper is doing, and they are all load-bearing:
+
+   - **`relative`** makes it the positioning context. The icon is `absolute`,
+     so it positions against this wrapper — not against the page. This is the
+     standard way to put an icon inside an input, and you will write it often.
+   - **`hidden sm:block`** moved here *from the icon*. In the starter it was on
+     the `<SearchIcon />`; now it is on the wrapper, so the icon and the input
+     hide and show together instead of the input surviving on its own.
+   - **`pointer-events-none`** on the icon means a click passes straight
+     through to the input underneath. Without it, clicking the magnifying glass
+     does nothing — the icon swallows it.
 
 4. **`TODO(lab-1.4)` — show the cart count.** The badge goes **inside the
    existing cart `<Button>`, right after `<ShoppingCartIcon />`.** Add the
