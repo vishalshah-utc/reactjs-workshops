@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push: { branches: [main] }
+  pull_request:
+
+jobs:
+  structure:
+    name: Session structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: node scripts/verify-sessions.mjs
+
+  api:
+    name: API boots and answers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: npm, cache-dependency-path: api/package-lock.json }
+      - run: npm ci
+        working-directory: api
+      - name: Boot and smoke-test
+        working-directory: api
+        run: |
+          node src/index.js &
+          for i in $(seq 1 40); do curl -sf localhost:4000/api/dev/health >/dev/null && break; sleep 0.5; done
+          curl -sf localhost:4000/api/dev/health | grep -q '"ok":true'
+          curl -sf "localhost:4000/api/products?limit=5" | grep -q '"data"'
+          test "$(curl -s -o /dev/null -w '%{http_code}' 'localhost:4000/api/products?_fail=422')" = 422
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:4000/api/admin/products)" = 401
+
+  apps:
+    name: ${{ matrix.session }} / ${{ matrix.variant }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        session: ['01-foundations']
+        variant: [starter, solution]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - working-directory: sessions/${{ matrix.session }}/${{ matrix.variant }}
+        run: |
+          npm install --no-audit --no-fund
+          npm run typecheck
+          npm run lint
+          npm run build
