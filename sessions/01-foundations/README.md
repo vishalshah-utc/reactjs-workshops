@@ -182,10 +182,15 @@ above it, and you can walk up the tree until you find it.
 
 ### Steps
 
-Open **`src/components/SiteHeader.tsx`**.
+All four steps are in **`src/components/SiteHeader.tsx`**. Open it now and
+keep it open.
+
+Two of the steps need a new import at the top of the file. They are called out
+where they happen — if you forget one you get `Input is not defined`, which
+looks like a React error and is really a missing import.
 
 1. **`TODO(lab-1.1)` — give the component props.** It currently takes none.
-   Add an optional `cartCount`:
+   **Replace the line `export function SiteHeader() {`** with:
 
    ```tsx
    interface SiteHeaderProps {
@@ -199,8 +204,13 @@ Open **`src/components/SiteHeader.tsx`**.
    Two different mechanisms — TypeScript's and JavaScript's — that you almost
    always use together.
 
-2. **`TODO(lab-1.2)` — render the nav links.** Above the component there is a
-   `NAV_LINKS` array. Turn it into anchors:
+   Then in **`src/App.tsx`**, pass a value: `<SiteHeader cartCount={3} />`.
+   Nothing visible changes yet — that's expected.
+
+2. **`TODO(lab-1.2)` — render the nav links.** Inside the existing `<nav>`
+   there is **one hand-written `<a>` for `NAV_LINKS[0]`. Delete it and the
+   comment above it**, and put the `.map()` in its place. Leave the `<nav>`
+   itself alone — its `gap-1` is what spaces the links:
 
    ```tsx
    <nav className="ml-4 hidden items-center gap-1 md:flex">
@@ -220,8 +230,15 @@ Open **`src/components/SiteHeader.tsx`**.
    default, `display: flex` from the `md` breakpoint up. We fix the mobile
    case in Lab 4.
 
-3. **`TODO(lab-1.3)` — add the search box.** Note the wrapper is `relative`
-   and the icon is `absolute` — that is how you overlay an icon on an input:
+3. **`TODO(lab-1.3)` — add the search box.** **Replace the bare
+   `<SearchIcon … />` placeholder.** Add the import first:
+
+   ```tsx
+   import { Input } from '@/components/ui/input';
+   ```
+
+   The wrapper is `relative` and the icon is `absolute` — that is how you
+   overlay an icon on an input:
 
    ```tsx
    <div className="relative hidden sm:block">
@@ -238,7 +255,15 @@ Open **`src/components/SiteHeader.tsx`**.
    `pointer-events-none` on the icon matters: without it, clicking the
    magnifying glass hits the icon instead of focusing the input underneath.
 
-4. **`TODO(lab-1.4)` — show the cart count.** Only when there is one:
+4. **`TODO(lab-1.4)` — show the cart count.** The badge goes **inside the
+   existing cart `<Button>`, right after `<ShoppingCartIcon />`.** Add the
+   import first:
+
+   ```tsx
+   import { Badge } from '@/components/ui/badge';
+   ```
+
+   Then replace the whole cart button with:
 
    ```tsx
    <Button variant="ghost" size="icon" aria-label={`Cart, ${cartCount} items`} className="relative">
@@ -251,7 +276,14 @@ Open **`src/components/SiteHeader.tsx`**.
    </Button>
    ```
 
-5. In **`src/App.tsx`**, pass a value so you can see it: `<SiteHeader cartCount={3} />`.
+   `relative` on the button and `absolute` on the badge are a pair: the badge
+   positions itself against the nearest positioned ancestor. Put the badge
+   outside the button and it flies to the corner of the page. That `relative`
+   was already in the starter, waiting for you.
+
+   Note the `aria-label` changed too — a screen reader user now hears
+   "Cart, 3 items" rather than just "Cart". The badge is visual only; the
+   label carries the actual information.
 
 ### Verify
 
