@@ -66,10 +66,19 @@ rather than a warning to silence.
 
 | # | Module | Time | Status |
 |---|---|---|---|
-| 7 | **[State & Events](./07-state-and-events/)** | 2.5h | 📝 outline |
-| 8 | **[Structuring State: Objects, Arrays, Lifting & Resetting](./08-state-structure/)** | 2.5h | 📝 outline |
-| 9 | **[Reducers & Context](./09-reducers-and-context/)** | 2.5h | 📝 outline |
+| 7 | **[State & Events](./07-state-and-events/)** | 3h | ✅ complete |
+| 8 | **[Structuring State: Objects, Arrays, Lifting & Resetting](./08-state-structure/)** | 3h | ✅ complete |
+| 9 | **[Reducers & Context](./09-reducers-and-context/)** | 3h | ✅ complete |
 | 10 | **[Forms & Controlled Components](./10-forms/)** | 2.5h | 📝 outline |
+
+`useState` and events, including the two things that confuse everyone —
+state-as-a-snapshot and why three setter calls increment once. Then the
+decisions that keep a codebase workable: immutable updates at every depth, a
+state shape that cannot contradict itself, which component should own a value,
+and controlling when React preserves state versus resets it. Module 9 adds
+reducers (one testable pure function instead of scattered update rules) and
+Context, including the re-render cost and the state/dispatch split that avoids
+it.
 
 ### Part 4 — Escape hatches
 
