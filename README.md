@@ -25,7 +25,7 @@ events and file upload.
 | # | Session | What you ship | Open |
 |---|---|---|---|
 | 1 | **[Foundations & the Component Model](./sessions/01-foundations/)** | Storefront shell + product grid | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/sessions/01-foundations/starter) |
-| 2 | State, Events & Controlled UI | Facets, sort, local CRUD, the cart reducer | *coming soon* |
+| 2 | **[State, Events & Controlled UI](./sessions/02-state-and-events/)** | Search, sort, filters, cart reducer, back-office CRUD | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/sessions/02-state-and-events/starter) |
 | 3 | Effects, the Network & Custom Hooks | Real API, loading/error/empty states | *coming soon* |
 | 4 | Routing & Application Architecture | Multi-page, shareable filtered URLs | *coming soon* |
 | 5 | Server State with TanStack Query | Infinite scroll, optimistic cart | *coming soon* |

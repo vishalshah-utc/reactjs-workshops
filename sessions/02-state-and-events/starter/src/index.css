@@ -1,0 +1,122 @@
+/* Tailwind v4. One import, no config file, no PostCSS file. */
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* Tell Tailwind that `.dark` on an ancestor means dark mode, rather than
+   relying only on the OS setting. Session 8 wires a theme toggle to this. */
+@custom-variant dark (&:is(.dark *));
+
+/* ---------------------------------------------------------------------------
+   Design tokens.
+
+   In Tailwind v4 the theme lives in CSS, not in a JS config. Every token below
+   becomes a utility: `--color-primary` gives you `bg-primary`, `text-primary`,
+   `border-primary`. Change a value here and the whole app moves with it —
+   which is exactly what a design system is.
+--------------------------------------------------------------------------- */
+:root {
+  --radius: 0.65rem;
+
+  --background: oklch(0.995 0 0);
+  --foreground: oklch(0.21 0.02 264);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.21 0.02 264);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.21 0.02 264);
+
+  --primary: oklch(0.52 0.19 259);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.968 0.007 264);
+  --secondary-foreground: oklch(0.28 0.03 264);
+
+  --muted: oklch(0.968 0.007 264);
+  --muted-foreground: oklch(0.55 0.02 264);
+  --accent: oklch(0.955 0.012 259);
+  --accent-foreground: oklch(0.28 0.03 264);
+
+  --destructive: oklch(0.58 0.22 27);
+  --destructive-foreground: oklch(0.99 0 0);
+  --success: oklch(0.62 0.15 155);
+  --success-foreground: oklch(0.99 0 0);
+  --warning: oklch(0.75 0.15 75);
+  --warning-foreground: oklch(0.21 0.02 264);
+
+  --border: oklch(0.922 0.008 264);
+  --input: oklch(0.922 0.008 264);
+  --ring: oklch(0.52 0.19 259);
+}
+
+.dark {
+  --background: oklch(0.17 0.015 264);
+  --foreground: oklch(0.97 0.005 264);
+  --card: oklch(0.21 0.018 264);
+  --card-foreground: oklch(0.97 0.005 264);
+  --popover: oklch(0.21 0.018 264);
+  --popover-foreground: oklch(0.97 0.005 264);
+
+  --primary: oklch(0.68 0.16 256);
+  --primary-foreground: oklch(0.17 0.015 264);
+  --secondary: oklch(0.27 0.02 264);
+  --secondary-foreground: oklch(0.97 0.005 264);
+
+  --muted: oklch(0.27 0.02 264);
+  --muted-foreground: oklch(0.68 0.015 264);
+  --accent: oklch(0.29 0.025 264);
+  --accent-foreground: oklch(0.97 0.005 264);
+
+  --destructive: oklch(0.66 0.19 25);
+  --destructive-foreground: oklch(0.17 0.015 264);
+  --success: oklch(0.68 0.14 155);
+  --success-foreground: oklch(0.17 0.015 264);
+  --warning: oklch(0.78 0.14 75);
+  --warning-foreground: oklch(0.17 0.015 264);
+
+  --border: oklch(0.3 0.02 264);
+  --input: oklch(0.32 0.02 264);
+  --ring: oklch(0.68 0.16 256);
+}
+
+/* @theme inline maps the variables above onto Tailwind's utility namespaces. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+@layer base {
+  * { @apply border-border outline-ring/50; }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  /* Never remove focus rings. Keyboard users need them, and Session 10's
+     accessibility pass will fail you for it. */
+  :focus-visible { @apply outline-2 outline-offset-2 outline-ring; }
+}
