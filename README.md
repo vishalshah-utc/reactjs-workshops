@@ -18,7 +18,8 @@ events and file upload.
 | | |
 |---|---|
 | 📋 **[Course plan](./PLAN.md)** | The full curriculum, the technology choices and why |
-| 📚 **[Study notes](./notes/)** | Module-wise notes for teaching React from scratch — JavaScript foundations, tooling, rendering architectures, then React itself |
+| 📚 **[Study notes](./study-notes/)** | Module-wise notes for teaching React from scratch — JavaScript foundations, tooling, rendering architectures, then React itself |
+| 📖 **[Study guides](./study-guides/)** | Standalone guided-project write-ups: React + Tailwind/shadcn, and React + TypeScript/Bootstrap |
 | 🔌 **[API reference](./api/README.md)** | The backend every session runs against |
 
 ## The ten sessions

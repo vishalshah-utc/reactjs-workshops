@@ -1,0 +1,70 @@
+
+javascript 
+    - 1997 
+    - was submitted to ECMA for standardization 
+    - ECMA kept publishing specifications / standards for javascript 
+    - since then every browser started implementing these specifications / standards 
+
+1997    - ES 1 
+1998    - ES 2
+1999    - ES 3
+2009    - ES 5
+2015    - ES 6 - introduced some great / dramatic features 
+            - modern javascript 
+            - ECMAScript
+2026       - ES 2026 
+
+    - write business logic 
+    - handle events 
+    - handle the http api calls / ajax calls / 
+    - form validations 
+    - ....
+
+language            library             frameworks 
+javascript              .js             angular 
+                    datepickers         nextjs
+                    calendar            remix
+                    jquery              
+                    bootstrap
+                    materialUI
+                    redux
+                    react
+= programming       = simplify tasks    = standardize the process
+capabitlies 
+
+
+React library 
+    - allow to create "Components" 
+
+ReactDOM
+    - render the components on the browser 
+
+Build tools 
+    - 
+    - Webpacks (create-react-app cli tool)
+    - Vite - latest build tool 
+
+
+JSX / TSX 
+    - javascript / typescript exetension 
+    - it is used to describe the UI for the component 
+    - it is similar to html (not 100%)
+
+Styling in reactjs 
+
+    1. plain css 
+        - you can define all your styles in .css files 
+    
+    2. CSS Modules 
+        - imports a css file as object, so the css classnames can be scoped to a particular component file 
+
+    3. inline style 
+
+    4. Tailwind 
+
+    5. UI/component Libraries 
+
+        - bootstrap 
+        - shadcn
+        - 
+ 
