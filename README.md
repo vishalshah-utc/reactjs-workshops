@@ -28,8 +28,8 @@ events and file upload.
 |---|---|---|---|
 | 1 | **[Foundations & the Component Model](./sessions/01-foundations/)** | Storefront shell + product grid | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/sessions/01-foundations/starter) |
 | 2 | **[State, Events & Controlled UI](./sessions/02-state-and-events/)** | Search, sort, filters, cart reducer, back-office CRUD | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/sessions/02-state-and-events/starter) |
-| 3 | Effects, the Network & Custom Hooks | Real API, loading/error/empty states | *coming soon* |
-| 4 | Routing & Application Architecture | Multi-page, shareable filtered URLs | *coming soon* |
+| 3 | **[Effects, the Network & Custom Hooks](./sessions/03-effects-and-data/)** | Real API, loading/error/empty states, custom hooks | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/sessions/03-effects-and-data/starter) |
+| 4 | **[Routing & Application Architecture](./sessions/04-routing-and-architecture/)** | Multi-page, shareable filtered URLs, feature slices | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/sessions/04-routing-and-architecture/starter) |
 | 5 | Server State with TanStack Query | Infinite scroll, optimistic cart | *coming soon* |
 | 6 | Auth, RBAC & the Storefront/Back-office Split | Login, roles, two dashboards | *coming soon* |
 | 7 | Production-Grade Forms | Checkout wizard, promotion builder | *coming soon* |

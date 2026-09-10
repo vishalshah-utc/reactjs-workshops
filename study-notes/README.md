@@ -69,7 +69,7 @@ rather than a warning to silence.
 | 7 | **[State & Events](./07-state-and-events/)** | 3h | ✅ complete |
 | 8 | **[Structuring State: Objects, Arrays, Lifting & Resetting](./08-state-structure/)** | 3h | ✅ complete |
 | 9 | **[Reducers & Context](./09-reducers-and-context/)** | 3h | ✅ complete |
-| 10 | **[Forms & Controlled Components](./10-forms/)** | 2.5h | 📝 outline |
+| 10 | **[Forms & Controlled Components](./10-forms/)** | 3h | ✅ complete |
 
 `useState` and events, including the two things that confuse everyone —
 state-as-a-snapshot and why three setter calls increment once. Then the
@@ -84,9 +84,16 @@ it.
 
 | # | Module | Time | Status |
 |---|---|---|---|
-| 11 | **[Refs & the DOM](./11-refs-and-the-dom/)** | 1.5h | 📝 outline |
-| 12 | **[Effects & Synchronisation](./12-effects/)** | 3h | 📝 outline |
-| 13 | **[Data Fetching & Custom Hooks](./13-data-fetching-and-custom-hooks/)** | 2.5h | 📝 outline |
+| 11 | **[Refs & the DOM](./11-refs-and-the-dom/)** | 2h | ✅ complete |
+| 12 | **[Effects & Synchronisation](./12-effects/)** | 3.5h | ✅ complete |
+| 13 | **[Data Fetching & Custom Hooks](./13-data-fetching-and-custom-hooks/)** | 3h | ✅ complete |
+
+Forms end Part 3 — every input type, validation that is actually accessible,
+and React 19 Actions. Then the escape hatches: refs for values React must not
+re-render for and for the DOM nodes it does; effects, which is the module where
+most React bugs are born and which spends as much space on deleting effects as
+writing them; and data fetching, where hand-rolling stops being viable — build
+`useFetch` correctly, then read the list of what it still cannot do.
 
 ### Part 5 — Applications
 
