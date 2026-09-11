@@ -2,7 +2,7 @@
 
 **What this is:** the teaching half of a two-document workshop. Every React concept is explained from
 first principles and then practised in a **small isolated lab demo** you can run, poke at, and
-deliberately break. There are 23 concept sections and 92 labs, all living in one playground project.
+deliberately break. There are 23 concept sections and 97 labs, all living in one playground project.
 
 **Who it's for.** Two audiences, same document:
 
@@ -19161,10 +19161,10 @@ next. Nesting, `Outlet`, params and the-URL-as-state are identical in all three;
 declarative mode you have learned them for all of them.
 
 - **§18.2–§18.11 — Declarative.** The bulk of the section, and the bulk of the React code you'll meet
-  in existing projects. Labs 18.1 to 18.4.
-- **§18.12 — Data.** What moving the config out of React buys you, and what it costs. Lab 18.5.
+  in existing projects. Labs 18.1 to 18.9.
+- **§18.12 — Data.** What moving the config out of React buys you, and what it costs. Lab 18.10.
 - **§18.13 — Framework.** The full-stack option, and why it's a project decision rather than a
-  library one. Lab 18.6.
+  library one. Lab 18.11.
 - **§18.14 — Choosing.** The honest decision table.
 
 > **One package.** All three modes ship in `react-router`. There is nothing to install when moving
@@ -19179,7 +19179,7 @@ declarative mode you have learned them for all of them.
 
 ---
 
-**Part A — Declarative mode.** §18.2 to §18.11, and Labs 18.1 to 18.4.
+**Part A — Declarative mode.** §18.2 to §18.11, and Labs 18.1 to 18.9.
 
 ## 18.2 The pieces
 
@@ -19556,7 +19556,7 @@ So why write the object version?
 
 - **The tree becomes data you can read at runtime.** Derive the navbar, a breadcrumb trail, a sitemap
   or a permissions audit *from* the config, instead of maintaining a second list beside it that
-  silently drifts out of sync. This is the real payoff, and Lab 18.4 builds it.
+  silently drifts out of sync. This is the real payoff, and Lab 18.8 builds it.
 - **You can attach your own metadata.** Add a `title`, an icon, a `requiredRole`, `showInNav: false`.
   JSX `Route` elements can't carry arbitrary props; objects can carry anything.
 - **It's testable without rendering.** A route config is a value. You can assert that every path is
@@ -19574,7 +19574,7 @@ something from it — which, in practice, is the moment you add a second navigat
 
 ---
 
-**Part B — Data mode.** §18.12, and Lab 18.5.
+**Part B — Data mode.** §18.12, and Lab 18.10.
 
 ## 18.12 Data mode: loaders, actions, and `errorElement`
 
@@ -19634,12 +19634,12 @@ addition.
 > gap; until you're on it, the schema is the answer.
 
 **Learn declarative mode first.** It's what most existing code uses, it's what every tutorial shows,
-and the concepts — nesting, params, the URL as state — transfer unchanged. Lab 18.5 converts one app
+and the concepts — nesting, params, the URL as state — transfer unchanged. Lab 18.10 converts one app
 from declarative to data mode so you can see exactly what moves.
 
 ---
 
-**Part C — Framework mode.** §18.13, and Lab 18.6.
+**Part C — Framework mode.** §18.13, and Lab 18.11.
 
 ## 18.13 Framework mode
 
@@ -19878,15 +19878,1556 @@ understanding as a progression rather than as three unrelated choices.
 
 ---
 
-## 🧪 Lab 18.1 — Replace the lab shell with a real router
+**The labs in this section build one app, one concept at a time.** Lab 18.1 writes the
+components with no router at all; each lab after it adds exactly one routing idea and edits the
+same files. Copy each step in order and you'll have a working app at every point.
+
+| Lab | Adds | Level |
+|---|---|---|
+| 18.1 | The pages, hand-rolled navigation, no router | core |
+| 18.2 | `Routes`, `Route`, `Link` — the URL takes over | core |
+| 18.3 | A layout route, `Outlet`, `index`, `NavLink`, a 404 | core |
+| 18.4 | A dynamic segment and `useParams` | core |
+| 18.5 | A nested layout, a sub-nav, and `Outlet` context | core |
+| 18.6 | `useSearchParams` — filters in the URL | core |
+| 18.7 | A pathless guard route, and the return trip | depth |
+| 18.8 | The tree as a config, and a nav derived from it | depth |
+| 18.9 | The same ideas against a real `BrowserRouter` | depth |
+
+
+---
+
+## 🧪 Lab 18.1 — The pages, before any routing
 
 **Level:** core
 
-The exercise promised back in Part 0.5. You'll rebuild the demo shell's navigation with React Router, which is a much better way to learn routing than a hello-world app — you already understand exactly what the thing does.
+Labs 18.1 to 18.9 build **one app, one concept at a time**. This first lab writes the components and
+adds no router at all — so that when the router arrives in Lab 18.2 you can see exactly what it
+replaces.
+
+Every later lab in Part A edits these same files. You register the demo once, here, and it improves
+as you go.
+
+### The folder
+
+```
+src/demos/18-routing/
+├── CrewLab.tsx              ← the registered demo
+└── crew/
+    ├── data.ts
+    └── pages/
+        ├── HomePage.tsx
+        ├── RosterPage.tsx
+        └── SettingsPage.tsx
+```
+
+**1. Create `src/demos/18-routing/crew/data.ts`:**
+
+```ts
+export type Role = "engineer" | "designer" | "ops"
+
+export interface CrewMember {
+  id: string
+  name: string
+  role: Role
+  onCall: boolean
+  shifts: string[]
+}
+
+export const crew: CrewMember[] = [
+  { id: "ada",   name: "Ada Lovelace", role: "engineer", onCall: true,  shifts: ["Mon 09:00", "Thu 14:00"] },
+  { id: "grace", name: "Grace Hopper", role: "engineer", onCall: false, shifts: ["Tue 09:00"] },
+  { id: "kata",  name: "Katherine J.", role: "ops",      onCall: true,  shifts: ["Wed 22:00", "Sat 06:00"] },
+  { id: "may",   name: "May Ling",     role: "designer", onCall: false, shifts: [] },
+]
+
+export const ROLES = ["engineer", "designer", "ops"] as const
+
+/** URL values and user input are strings; this is the one place that turns one into a Role. */
+export const isRole = (v: string): v is Role =>
+  (ROLES as readonly string[]).includes(v)
+```
+
+**2. Create `crew/pages/HomePage.tsx`:**
+
+```tsx
+import { ListGroup } from "react-bootstrap"
+import { crew } from "../data"
+
+export default function HomePage() {
+  const onCall = crew.filter((m) => m.onCall)
+
+  return (
+    <>
+      <p className="small text-muted">Who's on call right now.</p>
+      <ListGroup>
+        {onCall.map((m) => (
+          <ListGroup.Item key={m.id} className="small">
+            {m.name} — {m.role}
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
+    </>
+  )
+}
+```
+
+**3. Create `crew/pages/RosterPage.tsx`:**
+
+```tsx
+import { ListGroup } from "react-bootstrap"
+import { crew } from "../data"
+
+export default function RosterPage() {
+  return (
+    <ListGroup>
+      {crew.map((m) => (
+        <ListGroup.Item key={m.id} className="small d-flex justify-content-between">
+          <span>{m.name}</span>
+          <span className="text-muted">{m.role}</span>
+        </ListGroup.Item>
+      ))}
+    </ListGroup>
+  )
+}
+```
+
+**4. Create `crew/pages/SettingsPage.tsx`:**
+
+```tsx
+import { ListGroup } from "react-bootstrap"
+import { crew } from "../data"
+
+export default function SettingsPage() {
+  return (
+    <ListGroup className="small">
+      <ListGroup.Item>Crew size — <strong>{crew.length}</strong></ListGroup.Item>
+      <ListGroup.Item>On call — <strong>{crew.filter((m) => m.onCall).length}</strong></ListGroup.Item>
+      <ListGroup.Item>Shifts booked — <strong>{crew.reduce((n, m) => n + m.shifts.length, 0)}</strong></ListGroup.Item>
+    </ListGroup>
+  )
+}
+```
+
+Three ordinary components. No routing, no props, no state — each one renders from the same data
+module. That's deliberate: the router should be the only new thing in Lab 18.2.
+
+**5. Create `src/demos/18-routing/CrewLab.tsx`** — and here's the part worth reading carefully. With
+no router, *you* have to track which page is showing:
+
+```tsx
+import { useState } from "react"
+import { Button, Card, Nav } from "react-bootstrap"
+import DemoCard from "@/lab/DemoCard"
+import HomePage from "./crew/pages/HomePage"
+import RosterPage from "./crew/pages/RosterPage"
+import SettingsPage from "./crew/pages/SettingsPage"
+
+// Hand-rolled navigation state. This is what a router replaces.
+type View = "home" | "roster" | "settings"
+
+export default function CrewLab() {
+  const [view, setView] = useState<View>("home")
+
+  return (
+    <DemoCard
+      title="Crew — no router yet"
+      claim="Three pages and a useState to choose between them. It works, and it is missing three things a router would give you for nothing."
+      level="core"
+      notice={
+        <ul className="mb-0">
+          <li>
+            Switch pages, then <strong>press the browser Back button</strong>. It leaves the
+            lab entirely — the app has no history.
+          </li>
+          <li>
+            There is <strong>no URL</strong> for "the roster". You cannot link to it, bookmark
+            it, or send it to anyone.
+          </li>
+          <li>
+            Reload the page. You're back on Home, because the current view is component state.
+          </li>
+          <li>
+            Note how the switching logic grows: every new page means a new{" "}
+            <code>View</code> member <em>and</em> a new branch below.
+          </li>
+        </ul>
+      }
+    >
+      <Card>
+        <Nav variant="tabs" className="px-2 pt-2">
+          {(["home", "roster", "settings"] as View[]).map((v) => (
+            <Nav.Item key={v}>
+              <Button
+                variant="link"
+                className={`nav-link ${view === v ? "active" : ""}`}
+                onClick={() => setView(v)}
+              >
+                {v}
+              </Button>
+            </Nav.Item>
+          ))}
+        </Nav>
+        <Card.Body>
+          {view === "home" ? (
+            <HomePage />
+          ) : view === "roster" ? (
+            <RosterPage />
+          ) : (
+            <SettingsPage />
+          )}
+        </Card.Body>
+      </Card>
+    </DemoCard>
+  )
+}
+```
+
+Register as `{ id: "crew-app", chapter: "18 — Routing", title: "Crew app (built up)", element: <CrewLab /> }`.
+
+**Run it:**
+
+```bash
+npm run dev
+```
+
+**What to notice.** The app works. It is also, precisely, the thing §18's intro described: a URL that
+has no relationship to what's on screen. Three specific costs, and you can feel all three in the
+browser right now:
+
+| What's missing | Why it matters |
+|---|---|
+| A URL per page | Nothing is linkable, bookmarkable, or shareable |
+| History | Back and Forward don't work; Back exits the app |
+| Deep linking | Reload always lands on Home, whatever you were looking at |
+
+And one cost in the code: **the `View` union and the ternary chain are a router you're writing by
+hand**, and they grow linearly with the number of pages.
+
+**Experiments:**
+
+1. **Add a fourth page** — copy `SettingsPage.tsx` to `AboutPage.tsx` and wire it up. Count the edits:
+   the `View` union, the tab array, and the ternary chain. Three places, none of which the compiler
+   forces you to keep in sync. Remember this number; Lab 18.2 makes it one.
+2. **Try to deep-link.** Get the app onto Settings, copy the browser URL, open it in a new tab. You
+   land on Home. There is nothing you could add to the URL to fix that without a router.
+3. **Make the ternary chain a `switch`** over `view` with a `never` default (§13.2). Better — now
+   adding a `View` member is a compile error. It's still a router you're maintaining.
+
+---
+
+## 🧪 Lab 18.2 — Your first routes
+
+**Level:** core
+
+Now delete the hand-rolled navigation and let the router do it. Three pages, three routes, and the
+`View` union disappears entirely.
 
 ```bash
 npm install react-router
 ```
+
+### 1. Wrap the app in a router and declare the routes
+
+Replace `src/demos/18-routing/CrewLab.tsx`:
+
+```tsx
+import { Link, MemoryRouter, Route, Routes, useLocation } from "react-router"
+import { Badge, Card, Nav } from "react-bootstrap"
+import DemoCard from "@/lab/DemoCard"
+import HomePage from "./crew/pages/HomePage"
+import RosterPage from "./crew/pages/RosterPage"
+import SettingsPage from "./crew/pages/SettingsPage"
+
+/** Stands in for the address bar, since MemoryRouter doesn't touch the real one. */
+function UrlBar() {
+  const location = useLocation()
+  return (
+    <div className="d-flex align-items-center gap-2 py-2 px-3 border-bottom">
+      <Badge bg="dark" className="font-monospace">URL</Badge>
+      <code className="small">{location.pathname}</code>
+    </div>
+  )
+}
+
+export default function CrewLab() {
+  return (
+    <DemoCard
+      title="Crew — first routes"
+      claim="Three <Route> elements replace the View union and the ternary chain. The URL now says what's on screen."
+      level="core"
+      notice={
+        <ul className="mb-0">
+          <li>
+            Click the links and watch the <strong>URL bar</strong> above the panel change.
+            That's <code>useLocation()</code>, not the browser.
+          </li>
+          <li>
+            There is no <code>useState</code> anywhere in this file any more.{" "}
+            <strong>The URL is the state.</strong>
+          </li>
+          <li>
+            The nav is still hand-written and sits <em>outside</em> the routes — Lab 18.3
+            moves it into a layout route where it belongs.
+          </li>
+        </ul>
+      }
+    >
+      {/* MemoryRouter keeps history in an array instead of the browser. See the note below. */}
+      <MemoryRouter initialEntries={["/"]}>
+        <Card>
+          <UrlBar />
+          <Nav className="px-2 pt-2 gap-2">
+            {/* Link, never <a href> — an <a> would reload the whole lab app */}
+            <Link to="/">Home</Link>
+            <Link to="/roster">Roster</Link>
+            <Link to="/settings">Settings</Link>
+          </Nav>
+          <Card.Body>
+            {/* Routes picks the ONE best match for the current URL */}
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/roster" element={<RosterPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+            </Routes>
+          </Card.Body>
+        </Card>
+      </MemoryRouter>
+    </DemoCard>
+  )
+}
+```
+
+The page components are **unchanged**. They didn't need to know they were being routed, which is the
+first good sign about this design.
+
+### Why `MemoryRouter` here
+
+The lab shell already owns the browser's address bar, and **routers cannot nest** — a
+`BrowserRouter` inside another router throws. `MemoryRouter` keeps its history in a JavaScript array
+instead, so this demo is a complete, independent router that doesn't fight its host.
+
+| Router | History lives in | Use for |
+|---|---|---|
+| `BrowserRouter` | the browser (`/roster`) | real apps — Lab 18.9 uses it |
+| `HashRouter` | the fragment (`/#/roster`) | static hosts you can't configure |
+| `MemoryRouter` | an array | embedded demos, tests, Storybook |
+
+Everything else behaves identically, which is why every concept in Labs 18.2–18.8 transfers to
+`BrowserRouter` without a change.
+
+**Run it:**
+
+```bash
+npm run dev
+```
+
+**What to notice:**
+
+1. **Three routes replaced a union, a tab array and a ternary chain.** Adding a page is now *one*
+   `<Route>` plus one `<Link>` — and Lab 18.8 gets that down to one entry in a config.
+2. **`Routes` picks exactly one match.** It isn't a list of conditions that all get evaluated; it
+   ranks the patterns and renders the best one.
+3. **`Link` is an `<a>`** — middle-click and ⌘-click work, so it behaves like a real link — but it
+   intercepts the click and updates history instead of reloading.
+4. **Nothing in this file stores the current page.** Deleting state is the most reliable sign that a
+   library is pulling its weight.
+
+**Experiments:**
+
+1. **Swap one `Link` for `<a href="/roster">`.** Click it. The entire lab app reloads — the Network
+   tab shows the bundle fetched again, and you land on the lab's own 404 because the *real* server
+   has no `/roster`. This is the single most common routing mistake in React.
+2. **Visit a route that doesn't exist.** Add `<Link to="/nope">` and click it. The panel goes
+   **blank** — no error, no warning. `Routes` matched nothing, so it rendered nothing. Lab 18.3 adds
+   the catch-all that fixes this.
+3. **Reorder the routes** so `/` comes last. Everything still works: matching is by specificity, not
+   by source order. (This is a v6/v7 behaviour change — React Router v5 *was* order-dependent, which
+   is why old tutorials fuss about putting `exact` on `/`.)
+4. **Add `initialEntries={["/settings"]}`** to `MemoryRouter`. The demo now opens on Settings. That's
+   deep linking, and it's the thing Lab 18.1 couldn't do at all.
+
+---
+
+## 🧪 Lab 18.3 — A layout route, `Outlet`, and a 404
+
+**Level:** core
+
+Lab 18.2 left two problems: the nav lives outside the routes (so it can't know which link is active),
+and an unmatched URL renders a blank panel. Both are fixed by the same idea — **nesting**.
+
+### 1. Move the chrome into a layout route
+
+Create `src/demos/18-routing/crew/layouts/RootLayout.tsx`:
+
+```tsx
+import { NavLink, Outlet, useLocation } from "react-router"
+import { Badge, Card, Nav } from "react-bootstrap"
+
+export default function RootLayout() {
+  const location = useLocation()
+
+  return (
+    <Card>
+      <div className="d-flex align-items-center gap-2 py-2 px-3 border-bottom">
+        <Badge bg="dark" className="font-monospace">URL</Badge>
+        <code className="small">{location.pathname}</code>
+      </div>
+
+      <Nav variant="tabs" className="px-2 pt-2">
+        {/* NavLink adds an `active` class when it matches; Bootstrap styles it for free.
+            `end` stops "/" matching every path — see the experiments. */}
+        <Nav.Link as={NavLink} to="/" end>Home</Nav.Link>
+        <Nav.Link as={NavLink} to="/roster">Roster</Nav.Link>
+        <Nav.Link as={NavLink} to="/settings">Settings</Nav.Link>
+      </Nav>
+
+      <Card.Body>
+        <Outlet />   {/* ← the matched child route renders here */}
+      </Card.Body>
+    </Card>
+  )
+}
+```
+
+Three upgrades in one file, and each is a concept:
+
+- **`Outlet`** is the hole a parent route leaves for its matched child. The layout renders once and
+  the child changes underneath it.
+- **`NavLink` instead of `Link`** — same navigation, but it knows whether it matches the current URL
+  and sets an `active` class. Bootstrap's `.nav-link.active` picks it up with no CSS from you.
+- **The URL bar moved in here**, because it's chrome. It's now written once instead of per page.
+
+### 2. Add a 404 page
+
+Create `crew/pages/NotFoundPage.tsx`:
+
+```tsx
+import { Link, useLocation } from "react-router"
+import { Alert } from "react-bootstrap"
+
+export default function NotFoundPage() {
+  const location = useLocation()
+
+  return (
+    <Alert variant="warning" className="mb-0 small">
+      <div className="fw-semibold">Nothing matches {location.pathname}</div>
+      <p className="mb-2">
+        This is the <code>path="*"</code> route. Without it, an unmatched URL renders an
+        empty <code>Outlet</code> and looks like a broken page.
+      </p>
+      <Link to="/">Back to Home</Link>
+    </Alert>
+  )
+}
+```
+
+### 3. Nest the routes under the layout
+
+Replace the `<Card>…</Card>` block in `CrewLab.tsx` — the whole thing becomes just the route tree,
+because the chrome now lives in `RootLayout`:
+
+```tsx
+import { MemoryRouter, Route, Routes } from "react-router"
+import DemoCard from "@/lab/DemoCard"
+import RootLayout from "./crew/layouts/RootLayout"
+import HomePage from "./crew/pages/HomePage"
+import RosterPage from "./crew/pages/RosterPage"
+import SettingsPage from "./crew/pages/SettingsPage"
+import NotFoundPage from "./crew/pages/NotFoundPage"
+
+export default function CrewLab() {
+  return (
+    <DemoCard
+      title="Crew — layout route and 404"
+      claim="One layout route declares the chrome for every page, including the 404. The active tab is the router's job now, not yours."
+      level="core"
+      notice={
+        <ul className="mb-0">
+          <li>
+            The active tab is highlighted, and you wrote no code for it —{" "}
+            <code>NavLink</code> sets the class, Bootstrap styles it.
+          </li>
+          <li>
+            Click through the pages. The nav and URL bar <strong>never unmount</strong>: only
+            the panel inside <code>Outlet</code> changes.
+          </li>
+          <li>
+            The <code>index</code> route is how a layout gets default content at its own
+            path, <code>/</code>.
+          </li>
+          <li>
+            <code>path="*"</code> catches everything unmatched, and renders{" "}
+            <em>inside</em> the layout — so a 404 still has working navigation.
+          </li>
+        </ul>
+      }
+    >
+      <MemoryRouter initialEntries={["/"]}>
+        <Routes>
+          {/* The layout route: its element wraps every child below it */}
+          <Route path="/" element={<RootLayout />}>
+            {/* index = the parent's own path, "/" */}
+            <Route index element={<HomePage />} />
+            <Route path="roster" element={<RosterPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            {/* Last resort. Matched only when nothing else does. */}
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    </DemoCard>
+  )
+}
+```
+
+Read the indentation: **it is the URL structure.** That's the strongest argument for declaring routes
+as a tree rather than a flat list.
+
+Two details that trip people up:
+
+- **The child paths lost their leading slash.** `path="roster"` inside `path="/"` matches `/roster`.
+  A child path is relative to its parent, and `path="/roster"` there would be an error.
+- **`index` takes no `path`.** It answers "what goes in the `Outlet` when the URL is exactly the
+  parent's path?" It's why `/` shows the home page rather than an empty panel.
+
+**Run it:**
+
+```bash
+npm run dev
+```
+
+**What to notice:**
+
+| Before (Lab 18.2) | Now |
+|---|---|
+| Nav written in the lab file, outside the routes | Nav in `RootLayout`, rendered by a route |
+| Active link — impossible to know | `NavLink` handles it |
+| Unmatched URL → blank panel | `path="*"` → a real 404, inside the layout |
+| Chrome re-evaluated per page | Layout mounts once and stays |
+
+**Experiments:**
+
+1. **Delete `<Outlet />` from `RootLayout`.** The nav and URL bar still render; every page disappears.
+   No error, no warning. **This is the number one cause of "why is my page blank" in nested routing**
+   — and now you've seen it deliberately.
+2. **Remove `end` from the Home `NavLink`.** Home is now highlighted on *every* page, because every
+   path starts with `/`. Everyone hits this once; now it's once on purpose.
+3. **Change `<Route index …>` to `<Route path="" …>`.** Identical behaviour — `index` is sugar. Now
+   change it to `path="home"` and note that `/` renders an empty `Outlet`: the layout matched, but
+   nothing matched inside it.
+4. **Move `path="*"` to the top of the list.** Everything still works, because matching is by
+   specificity rather than order — the catch-all is always the weakest match.
+5. **Put the URL bar back in `CrewLab`** (outside `MemoryRouter`). `useLocation` throws: *"useLocation
+   may be used only in the context of a Router"*. Router hooks need a router **above** them, and the
+   component that renders `MemoryRouter` is not inside it.
+
+---
+
+## 🧪 Lab 18.4 — Dynamic segments and `useParams`
+
+**Level:** core
+
+Every route so far had a fixed path. Now the URL needs to carry data: `/roster/ada` should show one
+crew member. That's a **dynamic segment**, written `:memberId`, and it's how a URL stops being a menu
+and becomes an address.
+
+### 1. A page that reads the URL
+
+Create `crew/pages/MemberPage.tsx`:
+
+```tsx
+import { Link, useParams } from "react-router"
+import { Alert, Badge, ListGroup } from "react-bootstrap"
+import { crew } from "../data"
+
+export default function MemberPage() {
+  // The key matches the route pattern's `:memberId`.
+  // ALWAYS `string | undefined` — see the note below.
+  const { memberId } = useParams<{ memberId: string }>()
+
+  const member = memberId ? crew.find((m) => m.id === memberId) : undefined
+
+  if (!member) {
+    return (
+      <Alert variant="warning" className="mb-0 small">
+        <div className="fw-semibold">No crew member "{memberId}"</div>
+        <p className="mb-2">A bad id is a 404 for this page, not for the whole app.</p>
+        <Link to="/roster">Back to the roster</Link>
+      </Alert>
+    )
+  }
+
+  return (
+    <>
+      <div className="d-flex align-items-center gap-2 mb-2">
+        <h5 className="mb-0">{member.name}</h5>
+        <Badge bg="secondary">{member.role}</Badge>
+        {member.onCall && <Badge bg="danger">on call</Badge>}
+      </div>
+      <ListGroup className="small mb-3">
+        {member.shifts.length === 0 ? (
+          <ListGroup.Item className="text-muted">No shifts booked.</ListGroup.Item>
+        ) : (
+          member.shifts.map((s) => <ListGroup.Item key={s}>{s}</ListGroup.Item>)
+        )}
+      </ListGroup>
+      <Link to="/roster" className="small">← back to the roster</Link>
+    </>
+  )
+}
+```
+
+### 2. Link to it from the roster
+
+Update `crew/pages/RosterPage.tsx` — the name becomes a link:
+
+```tsx
+import { Link } from "react-router"
+import { ListGroup } from "react-bootstrap"
+import { crew } from "../data"
+
+export default function RosterPage() {
+  return (
+    <ListGroup>
+      {crew.map((m) => (
+        <ListGroup.Item key={m.id} className="small d-flex justify-content-between">
+          {/* The id goes into the URL — that's the whole point of a dynamic segment */}
+          <Link to={`/roster/${m.id}`}>{m.name}</Link>
+          <span className="text-muted">{m.role}</span>
+        </ListGroup.Item>
+      ))}
+    </ListGroup>
+  )
+}
+```
+
+Do the same in `crew/pages/HomePage.tsx`, so the on-call names are clickable:
+
+```tsx
+import { Link } from "react-router"
+import { ListGroup } from "react-bootstrap"
+import { crew } from "../data"
+
+export default function HomePage() {
+  const onCall = crew.filter((m) => m.onCall)
+
+  return (
+    <>
+      <p className="small text-muted">Who's on call right now.</p>
+      <ListGroup>
+        {onCall.map((m) => (
+          <ListGroup.Item key={m.id} className="small">
+            <Link to={`/roster/${m.id}`}>{m.name}</Link> — {m.role}
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
+    </>
+  )
+}
+```
+
+### 3. Add the route
+
+In `CrewLab.tsx`, add one line inside the layout route and import the page:
+
+```tsx
+import MemberPage from "./crew/pages/MemberPage"
+
+// ...inside <Route path="/" element={<RootLayout />}>:
+  <Route index element={<HomePage />} />
+  <Route path="roster" element={<RosterPage />} />
+  <Route path="roster/:memberId" element={<MemberPage />} />   {/* ← new */}
+  <Route path="settings" element={<SettingsPage />} />
+  <Route path="*" element={<NotFoundPage />} />
+```
+
+One route pattern now serves four URLs — and four thousand, if the crew grew.
+
+> **TS Note — the most important five lines in this section.** `useParams<{ memberId: string }>()`
+> looks like it promises a `string`. It doesn't. The values are **always `string | undefined`**,
+> because the hook is generic over the *names* you expect, not over the route that matched. A
+> component can be rendered from a route without that param, or with the param empty, and TypeScript
+> can't see your route config. So narrow it:
+> ```tsx
+> const { memberId } = useParams<{ memberId: string }>()
+> if (!memberId) return <NotFound />      // now memberId is string below here
+> ```
+> That guard isn't paranoia — it's how the rest of the component gets a `string` to work with. (This
+> is also the single thing framework mode fixes outright: §18.13's generated types *can* see the
+> route pattern, so `params.memberId` is typed `string`.)
+
+Two more properties of params worth knowing now:
+
+- **They're always strings.** `/tasks/42` gives you `"42"`, not `42`. Convert deliberately, and check
+  the result — `Number("abc")` is `NaN`, not an error.
+- **They're untrusted.** A param comes from the address bar, so it's user input. `crew.find(...)`
+  returning `undefined` is the expected case, not the exceptional one, which is why the page handles
+  it before it handles the happy path.
+
+**Run it:**
+
+```bash
+npm run dev
+```
+
+**What to notice:**
+
+1. **The URL carries data now.** `/roster/ada` is an address you could send someone.
+2. **Back works through the detail pages.** Roster → Ada → back → roster. You wrote no history code.
+3. **`/roster` and `/roster/ada` are different routes**, and the more specific one wins. Matching is
+   by specificity, so their order in the file doesn't matter.
+4. **The not-found branch renders inside the layout**, so a bad id leaves the nav working.
+
+**Experiments:**
+
+1. **Visit a bad id.** Add a `<Link to="/roster/nobody">` somewhere and click it. You get the page's
+   own warning, not a blank panel and not the `path="*"` 404 — because `/roster/nobody` *did* match
+   `roster/:memberId`. **A matched route with bad data is not a routing 404**, and conflating the two
+   is a common bug.
+2. **Delete the `if (!member)` guard.** TypeScript immediately complains about `member.name`, because
+   `find` returns `CrewMember | undefined`. The compiler is doing the work the URL can't.
+3. **Delete just the `memberId ?` check** and pass `memberId` straight to `find`. Read the error:
+   `string | undefined` isn't assignable to `string`. This is the TS Note as a compile error.
+4. **Rename the segment** to `:id` in the route but leave `memberId` in `useParams`. It compiles
+   cleanly and `memberId` is `undefined` at runtime — the names are matched as *strings*, and nothing
+   checks that they agree. Another argument for framework mode's generated types.
+
+---
+
+## 🧪 Lab 18.5 — Nesting deeper: a sub-nav and `Outlet` context
+
+**Level:** core
+
+A crew member has more than one view — a profile and a shift list. Both need the member's name at the
+top and a sub-nav to switch between them. That's the same layout-plus-`Outlet` shape as Lab 18.3, one
+level further down, and it introduces the piece that makes deep nesting pleasant: **`Outlet` can pass
+data to its children.**
+
+### 1. A second layout, one level down
+
+Create `crew/layouts/MemberLayout.tsx`. This replaces `pages/MemberPage.tsx`, which you can delete
+once this works:
+
+```tsx
+import { NavLink, Outlet, useParams } from "react-router"
+import { Alert, Badge, Nav } from "react-bootstrap"
+import { crew, type CrewMember } from "../data"
+
+/** The shape this layout hands to its children. Both ends import this one type. */
+export interface MemberContext {
+  member: CrewMember
+}
+
+export default function MemberLayout() {
+  const { memberId } = useParams<{ memberId: string }>()
+  const member = memberId ? crew.find((m) => m.id === memberId) : undefined
+
+  if (!member) {
+    return (
+      <Alert variant="warning" className="mb-0 small">
+        <div className="fw-semibold">No crew member "{memberId}"</div>
+        A bad id fails this branch of the tree, not the whole app — the nav above still works.
+      </Alert>
+    )
+  }
+
+  return (
+    <>
+      <div className="d-flex align-items-center gap-2 mb-2">
+        <h5 className="mb-0">{member.name}</h5>
+        <Badge bg="secondary">{member.role}</Badge>
+        {member.onCall && <Badge bg="danger">on call</Badge>}
+      </div>
+
+      {/* Relative links: "." is this layout's own URL, "shifts" is its child.
+          Neither mentions the member id, so these can't drift from the route. */}
+      <Nav variant="pills" className="mb-3 gap-1">
+        <Nav.Link as={NavLink} to="." end>Profile</Nav.Link>
+        <Nav.Link as={NavLink} to="shifts">Shifts</Nav.Link>
+      </Nav>
+
+      {/* Resolve the param ONCE here; children just read the result */}
+      <Outlet context={{ member } satisfies MemberContext} />
+    </>
+  )
+}
+```
+
+### 2. Two children that know almost nothing
+
+Create `crew/pages/MemberProfilePage.tsx`:
+
+```tsx
+import { Link, useOutletContext } from "react-router"
+import { ListGroup } from "react-bootstrap"
+import type { MemberContext } from "../layouts/MemberLayout"
+
+export default function MemberProfilePage() {
+  // No useParams. No crew.find. No not-found branch. The layout did all three.
+  const { member } = useOutletContext<MemberContext>()
+
+  return (
+    <>
+      <ListGroup className="small mb-3">
+        <ListGroup.Item><strong>id</strong> — <code>{member.id}</code></ListGroup.Item>
+        <ListGroup.Item><strong>role</strong> — {member.role}</ListGroup.Item>
+        <ListGroup.Item><strong>shifts booked</strong> — {member.shifts.length}</ListGroup.Item>
+      </ListGroup>
+      <Link to="/roster" className="small">← back to the roster</Link>
+    </>
+  )
+}
+```
+
+Create `crew/pages/MemberShiftsPage.tsx`:
+
+```tsx
+import { useOutletContext } from "react-router"
+import { Alert, ListGroup } from "react-bootstrap"
+import type { MemberContext } from "../layouts/MemberLayout"
+
+export default function MemberShiftsPage() {
+  const { member } = useOutletContext<MemberContext>()
+
+  if (member.shifts.length === 0) {
+    return <Alert variant="light" className="border small mb-0">No shifts booked.</Alert>
+  }
+
+  return (
+    <ListGroup className="small">
+      {member.shifts.map((shift) => (
+        <ListGroup.Item key={shift}>{shift}</ListGroup.Item>
+      ))}
+    </ListGroup>
+  )
+}
+```
+
+### 3. Nest them under the member route
+
+In `CrewLab.tsx`, the member route grows children. Swap the imports and that one line:
+
+```tsx
+import MemberLayout from "./crew/layouts/MemberLayout"
+import MemberProfilePage from "./crew/pages/MemberProfilePage"
+import MemberShiftsPage from "./crew/pages/MemberShiftsPage"
+
+// ...inside <Route path="/" element={<RootLayout />}>:
+  <Route index element={<HomePage />} />
+  <Route path="roster" element={<RosterPage />} />
+
+  {/* Was a single element; now a layout with its own index and child */}
+  <Route path="roster/:memberId" element={<MemberLayout />}>
+    <Route index element={<MemberProfilePage />} />          {/* /roster/ada */}
+    <Route path="shifts" element={<MemberShiftsPage />} />    {/* /roster/ada/shifts */}
+  </Route>
+
+  <Route path="settings" element={<SettingsPage />} />
+  <Route path="*" element={<NotFoundPage />} />
+```
+
+You now have three levels of layout: `RootLayout` → `MemberLayout` → the page. At
+`/roster/ada/shifts` the rendered tree is:
+
+```
+RootLayout           (URL bar, tabs)
+└── MemberLayout     (name, badges, sub-nav)
+    └── MemberShiftsPage
+```
+
+You never wrote that composition. The route tree's shape *is* the composition.
+
+**Run it:**
+
+```bash
+npm run dev
+```
+
+**What to notice:**
+
+1. **Switch Profile ↔ Shifts.** Only the innermost panel changes. The tabs, the URL bar, the member's
+   name and the sub-nav all stay mounted — **every ancestor of a match survives the navigation.**
+   That's the performance argument for nesting: a layout that fetched something doesn't refetch it.
+2. **The children are tiny.** No `useParams`, no lookup, no not-found branch. The param is resolved at
+   the level that owns it, which is also the level that can render a sensible error.
+3. **`to="."` and `to="shifts"` are relative.** Neither mentions `ada`. Rename the URL segment and the
+   sub-nav follows.
+4. **`end` on the Profile link** stops it staying active on the Shifts page — the same rule as Home in
+   Lab 18.3, one level down.
+
+> **TS Note.** `useOutletContext<T>()` is **unchecked**. Whatever type you write is what you get, with
+> no verification that the parent passed it — it's a cast, not a check, exactly like
+> `useLoaderData() as T` in §18.12. That's why `MemberContext` is exported from the layout and
+> imported by both children, and why the layout writes
+> `context={{ member } satisfies MemberContext}`: `satisfies` makes the *producing* side an error if
+> it drifts. One shared type, checked at both ends, is the best this API allows.
+
+**Experiments:**
+
+1. **Break the context key.** In `MemberLayout`, change it to `context={{ crewMember: member }}`.
+   `satisfies` catches it immediately — so delete the `satisfies` too, and now it compiles and crashes
+   at runtime with "Cannot read properties of undefined". **That is what "unchecked" means.**
+2. **Move the lookup into the children.** Give `MemberProfilePage` its own `useParams` + `find` and
+   drop the context. It works — but now the not-found case is handled in two places, and the member's
+   name in the layout header renders before the child validates the id. **The param belongs to the
+   level that owns it.**
+3. **Delete `<Outlet />` from `MemberLayout`.** The name and sub-nav render; the profile vanishes.
+   Same failure as Lab 18.3's experiment 1, and worth being able to recognise instantly.
+4. **Add a third child** — `<Route path="notes" element={<MemberNotesPage />} />` with a two-line
+   component reading the same context. Count the edits: one route, one nav link, one file. Compare
+   with Lab 18.1's three-places-to-change.
+5. **Navigate to `/roster/ada/nonsense`.** The `path="*"` route catches it — and note that it renders
+   inside `RootLayout` but **outside** `MemberLayout`, because the catch-all is a sibling of the
+   member route, not a child of it. Add a nested `<Route path="*">` inside `MemberLayout`'s children
+   and watch the 404 move inside the member's chrome. **Where you put the catch-all decides how much
+   context survives a bad URL.**
+
+---
+
+## 🧪 Lab 18.6 — The URL as state: filters in the query string
+
+**Level:** core
+
+Paths answer *which page*. The **query string** answers *which view of that page* — the filter, the
+search term, the sort order, the page number. Putting that in `useState` is the default instinct and
+it's usually the wrong one.
+
+Only one file changes. Replace `crew/pages/RosterPage.tsx`:
+
+```tsx
+import { Link, useSearchParams } from "react-router"
+import { Badge, Button, ButtonGroup, Form, ListGroup } from "react-bootstrap"
+import { crew, isRole, ROLES, type Role } from "../data"
+
+export default function RosterPage() {
+  const [params, setParams] = useSearchParams()
+
+  // Read from the URL. It's user input, so VALIDATE rather than cast.
+  const raw = params.get("role") ?? "all"
+  const role: Role | "all" = isRole(raw) ? raw : "all"
+  const q = params.get("q") ?? ""
+
+  /**
+   * Copy the previous params, change one key, return the whole thing.
+   * setSearchParams REPLACES the entire query string — building from `prev`
+   * is what stops the filter from wiping the search term.
+   */
+  function setParam(key: string, value: string, isDefault: boolean, replace = false) {
+    setParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        if (isDefault) next.delete(key)      // keep default values out of the URL
+        else next.set(key, value)
+        return next
+      },
+      { replace }
+    )
+  }
+
+  const visible = crew
+    .filter((m) => role === "all" || m.role === role)
+    .filter((m) => m.name.toLowerCase().includes(q.trim().toLowerCase()))
+
+  return (
+    <>
+      <div className="d-flex flex-wrap gap-3 align-items-end mb-3">
+        <div>
+          <div className="small text-muted mb-1">role — pushes history</div>
+          <ButtonGroup size="sm">
+            {(["all", ...ROLES] as const).map((r) => (
+              <Button
+                key={r}
+                variant={role === r ? "primary" : "outline-primary"}
+                onClick={() => setParam("role", r, r === "all")}
+              >
+                {r}
+              </Button>
+            ))}
+          </ButtonGroup>
+        </div>
+
+        <Form.Group>
+          <Form.Label className="small text-muted mb-1">
+            search — replaces history
+          </Form.Label>
+          <Form.Control
+            size="sm"
+            value={q}
+            placeholder="name"
+            onChange={(e) => setParam("q", e.target.value, e.target.value === "", true)}
+          />
+        </Form.Group>
+      </div>
+
+      <ListGroup>
+        {visible.length === 0 ? (
+          <ListGroup.Item className="small text-muted">
+            Nobody matches <code>?{params.toString()}</code>.
+          </ListGroup.Item>
+        ) : (
+          visible.map((m) => (
+            <ListGroup.Item key={m.id} className="small d-flex justify-content-between">
+              <Link to={`/roster/${m.id}`}>{m.name}</Link>
+              <Badge bg="light" text="dark">{m.role}</Badge>
+            </ListGroup.Item>
+          ))
+        )}
+      </ListGroup>
+    </>
+  )
+}
+```
+
+No route changes. The query string isn't part of route matching at all — `/roster?role=ops` and
+`/roster` match the same route.
+
+### The three decisions in that file
+
+**1. Push or replace.** The role buttons push a history entry; the search box replaces. Ask what Back
+should do: a filter change is a deliberate step a user would expect to undo, while typing is a
+continuous stream — pushing per keystroke means one Back press per character.
+
+**2. Validate, don't cast.** `isRole(raw) ? raw : "all"` rather than `raw as Role`. The URL is a
+user-editable string: `?role=banana` will happen, from a stale bookmark or a typo, and a cast would
+let it through to compare against nothing and silently show an empty list.
+
+**3. Delete defaults.** `?role=all` is noise, so the default is removed from the URL rather than
+written to it. A page whose untouched state carries six query params looks broken.
+
+**Run it:**
+
+```bash
+npm run dev
+```
+
+**What to notice:**
+
+1. **Filter, then look at the URL bar.** `/roster?role=engineer`. Copy that string — it's a complete
+   description of what's on screen.
+2. **Press Back after changing the filter.** The previous filter returns. You wrote no undo code.
+3. **Type in the search box, then press Back once.** You go back to before the search, not through it
+   character by character. That's `{ replace: true }`.
+4. **Open a member and come back.** The filter is still applied, because it was never component
+   state — it was in the URL, and the URL came back with the Back button.
+
+What this bought you, none of which you implemented: **shareable** views, **bookmarkable** views,
+**refresh-proof** views, a working **Back button**, and one source of truth so the UI and the URL
+can't disagree.
+
+**Experiments:**
+
+1. **Remove `{ replace: true }`** from the search box. Type six characters, then press Back six times.
+   This is why search boxes replace.
+2. **Set a bad value by hand.** Add a `<Link to="/roster?role=banana">`. The predicate rejects it and
+   falls back to "all". Now swap the predicate for `raw as Role` — the filter matches nothing, the
+   list is empty, and there's no clue why. **The URL is user input.**
+3. **Build from scratch instead of from `prev`:** change the updater to
+   `setParams(new URLSearchParams({ role: value }))`. Set a search term, then change the role — the
+   search term vanishes. This is the immutable-update rule from §6.4 in a different container.
+4. **Keep the defaults:** delete the `isDefault` branch so `role=all` is always written. Note how much
+   worse the URL looks on first load, before the user has touched anything.
+5. **Move the filter to `useState` instead.** Everything still works — until you refresh, share the
+   link, or press Back. Then compare the diffs: the `useState` version is *shorter*. The URL version
+   is better anyway, and knowing why is the point of this lab.
+
+---
+
+## 🧪 Lab 18.7 — Guarding routes, and the return trip
+
+**Level:** depth
+
+An Admin page that only signed-in users should see. The interesting part isn't hiding it — it's that
+after signing in, the user should land where they were originally going, not on the home page.
+
+### 1. Fake auth, with three states rather than two
+
+Create `crew/auth.tsx`:
+
+```tsx
+import { createContext, useContext, useState, type ReactNode } from "react"
+import { Navigate, Outlet, useLocation } from "react-router"
+
+/** Three states, not a boolean. "Not yet known" is a real state — see the note below. */
+type AuthState =
+  | { status: "anonymous" }
+  | { status: "authenticated"; user: string }
+
+interface AuthApi {
+  state: AuthState
+  signIn: (user: string) => void
+  signOut: () => void
+}
+
+const AuthContext = createContext<AuthApi | null>(null)
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [state, setState] = useState<AuthState>({ status: "anonymous" })
+
+  return (
+    <AuthContext.Provider
+      value={{
+        state,
+        signIn: (user) => setState({ status: "authenticated", user }),
+        signOut: () => setState({ status: "anonymous" }),
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+export function useAuth(): AuthApi {
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>")
+  return ctx
+}
+
+/**
+ * A PATHLESS layout route. Renders its children when signed in, otherwise
+ * redirects to /login — remembering where the user was headed.
+ */
+export function RequireAuth() {
+  const { state } = useAuth()
+  const location = useLocation()
+
+  if (state.status !== "authenticated") {
+    // `replace` matters: without it, Back returns here and redirects again, forever.
+    return <Navigate to="/login" replace state={{ from: location }} />
+  }
+  return <Outlet />
+}
+```
+
+`RequireAuth` takes **no props**, which is what lets it be dropped anywhere in the route tree. It
+reads the user from Context and the destination from the router, and it returns `<Outlet />` rather
+than `children`, because a layout route's children are route matches.
+
+### 2. The two pages
+
+Create `crew/pages/AdminPage.tsx`:
+
+```tsx
+import { Alert } from "react-bootstrap"
+import { useAuth } from "../auth"
+
+export default function AdminPage() {
+  const { state } = useAuth()
+
+  return (
+    <Alert variant="success" className="mb-0 small">
+      <div className="fw-semibold">Admin</div>
+      You only see this because <code>RequireAuth</code> rendered its <code>Outlet</code>
+      {state.status === "authenticated" && <> — signed in as <strong>{state.user}</strong></>}.
+    </Alert>
+  )
+}
+```
+
+Create `crew/pages/LoginPage.tsx`:
+
+```tsx
+import { useState } from "react"
+import { useLocation, useNavigate } from "react-router"
+import { Button, Card, Form } from "react-bootstrap"
+import { useAuth } from "../auth"
+
+export default function LoginPage() {
+  const [name, setName] = useState("ada")
+  const { signIn } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  // Where the guard wanted to send us. Falls back to "/" on a direct visit.
+  const from =
+    (location.state as { from?: { pathname: string } } | null)?.from?.pathname ?? "/"
+
+  return (
+    <Card body className="mx-auto" style={{ maxWidth: 380 }}>
+      <div className="small text-muted mb-2">
+        The guard sent you here. It wanted: <code>{from}</code>
+      </div>
+      <Form
+        onSubmit={(e) => {
+          e.preventDefault()
+          signIn(name)
+          navigate(from, { replace: true })   // replace: don't leave /login in history
+        }}
+      >
+        <Form.Control
+          size="sm"
+          className="mb-2"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          aria-label="username"
+        />
+        <Button size="sm" type="submit">Sign in</Button>
+      </Form>
+    </Card>
+  )
+}
+```
+
+### 3. An Admin tab, and a signed-in indicator
+
+Add to the `<Nav>` in `crew/layouts/RootLayout.tsx`, plus the sign-out control:
+
+```tsx
+import { NavLink, Outlet, useLocation } from "react-router"
+import { Badge, Button, Card, Nav } from "react-bootstrap"
+import { useAuth } from "../auth"
+
+// ...inside RootLayout, alongside `const location = useLocation()`:
+const { state, signOut } = useAuth()
+
+// ...and in the <Nav>, after the Settings link:
+  <Nav.Link as={NavLink} to="/admin">Admin</Nav.Link>
+  <div className="ms-auto d-flex align-items-center gap-2 pe-2 small">
+    {state.status === "authenticated" ? (
+      <>
+        <span className="text-success">signed in as {state.user}</span>
+        <Button size="sm" variant="link" className="p-0" onClick={signOut}>sign out</Button>
+      </>
+    ) : (
+      <span className="text-muted">not signed in</span>
+    )}
+  </div>
+```
+
+### 4. Wire the guard into the tree
+
+In `CrewLab.tsx` — note that `AuthProvider` goes **outside** `MemoryRouter`:
+
+```tsx
+import { AuthProvider, RequireAuth } from "./crew/auth"
+import AdminPage from "./crew/pages/AdminPage"
+import LoginPage from "./crew/pages/LoginPage"
+
+// ...the tree:
+<AuthProvider>
+  <MemoryRouter initialEntries={["/"]}>
+    <Routes>
+      <Route path="/" element={<RootLayout />}>
+        <Route index element={<HomePage />} />
+        <Route path="roster" element={<RosterPage />} />
+        <Route path="roster/:memberId" element={<MemberLayout />}>
+          <Route index element={<MemberProfilePage />} />
+          <Route path="shifts" element={<MemberShiftsPage />} />
+        </Route>
+        <Route path="settings" element={<SettingsPage />} />
+
+        {/* Pathless route: the guard wraps a GROUP of children and
+            contributes no URL segment of its own. */}
+        <Route element={<RequireAuth />}>
+          <Route path="admin" element={<AdminPage />} />
+        </Route>
+
+        {/* OUTSIDE the guard, or the redirect loops forever */}
+        <Route path="login" element={<LoginPage />} />
+
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+    </Routes>
+  </MemoryRouter>
+</AuthProvider>
+```
+
+**Auth is not routing state**, so its provider sits above the router. The guard needs a user before
+any route matches.
+
+**Run it:**
+
+```bash
+npm run dev
+```
+
+**What to notice:**
+
+1. **Click Admin while signed out.** You land on login, and it tells you it wanted `/admin`. Sign in
+   and you arrive at `/admin` — not at home. That round trip is `location.state`, attached to the
+   history entry rather than to the URL.
+2. **The guard protects a group.** A second protected page is one more `<Route>` *inside*
+   `<RequireAuth>` — there's nothing to remember to wrap.
+3. **`login` is a sibling of the guard, not a child.** Put it inside and an anonymous user is
+   redirected to login, which redirects to login, forever.
+4. **Sign out while on `/admin`.** You're redirected immediately, because the guard re-renders when
+   the auth context changes. Guards are reactive, not one-shot checks.
+
+> **This is not security.** A client-side guard decides what to *render*. Anyone can edit the
+> bundle, the memory, or the URL. Every protected route needs a protected endpoint behind it — the
+> guard is a UX feature, and treating it as an authorisation boundary is a genuine vulnerability.
+
+> **The state you'll wish you had.** Real auth has a third state: *not yet known*, while a token is
+> being verified. Miss it and the guard sees "anonymous" for one render and bounces an authenticated
+> user to the login page — a classic, maddening bug. Add `| { status: "loading" }` to `AuthState` and
+> have `RequireAuth` render a spinner for it (§5.3).
+
+**Experiments:**
+
+1. **Drop `replace` from the `<Navigate>`.** Click Admin while signed out, then press Back. You're
+   sent to `/admin`, which redirects to `/login` again — Back is now unusable.
+2. **Drop `replace` from the login `navigate`.** Sign in, then press Back: you're on the login page
+   while already authenticated. Both `replace` calls exist for the same reason.
+3. **Move `login` inside `<RequireAuth>`.** Click Admin while signed out and watch the redirect loop
+   in the URL bar. Read it as a lesson about where guards belong.
+4. **Put `AuthProvider` inside `MemoryRouter`** instead. It still works — but now try moving it
+   *below* `<Routes>` and note that `RequireAuth` can't reach it. Provider placement is about who
+   needs the value, and the guard is part of the route tree.
+5. **Delete the `state={{ from: location }}`.** Sign-in now always lands on home. Small change; it's
+   the difference between a login flow that feels considered and one that doesn't.
+
+---
+
+## 🧪 Lab 18.8 — The same tree, as a config — and a nav derived from it
+
+**Level:** depth
+
+The route tree is now eight routes across three levels, and the nav in `RootLayout` is a *second*
+hand-maintained list of the same pages. Those two drift apart — someone adds a route and forgets the
+tab, or removes a page and leaves a dead link.
+
+This lab converts the JSX tree into **an array of objects** and then generates the nav *from* it. The
+app behaves identically; what changes is that there's one list instead of two.
+
+### 1. The route config
+
+Create `crew/routes.tsx`:
+
+```tsx
+import type { RouteObject } from "react-router"
+import { RequireAuth } from "./auth"
+import RootLayout from "./layouts/RootLayout"
+import MemberLayout from "./layouts/MemberLayout"
+import HomePage from "./pages/HomePage"
+import RosterPage from "./pages/RosterPage"
+import MemberProfilePage from "./pages/MemberProfilePage"
+import MemberShiftsPage from "./pages/MemberShiftsPage"
+import SettingsPage from "./pages/SettingsPage"
+import AdminPage from "./pages/AdminPage"
+import LoginPage from "./pages/LoginPage"
+import NotFoundPage from "./pages/NotFoundPage"
+
+/**
+ * Our own metadata, hung off each route. React Router ignores unknown keys,
+ * and `handle` is its official home for exactly this.
+ */
+export interface RouteMeta {
+  /** Label for the generated nav. Omit to keep a route out of the menu. */
+  navLabel?: string
+  /** Render the NavLink with `end`, so it doesn't match descendants. */
+  navEnd?: boolean
+  /** Shown as a lock in the nav. Derived, not enforced. */
+  guarded?: boolean
+}
+
+/** RouteObject plus our meta. Note `children` is restated — see the TS Note. */
+type AppRoute = RouteObject & {
+  handle?: RouteMeta
+  children?: AppRoute[]
+}
+
+export const routes: AppRoute[] = [
+  {
+    path: "/",
+    element: <RootLayout />,
+    children: [
+      { index: true, element: <HomePage />, handle: { navLabel: "Home", navEnd: true } },
+      { path: "roster", element: <RosterPage />, handle: { navLabel: "Roster" } },
+      {
+        // No navLabel: you reach a member by clicking one, not from the menu.
+        path: "roster/:memberId",
+        element: <MemberLayout />,
+        children: [
+          { index: true, element: <MemberProfilePage /> },
+          { path: "shifts", element: <MemberShiftsPage /> },
+        ],
+      },
+      { path: "settings", element: <SettingsPage />, handle: { navLabel: "Settings" } },
+      {
+        // A pathless route: no `path`, so it contributes no URL segment.
+        element: <RequireAuth />,
+        children: [
+          { path: "admin", element: <AdminPage />, handle: { navLabel: "Admin", guarded: true } },
+        ],
+      },
+      { path: "login", element: <LoginPage /> },
+      { path: "*", element: <NotFoundPage /> },
+    ],
+  },
+]
+```
+
+Compare it line by line with Lab 18.7's JSX: `<Route path="x">` became `{ path: "x" }`,
+`element={<X />}` became `element: <X />`, nesting became `children`, and `index` went from a boolean
+prop to `index: true`. **The two forms compile to the same route tree** — `Routes`/`Route` builds
+this array internally.
+
+> **TS Note.** `AppRoute` extends `RouteObject` and **restates `children` as `AppRoute[]`**. Without
+> that line, `children` stays `RouteObject[]`, and your `handle` type is lost one level down — the
+> metadata would check at the top level and silently widen inside `children`. Recursive types need
+> the recursive field redeclared, and forgetting it is the usual bug when typing a config tree.
+
+### 2. The nav, derived
+
+Create `crew/layouts/DerivedNav.tsx`:
+
+```tsx
+import { NavLink } from "react-router"
+import { Badge, Nav } from "react-bootstrap"
+import { routes } from "../routes"
+
+/** Flatten the config down to the routes that asked to appear in a menu. */
+function navItems() {
+  const top = routes[0]?.children ?? []
+
+  return top
+    // A pathless route (the guard) contributes no URL, so look at its children instead
+    .flatMap((route) => (route.children && !route.path ? route.children : [route]))
+    .filter((route) => route.handle?.navLabel)
+    .map((route) => ({
+      to: route.index ? "/" : `/${route.path}`,
+      label: route.handle!.navLabel!,
+      end: route.handle?.navEnd ?? false,
+      guarded: route.handle?.guarded ?? false,
+    }))
+}
+
+export default function DerivedNav() {
+  return (
+    <>
+      {navItems().map((item) => (
+        <Nav.Link as={NavLink} key={item.to} to={item.to} end={item.end}>
+          {item.label}
+          {item.guarded && (
+            <Badge bg="warning" text="dark" className="ms-1" title="behind RequireAuth">
+              🔒
+            </Badge>
+          )}
+        </Nav.Link>
+      ))}
+    </>
+  )
+}
+```
+
+The `flatMap` is the line worth understanding. The guard is a pathless route, so *its children* are
+the navigable pages — the nav has to see through the wrapper. That's why Admin appears in the menu at
+all, and why its lock badge is a **consequence of where it sits in the tree** rather than a flag
+someone remembered to set.
+
+In `RootLayout.tsx`, replace the three or four hand-written `<Nav.Link>` elements with:
+
+```tsx
+import DerivedNav from "./DerivedNav"
+
+// ...inside the <Nav variant="tabs">, in place of the hand-written links:
+<DerivedNav />
+```
+
+Keep the signed-in indicator where it is — that's chrome, not navigation.
+
+### 3. Render the config
+
+In `CrewLab.tsx`, `useRoutes` replaces the whole `<Routes>` block:
+
+```tsx
+import { MemoryRouter, useRoutes } from "react-router"
+import DemoCard from "@/lab/DemoCard"
+import { AuthProvider } from "./crew/auth"
+import { routes } from "./crew/routes"
+
+/** useRoutes is a HOOK, so it must be called inside a router — hence this component. */
+function CrewRoutes() {
+  return useRoutes(routes)
+}
+
+export default function CrewLab() {
+  return (
+    <DemoCard
+      title="Crew — routes as a config"
+      claim="The same app, declared as data — so the nav is generated from the route tree instead of maintained beside it."
+      level="depth"
+      notice={
+        <ul className="mb-0">
+          <li>
+            The tabs are <strong>generated</strong>. Nothing in <code>RootLayout</code>
+            lists them any more.
+          </li>
+          <li>
+            Add <code>handle: {"{ navLabel: \"Login\" }"}</code> to the login route and it
+            appears in the menu. One edit, one place.
+          </li>
+          <li>
+            The 🔒 on Admin is derived from it sitting inside the pathless guard route.
+          </li>
+          <li>
+            <strong>This is still declarative mode.</strong> A config-shaped tree is not
+            data mode — see the note below.
+          </li>
+        </ul>
+      }
+    >
+      <AuthProvider>
+        <MemoryRouter initialEntries={["/"]}>
+          <CrewRoutes />
+        </MemoryRouter>
+      </AuthProvider>
+    </DemoCard>
+  )
+}
+```
+
+> **Still declarative mode.** `useRoutes` is a hook: it runs during render, inside a router, like any
+> other hook. Moving routes into an array changed their *syntax*, not their *location*. Data mode
+> (§18.12, Lab 18.9) is defined by building the router **outside React rendering**, which is what lets
+> it run loaders before rendering. This lab is the bridge: the array you just wrote is exactly what
+> `createBrowserRouter` accepts.
+
+**Run it:**
+
+```bash
+npm run dev
+```
+
+**What to notice:**
+
+1. **The app is unchanged.** Same URLs, same guard, same 404, same nesting. The route declaration is
+   an implementation detail — which is why this migration is safe to do incrementally.
+2. **Adding a page is one edit now.** In Lab 18.7 a new top-level page meant a `<Route>` *and* a
+   `<Nav.Link>`. Here, forgetting is impossible.
+3. **The config is a value**, so you can loop over it, test it, or generate from it. JSX elements are
+   opaque until rendered.
+
+**Experiments:**
+
+1. **Give `login` a `navLabel`.** It appears in the tabs instantly. Now delete the whole `login` route
+   and note two consequences in one place: the tab disappears *and* the guard's redirect target 404s.
+2. **Assert something about the config** — in a scratch file or at the bottom of `routes.tsx`:
+   ```ts
+   const paths = routes[0].children!.map((r) => r.path).filter(Boolean)
+   console.assert(new Set(paths).size === paths.length, "duplicate route paths")
+   ```
+   You could not write that against JSX. That's the argument in three lines.
+3. **Move `admin` out of the guard**, to be a direct child of `/`. The 🔒 vanishes on its own — it was
+   derived from position, not hard-coded. Put it back.
+4. **Delete the `children?: AppRoute[]` line** from `AppRoute`. The top-level `handle`s still check,
+   but the one on `admin` — nested inside `children` — errors or widens. That line is the whole reason
+   the config is typed all the way down.
+5. **Call `useRoutes` in `CrewLab` directly**, deleting the `CrewRoutes` wrapper. It throws:
+   *"useRoutes may be used only in the context of a Router"*. Worth causing once.
+
+---
+
+## 🧪 Lab 18.9 — Now do it for real: `BrowserRouter` and the lab shell
+
+**Level:** depth
+
+Everything from Lab 18.2 onward ran in a `MemoryRouter`, because an embedded demo can't own the
+address bar. This lab is the capstone of Part A: the same concepts against a **real
+`BrowserRouter`**, with real URLs, real history, and the browser's own Back button.
+
+The target is the exercise promised back in Part 0.5 — rebuild the lab shell's navigation with React
+Router. It's a better subject than a hello-world app because you already know exactly what it does.
 
 Create `src/RouterApp.tsx`:
 
@@ -20051,1156 +21592,31 @@ npm run dev
 
 ---
 
-## 🧪 Lab 18.2 — The URL as state
-
-**Level:** depth
-
-Create `src/demos/18-routing/UrlStateLab.tsx`:
-
-```tsx
-import { useSearchParams } from "react-router"
-import { Alert, Badge, Button, ButtonGroup, Card, Col, Form, ListGroup, Row } from "react-bootstrap"
-import { useState } from "react"
-import DemoCard from "@/lab/DemoCard"
-import StateInspector from "@/lab/StateInspector"
-
-type Filter = "all" | "active" | "done"
-type Sort = "newest" | "title"
-
-const isFilter = (v: string): v is Filter =>
-  v === "all" || v === "active" || v === "done"
-const isSort = (v: string): v is Sort => v === "newest" || v === "title"
-
-interface Task {
-  id: string
-  title: string
-  done: boolean
-  createdAt: number
-}
-
-const tasks: Task[] = [
-  { id: "1", title: "Audit the bundle", done: false, createdAt: 5 },
-  { id: "2", title: "Write release notes", done: true, createdAt: 3 },
-  { id: "3", title: "Fix the flaky test", done: true, createdAt: 7 },
-  { id: "4", title: "Bump dependencies", done: false, createdAt: 1 },
-]
-
-export default function UrlStateLab() {
-  const [params, setParams] = useSearchParams()
-
-  // Read from the URL, validating because URL values are untrusted strings
-  const rawFilter = params.get("filter") ?? "all"
-  const filter: Filter = isFilter(rawFilter) ? rawFilter : "all"
-
-  const rawSort = params.get("sort") ?? "newest"
-  const sort: Sort = isSort(rawSort) ? rawSort : "newest"
-
-  const query = params.get("q") ?? ""
-
-  // The same state, but held locally — for comparison
-  const [localFilter, setLocalFilter] = useState<Filter>("all")
-
-  /** Update one param, omitting defaults to keep the URL tidy. */
-  function update(key: string, value: string, isDefault: boolean, replace = false) {
-    setParams(
-      (prev) => {
-        const next = new URLSearchParams(prev)
-        if (isDefault) next.delete(key)
-        else next.set(key, value)
-        return next
-      },
-      { replace }
-    )
-  }
-
-  const visible = tasks
-    .filter((t) => (filter === "active" ? !t.done : filter === "done" ? t.done : true))
-    .filter((t) => t.title.toLowerCase().includes(query.trim().toLowerCase()))
-    .sort((a, b) => (sort === "title" ? a.title.localeCompare(b.title) : b.createdAt - a.createdAt))
-
-  return (
-    <DemoCard
-      title="The URL as state"
-      claim="Filters and search in the query string are shareable, bookmarkable, refresh-proof and Back-button-aware — none of which you have to implement."
-      level="depth"
-      notice={
-        <ul className="mb-0">
-          <li>
-            Change the filter and sort. <strong>Watch the address bar.</strong> Then press
-            Back — the previous view returns, because each change is a history entry.
-          </li>
-          <li>
-            Copy the URL into a new tab. You land on exactly this view. Now refresh — still
-            there. Compare with the local-state filter below, which resets both times.
-          </li>
-          <li>
-            The search box uses <code>{"{ replace: true }"}</code>, so typing doesn't
-            create a history entry per character. Without it, one Back press per keystroke.
-            <strong>Choose push vs replace deliberately.</strong>
-          </li>
-          <li>
-            URL values are <code>string</code> from an untrusted source, so both are run
-            through a type predicate (§8.4). Try setting{" "}
-            <code>?filter=banana</code> by hand — it falls back to "all" instead of
-            corrupting state.
-          </li>
-          <li>
-            Defaults are deleted rather than written, so the clean URL stays clean. A page
-            whose default state has six query params looks broken to users.
-          </li>
-        </ul>
-      }
-    >
-      <Row className="g-3 mb-3">
-        <Col md={4}>
-          <div className="small text-muted mb-1">filter (in the URL)</div>
-          <ButtonGroup size="sm">
-            {(["all", "active", "done"] as Filter[]).map((f) => (
-              <Button
-                key={f}
-                variant={filter === f ? "primary" : "outline-primary"}
-                onClick={() => update("filter", f, f === "all")}
-              >
-                {f}
-              </Button>
-            ))}
-          </ButtonGroup>
-        </Col>
-
-        <Col md={4}>
-          <div className="small text-muted mb-1">sort (in the URL)</div>
-          <ButtonGroup size="sm">
-            {(["newest", "title"] as Sort[]).map((s) => (
-              <Button
-                key={s}
-                variant={sort === s ? "primary" : "outline-primary"}
-                onClick={() => update("sort", s, s === "newest")}
-              >
-                {s}
-              </Button>
-            ))}
-          </ButtonGroup>
-        </Col>
-
-        <Col md={4}>
-          <Form.Group>
-            <Form.Label className="small text-muted mb-1">
-              search (in the URL, with replace)
-            </Form.Label>
-            <Form.Control
-              size="sm"
-              value={query}
-              onChange={(e) => update("q", e.target.value, e.target.value === "", true)}
-              placeholder="filter by title"
-            />
-          </Form.Group>
-        </Col>
-      </Row>
-
-      <Alert variant="light" className="border small">
-        <div className="d-flex flex-wrap gap-3 align-items-center">
-          <span>
-            current query string:{" "}
-            <code>{params.toString() ? `?${params.toString()}` : "(empty)"}</code>
-          </span>
-          <Button
-            size="sm"
-            variant="outline-secondary"
-            onClick={() => setParams(new URLSearchParams(), { replace: true })}
-          >
-            Clear all params
-          </Button>
-        </div>
-      </Alert>
-
-      <Row className="g-3">
-        <Col lg={7}>
-          <Card>
-            <Card.Header className="small fw-semibold d-flex justify-content-between">
-              <span>Results</span>
-              <Badge bg="secondary">{visible.length}</Badge>
-            </Card.Header>
-            <ListGroup variant="flush">
-              {visible.length === 0 ? (
-                <ListGroup.Item className="small text-muted">
-                  Nothing matches.
-                </ListGroup.Item>
-              ) : (
-                visible.map((task) => (
-                  <ListGroup.Item key={task.id} className="small d-flex justify-content-between">
-                    <span className={task.done ? "text-muted text-decoration-line-through" : ""}>
-                      {task.title}
-                    </span>
-                    <span className="text-muted">day {task.createdAt}</span>
-                  </ListGroup.Item>
-                ))
-              )}
-            </ListGroup>
-          </Card>
-        </Col>
-
-        <Col lg={5}>
-          <StateInspector
-            label="derived from URL"
-            value={{ filter, sort, query, visible: visible.length }}
-          />
-
-          <Card body className="mt-3">
-            <div className="small fw-semibold text-muted mb-2">
-              The same filter, in local state
-            </div>
-            <ButtonGroup size="sm">
-              {(["all", "active", "done"] as Filter[]).map((f) => (
-                <Button
-                  key={f}
-                  variant={localFilter === f ? "secondary" : "outline-secondary"}
-                  onClick={() => setLocalFilter(f)}
-                >
-                  {f}
-                </Button>
-              ))}
-            </ButtonGroup>
-            <div className="small text-muted mt-2">
-              Not in the URL. Refresh, share, or press Back and it's gone.
-            </div>
-          </Card>
-        </Col>
-      </Row>
-    </DemoCard>
-  )
-}
-```
-
-Register as `{ id: "url-state", chapter: "18 — Routing", title: "URL as state", element: <UrlStateLab /> }`.
-
-> This lab needs router context, so it only works under `RouterApp` (Lab 18.1). Under the hash shell, `useSearchParams` throws.
-
-**Experiments:**
-
-1. Remove `{ replace: true }` from the search box. Type six characters, then press Back six times. That's why search boxes replace rather than push.
-2. Set `?filter=banana` in the address bar. The predicate rejects it and falls back cleanly. Now delete the predicate and use `as Filter` instead — the filter silently matches nothing and the list is empty with no explanation. **The URL is user input.**
-3. Add pagination (`?page=2`). Note you have to decide what happens to `page` when the filter changes — almost certainly reset it to 1. That interaction is *visible* in the URL, which is one more reason to keep it there.
+---
 
 ---
 
-## 🧪 Lab 18.3 — A complete nested-route app, in its own files
-
-**Level:** core
-
-Labs 18.1 and 18.2 bolted routing onto something that already existed. This lab is the opposite: a
-**small but complete routed application**, built the way you'd start a real one — separate files for
-layouts, pages, data and the auth guard, so the structure teaches you as much as the code.
-
-It exercises, in one app: a layout route, an index route, a dynamic param, a **nested** layout with
-its own index and child, `Outlet` context, a pathless guard route, redirect-and-return-after-login,
-a catch-all 404, and `useSearchParams`. That is essentially all of routing.
-
-### The one trick that makes this work: `MemoryRouter`
-
-The lab shell already owns the address bar — either the hash shell from Part 0.5 or `RouterApp` from
-Lab 18.1. **You cannot nest `BrowserRouter` inside another router**, and you don't want a demo
-hijacking the page URL anyway. So this app runs in a `MemoryRouter`, which keeps its history in a
-JavaScript array instead of the browser:
-
-```tsx
-<MemoryRouter initialEntries={["/"]}>{/* a complete, independent router */}</MemoryRouter>
-```
-
-Everything inside behaves identically — `Link`, `useParams`, `useSearchParams`, guards, 404s — the
-history just isn't the browser's. This is also exactly how you route-test a component (§21) and how
-you put a routed component in Storybook. Since the address bar no longer shows where you are, the
-layout renders its own little URL bar from `useLocation()`.
-
-### The files
-
-Twelve small files. Create them in this order; each one only depends on the ones above it. Note that
-**`CrewAppLab.tsx` sits beside the `crew/` folder, not inside it** — it's the registered demo, and
-everything under `crew/` is the app it mounts.
-
-```
-src/demos/18-routing/
-├── CrewAppLab.tsx                   — the DemoCard, the MemoryRouter, and the route tree
-└── crew/
-    ├── data.ts                      — the domain type and some seed rows
-    ├── auth.tsx                     — AuthProvider, useAuth, RequireAuth
-    ├── layouts/
-    │   ├── RootLayout.tsx           — chrome, nav, the fake URL bar, <Outlet />
-    │   └── MemberLayout.tsx         — resolves :memberId once, passes it via Outlet context
-    └── pages/
-        ├── HomePage.tsx             — the index route
-        ├── RosterPage.tsx           — the list; filters live in the query string
-        ├── MemberProfilePage.tsx    — index child of MemberLayout
-        ├── MemberShiftsPage.tsx     — nested child of MemberLayout
-        ├── AdminPage.tsx            — behind the guard
-        ├── LoginPage.tsx            — signs in, then returns you where you were going
-        └── NotFoundPage.tsx         — the path="*" route
-```
-
-Labs 18.4 and 18.5 add four more files to `crew/` and reuse everything here unchanged, so this folder
-is worth building carefully.
-
-**1. `data.ts`** — the domain, so every page agrees on it:
-
-```ts
-export type Role = "engineer" | "designer" | "ops"
-
-export interface CrewMember {
-  id: string
-  name: string
-  role: Role
-  onCall: boolean
-  shifts: string[]
-}
-
-export const crew: CrewMember[] = [
-  { id: "ada",   name: "Ada Lovelace",  role: "engineer", onCall: true,  shifts: ["Mon 09:00", "Thu 14:00"] },
-  { id: "grace", name: "Grace Hopper",  role: "engineer", onCall: false, shifts: ["Tue 09:00"] },
-  { id: "kata",  name: "Katherine J.",  role: "ops",      onCall: true,  shifts: ["Wed 22:00", "Sat 06:00"] },
-  { id: "may",   name: "May Ling",      role: "designer", onCall: false, shifts: [] },
-]
-
-export const ROLES = ["engineer", "designer", "ops"] as const
-export const isRole = (v: string): v is Role => (ROLES as readonly string[]).includes(v)
-```
-
-Note `isRole` living next to the type. Both the roster's filter and any future route param will need
-to turn a URL string into a `Role`, and there should be exactly one place that decides how.
-
-**2. `auth.tsx`** — a deliberately fake auth, modelled as a union so the "still checking" state
-exists (§18.10):
-
-```tsx
-import { createContext, useContext, useState, type ReactNode } from "react"
-import { Navigate, Outlet, useLocation } from "react-router"
-
-type AuthState =
-  | { status: "anonymous" }
-  | { status: "authenticated"; user: string }
-
-interface AuthApi {
-  state: AuthState
-  signIn: (user: string) => void
-  signOut: () => void
-}
-
-const AuthContext = createContext<AuthApi | null>(null)
-
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AuthState>({ status: "anonymous" })
-
-  return (
-    <AuthContext.Provider
-      value={{
-        state,
-        signIn: (user) => setState({ status: "authenticated", user }),
-        signOut: () => setState({ status: "anonymous" }),
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  )
-}
-
-export function useAuth(): AuthApi {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>")
-  return ctx
-}
-
-/**
- * A pathless layout route. Renders its children if signed in, otherwise
- * redirects to /login while remembering where the user was headed.
- */
-export function RequireAuth() {
-  const { state } = useAuth()
-  const location = useLocation()
-
-  if (state.status !== "authenticated") {
-    return <Navigate to="/login" replace state={{ from: location }} />
-  }
-  return <Outlet />
-}
-```
-
-`RequireAuth` takes **no props**, which is why it can be dropped anywhere in the route tree. It reads
-auth from Context and the destination from the router, and it returns `<Outlet />` rather than
-`children` — because as a layout route, its children are route matches, not JSX.
-
-**3. `layouts/RootLayout.tsx`** — the chrome every page shares, rendered once and never unmounted:
-
-```tsx
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router"
-import { Badge, Button, Card, Nav } from "react-bootstrap"
-import { useAuth } from "../auth"
-
-export default function RootLayout() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { state, signOut } = useAuth()
-
-  return (
-    <Card>
-      {/* Stand-in for the address bar, because MemoryRouter doesn't touch the real one */}
-      <Card.Header className="d-flex align-items-center gap-2 py-2">
-        <Badge bg="dark" className="font-monospace">URL</Badge>
-        <code className="small flex-grow-1">
-          {location.pathname}
-          {location.search}
-        </code>
-        <Button
-          size="sm"
-          variant="outline-secondary"
-          onClick={() => navigate(-1)}
-          title="History.back() — works exactly as in the browser"
-        >
-          ← Back
-        </Button>
-      </Card.Header>
-
-      <Nav variant="tabs" className="px-2 pt-2">
-        {/* `end` stops "/" matching every single path */}
-        <Nav.Link as={NavLink} to="/" end>Home</Nav.Link>
-        <Nav.Link as={NavLink} to="/roster">Roster</Nav.Link>
-        <Nav.Link as={NavLink} to="/admin">Admin</Nav.Link>
-        <div className="ms-auto d-flex align-items-center gap-2 pe-2 small">
-          {state.status === "authenticated" ? (
-            <>
-              <span className="text-success">signed in as {state.user}</span>
-              <Button size="sm" variant="link" className="p-0" onClick={signOut}>
-                sign out
-              </Button>
-            </>
-          ) : (
-            <span className="text-muted">not signed in</span>
-          )}
-        </div>
-      </Nav>
-
-      <Card.Body>
-        <Outlet />   {/* ← every page below renders here */}
-      </Card.Body>
-    </Card>
-  )
-}
-```
-
-**4. `layouts/MemberLayout.tsx`** — the nested layout, and the most instructive file in the lab:
-
-```tsx
-import { NavLink, Outlet, useParams } from "react-router"
-import { Alert, Badge, Nav } from "react-bootstrap"
-import { crew, type CrewMember } from "../data"
-
-/** The shape this layout hands to its children. Both ends import this. */
-export interface MemberContext {
-  member: CrewMember
-}
-
-export default function MemberLayout() {
-  const { memberId } = useParams<{ memberId: string }>()
-
-  // useParams is ALWAYS string | undefined. Narrow here, once.
-  const member = memberId ? crew.find((m) => m.id === memberId) : undefined
-
-  if (!member) {
-    return (
-      <Alert variant="warning" className="mb-0">
-        <div className="fw-semibold">No crew member "{memberId}"</div>
-        <p className="small mb-0">
-          A bad param is a 404 for this branch of the tree — not for the whole app. The nav
-          above is still here, because <code>RootLayout</code> never unmounted.
-        </p>
-      </Alert>
-    )
-  }
-
-  return (
-    <>
-      <div className="d-flex align-items-center gap-2 mb-2">
-        <h5 className="mb-0">{member.name}</h5>
-        <Badge bg="secondary">{member.role}</Badge>
-        {member.onCall && <Badge bg="danger">on call</Badge>}
-      </div>
-
-      {/* Relative links — no member id repeated, so this nav can't drift from the route */}
-      <Nav variant="pills" className="mb-3 gap-1">
-        <Nav.Link as={NavLink} to="." end>Profile</Nav.Link>
-        <Nav.Link as={NavLink} to="shifts">Shifts</Nav.Link>
-      </Nav>
-
-      {/* Resolve the param once here; children just read it */}
-      <Outlet context={{ member } satisfies MemberContext} />
-    </>
-  )
-}
-```
-
-Three decisions worth pausing on:
-
-- **The param is resolved once.** `MemberProfilePage` and `MemberShiftsPage` never call `useParams`
-  and never touch `crew`. If the lookup becomes a fetch, one file changes.
-- **`to="."` and `to="shifts"` are relative.** `.` is the layout's own URL (the index child);
-  `shifts` is its child. Neither mentions `ada`, so renaming the route segment doesn't break the nav.
-- **`satisfies MemberContext`** checks the object against the shared type without widening it, and the
-  children read it with `useOutletContext<MemberContext>()`. `useOutletContext` is unchecked, so this
-  shared type is the only thing keeping the two ends honest.
-
-**5. `pages/HomePage.tsx`**:
-
-```tsx
-import { Link } from "react-router"
-import { ListGroup } from "react-bootstrap"
-import { crew } from "../data"
-
-export default function HomePage() {
-  const onCall = crew.filter((m) => m.onCall)
-
-  return (
-    <>
-      <p className="small text-muted">
-        This is the <code>index</code> route — it matches the parent's exact path, <code>/</code>.
-      </p>
-      <div className="fw-semibold small mb-2">On call right now</div>
-      <ListGroup>
-        {onCall.map((m) => (
-          <ListGroup.Item key={m.id} className="small">
-            {/* Link, never <a href> — an anchor would reload the entire lab app */}
-            <Link to={`/roster/${m.id}`}>{m.name}</Link>
-          </ListGroup.Item>
-        ))}
-      </ListGroup>
-    </>
-  )
-}
-```
-
-**6. `pages/RosterPage.tsx`** — the list, with its filters in the query string:
-
-```tsx
-import { Link, useSearchParams } from "react-router"
-import { Badge, Button, ButtonGroup, Form, ListGroup } from "react-bootstrap"
-import { crew, isRole, ROLES, type Role } from "../data"
-
-export default function RosterPage() {
-  const [params, setParams] = useSearchParams()
-
-  // The URL is untrusted input: validate, don't cast.
-  const raw = params.get("role") ?? "all"
-  const role: Role | "all" = isRole(raw) ? raw : "all"
-  const q = params.get("q") ?? ""
-
-  /** Copy the previous params, change one key. Never build from scratch. */
-  function setParam(key: string, value: string, isDefault: boolean, replace = false) {
-    setParams(
-      (prev) => {
-        const next = new URLSearchParams(prev)
-        isDefault ? next.delete(key) : next.set(key, value)
-        return next
-      },
-      { replace }
-    )
-  }
-
-  const visible = crew
-    .filter((m) => role === "all" || m.role === role)
-    .filter((m) => m.name.toLowerCase().includes(q.trim().toLowerCase()))
-
-  return (
-    <>
-      <div className="d-flex flex-wrap gap-3 align-items-end mb-3">
-        <div>
-          <div className="small text-muted mb-1">role — pushes history</div>
-          <ButtonGroup size="sm">
-            {(["all", ...ROLES] as const).map((r) => (
-              <Button
-                key={r}
-                variant={role === r ? "primary" : "outline-primary"}
-                onClick={() => setParam("role", r, r === "all")}
-              >
-                {r}
-              </Button>
-            ))}
-          </ButtonGroup>
-        </div>
-        <Form.Group>
-          <Form.Label className="small text-muted mb-1">search — replaces history</Form.Label>
-          <Form.Control
-            size="sm"
-            value={q}
-            placeholder="name"
-            onChange={(e) => setParam("q", e.target.value, e.target.value === "", true)}
-          />
-        </Form.Group>
-      </div>
-
-      <ListGroup>
-        {visible.length === 0 ? (
-          <ListGroup.Item className="small text-muted">
-            No crew match <code>?{params.toString()}</code>.
-          </ListGroup.Item>
-        ) : (
-          visible.map((m) => (
-            <ListGroup.Item key={m.id} className="small d-flex justify-content-between">
-              <Link to={`/roster/${m.id}`}>{m.name}</Link>
-              <Badge bg="light" text="dark">{m.role}</Badge>
-            </ListGroup.Item>
-          ))
-        )}
-      </ListGroup>
-    </>
-  )
-}
-```
-
-**7. `pages/MemberProfilePage.tsx`** — note how little it needs to know:
-
-```tsx
-import { useOutletContext } from "react-router"
-import { ListGroup } from "react-bootstrap"
-import type { MemberContext } from "../layouts/MemberLayout"
-
-export default function MemberProfilePage() {
-  // No useParams, no lookup, no loading state. The layout already did it.
-  const { member } = useOutletContext<MemberContext>()
-
-  return (
-    <ListGroup className="small">
-      <ListGroup.Item><strong>id</strong> — <code>{member.id}</code></ListGroup.Item>
-      <ListGroup.Item><strong>role</strong> — {member.role}</ListGroup.Item>
-      <ListGroup.Item><strong>shifts</strong> — {member.shifts.length}</ListGroup.Item>
-    </ListGroup>
-  )
-}
-```
-
-**8. `pages/MemberShiftsPage.tsx`**:
-
-```tsx
-import { useOutletContext } from "react-router"
-import { Alert, ListGroup } from "react-bootstrap"
-import type { MemberContext } from "../layouts/MemberLayout"
-
-export default function MemberShiftsPage() {
-  const { member } = useOutletContext<MemberContext>()
-
-  if (member.shifts.length === 0) {
-    return <Alert variant="light" className="border small mb-0">No shifts booked.</Alert>
-  }
-
-  return (
-    <ListGroup className="small">
-      {member.shifts.map((shift) => (
-        <ListGroup.Item key={shift}>{shift}</ListGroup.Item>
-      ))}
-    </ListGroup>
-  )
-}
-```
-
-**9. `pages/AdminPage.tsx`, `pages/LoginPage.tsx`, `pages/NotFoundPage.tsx`** — the guard's payload,
-the return trip, and the catch-all:
-
-```tsx
-// pages/AdminPage.tsx
-import { Alert } from "react-bootstrap"
-import { useAuth } from "../auth"
-
-export default function AdminPage() {
-  const { state } = useAuth()
-  return (
-    <Alert variant="success" className="mb-0 small">
-      <div className="fw-semibold">Admin</div>
-      You only see this because <code>RequireAuth</code> rendered its <code>Outlet</code>
-      {state.status === "authenticated" && <> — signed in as <strong>{state.user}</strong></>}.
-      A client-side guard decides what to <em>render</em>, never what you're <em>allowed</em> to have.
-    </Alert>
-  )
-}
-```
-
-```tsx
-// pages/LoginPage.tsx
-import { useLocation, useNavigate } from "react-router"
-import { Button, Card, Form } from "react-bootstrap"
-import { useState } from "react"
-import { useAuth } from "../auth"
-
-export default function LoginPage() {
-  const [name, setName] = useState("ada")
-  const { signIn } = useAuth()
-  const navigate = useNavigate()
-  const location = useLocation()
-
-  // Where the guard wanted to send us. Falls back to home on a cold arrival.
-  const from = (location.state as { from?: { pathname: string } } | null)?.from?.pathname ?? "/"
-
-  return (
-    <Card body className="mx-auto" style={{ maxWidth: 380 }}>
-      <div className="small text-muted mb-2">
-        Redirected here by the guard. It wanted: <code>{from}</code>
-      </div>
-      <Form
-        onSubmit={(e) => {
-          e.preventDefault()
-          signIn(name)
-          // `replace` so Back doesn't return to the login page we just left
-          navigate(from, { replace: true })
-        }}
-      >
-        <Form.Control
-          size="sm"
-          className="mb-2"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          aria-label="username"
-        />
-        <Button size="sm" type="submit">Sign in</Button>
-      </Form>
-    </Card>
-  )
-}
-```
-
-```tsx
-// pages/NotFoundPage.tsx
-import { Link, useLocation } from "react-router"
-import { Alert } from "react-bootstrap"
-
-export default function NotFoundPage() {
-  const location = useLocation()
-  return (
-    <Alert variant="danger" className="mb-0 small">
-      <div className="fw-semibold">404 — nothing matches {location.pathname}</div>
-      This is <code>path="*"</code>. Without it, an unmatched URL renders an empty{" "}
-      <code>Outlet</code> and looks like a broken page. <Link to="/">Go home</Link>.
-    </Alert>
-  )
-}
-```
-
-**10. `CrewAppLab.tsx`** — the route tree, and the only file that knows the whole shape:
-
-```tsx
-import { MemoryRouter, Route, Routes } from "react-router"
-import DemoCard from "@/lab/DemoCard"
-import { AuthProvider, RequireAuth } from "./crew/auth"
-import RootLayout from "./crew/layouts/RootLayout"
-import MemberLayout from "./crew/layouts/MemberLayout"
-import HomePage from "./crew/pages/HomePage"
-import RosterPage from "./crew/pages/RosterPage"
-import MemberProfilePage from "./crew/pages/MemberProfilePage"
-import MemberShiftsPage from "./crew/pages/MemberShiftsPage"
-import AdminPage from "./crew/pages/AdminPage"
-import LoginPage from "./crew/pages/LoginPage"
-import NotFoundPage from "./crew/pages/NotFoundPage"
-
-export default function CrewAppLab() {
-  return (
-    <DemoCard
-      title="A complete nested-route app"
-      claim="Nesting, params, Outlet context, a pathless guard and a catch-all — the whole of declarative mode in one small app, running in a MemoryRouter so it doesn't fight the lab shell."
-      level="core"
-      notice={
-        <ul className="mb-0">
-          <li>
-            Watch the <strong>URL bar</strong> in the card header. It's{" "}
-            <code>useLocation()</code>, not the browser — <code>MemoryRouter</code> keeps
-            history in an array.
-          </li>
-          <li>
-            Open a member, then switch Profile ↔ Shifts. Only the inner panel changes: the
-            nav, the header and <code>MemberLayout</code> <strong>never unmount</strong>.
-          </li>
-          <li>
-            Click <strong>Admin</strong> while signed out. The guard redirects to login,
-            login sends you back to <code>/admin</code>. That round trip is{" "}
-            <code>location.state</code>, not the URL.
-          </li>
-          <li>
-            Filter the roster, then press <strong>← Back</strong>. Role changes push; the
-            search box replaces. Deliberately different.
-          </li>
-        </ul>
-      }
-    >
-      <AuthProvider>
-        <MemoryRouter initialEntries={["/"]}>
-          <Routes>
-            {/* Layout route: renders chrome for everything below it */}
-            <Route path="/" element={<RootLayout />}>
-              {/* index = the parent's exact path, "/" */}
-              <Route index element={<HomePage />} />
-
-              <Route path="roster" element={<RosterPage />} />
-
-              {/* Dynamic segment + its own nested layout and children */}
-              <Route path="roster/:memberId" element={<MemberLayout />}>
-                <Route index element={<MemberProfilePage />} />
-                <Route path="shifts" element={<MemberShiftsPage />} />
-              </Route>
-
-              {/* Pathless route = a guard applied to a GROUP of children */}
-              <Route element={<RequireAuth />}>
-                <Route path="admin" element={<AdminPage />} />
-              </Route>
-
-              {/* Outside the guard, or the redirect loops */}
-              <Route path="login" element={<LoginPage />} />
-
-              <Route path="*" element={<NotFoundPage />} />
-            </Route>
-          </Routes>
-        </MemoryRouter>
-      </AuthProvider>
-    </DemoCard>
-  )
-}
-```
-
-Register as `{ id: "crew-app", chapter: "18 — Routing", title: "A nested-route app", element: <CrewAppLab /> }`.
-
-**Run it:**
-
-```bash
-npm run dev
-```
-
-**What to notice:**
-
-1. **The route tree reads like a sitemap.** Indentation *is* URL structure, and `Outlet` is where the
-   next level goes. This is the single clearest reason to declare routes as a tree.
-2. **`AuthProvider` sits outside `MemoryRouter`** — auth is not routing state, and the guard needs it
-   before any route matches. Putting the provider inside would still work here, but it's the wrong
-   dependency direction.
-3. **Ancestors keep their state.** Type something in the roster search, open a member, press Back.
-   The search term is still there — it's in the URL, so it survived. Now do the same with the
-   `useState` name field on the login page, and it won't.
-4. **`login` is a sibling of the guard, not a child.** Put it inside `<RequireAuth>` and an anonymous
-   user gets redirected to login, which redirects to login, forever.
-
-**Experiments:**
-
-1. **Delete `<Outlet />` from `RootLayout`.** The nav still renders; every page disappears. There's no
-   error and no warning — this is the single most common "why is my page blank" cause in nested
-   routing.
-2. **Remove `end` from the Home `NavLink`.** Now Home is highlighted on every page, because every
-   path starts with `/`. Everyone hits this once.
-3. **Change `<Route index element={<MemberProfilePage />} />` to `path=""`.** It still works —
-   `index` is sugar. Then try giving it `path="profile"` and watch `/roster/ada` render an empty panel,
-   because nothing matches the parent's own URL any more.
-4. **Break the `Outlet` context.** In `MemberLayout`, pass `context={{ crewMember: member }}` while the
-   children still read `{ member }`. It compiles — `satisfies` catches it, so delete that too — and
-   then crashes at runtime with `member is undefined`. **`useOutletContext` is a cast, not a check.**
-5. **Visit a bad param.** Navigate to `/roster/nobody`. `MemberLayout` renders its own not-found, and
-   the root nav stays. Now move that check into `MemberProfilePage` instead and note that the member
-   name in the layout header renders as blank first — the lookup belongs at the level that owns the
-   param.
-6. **Take `replace` off the login redirect.** Sign in, then press Back: you're on the login page,
-   already authenticated, and pressing Forward and Back cycles pointlessly.
-7. **Swap `MemoryRouter` for `BrowserRouter`.** React throws — you cannot nest routers — and the
-   error message is worth reading once, because you will meet it when someone adds a router to a
-   component that's already inside one.
+**Part B — Data mode.** One lab: the same app, with the config moved out of React.
 
 ---
 
-## 🧪 Lab 18.4 — The same app, driven by a route config
-
-**Level:** depth
-
-Lab 18.3's route tree is JSX. This lab converts it to **data** — an array of `RouteObject`s — and then
-does the thing that makes the conversion worth it: **generates the navigation from the route config**,
-so a new page appears in the menu because it exists, not because you remembered to add it twice.
-
-You'll reuse every page and layout from Lab 18.3 unchanged. Only the route declaration moves.
-
-### 1. The config file
-
-Create `src/demos/18-routing/crew/routes.tsx`. This is the whole shape of the app in one value:
-
-```tsx
-import type { RouteObject } from "react-router"
-import { RequireAuth } from "./auth"
-import RootLayout from "./layouts/RootLayout"
-import MemberLayout from "./layouts/MemberLayout"
-import HomePage from "./pages/HomePage"
-import RosterPage from "./pages/RosterPage"
-import MemberProfilePage from "./pages/MemberProfilePage"
-import MemberShiftsPage from "./pages/MemberShiftsPage"
-import AdminPage from "./pages/AdminPage"
-import LoginPage from "./pages/LoginPage"
-import NotFoundPage from "./pages/NotFoundPage"
-
-/**
- * Our own metadata, hung off each route. React Router ignores unknown keys,
- * which is exactly what makes this pattern useful: the config becomes the one
- * place that knows about a page, and everything else is derived from it.
- */
-export interface RouteMeta {
-  /** Label for generated navigation. Omit to keep the route out of menus. */
-  navLabel?: string
-  /** Render the NavLink with `end`, so it doesn't match descendants. */
-  navEnd?: boolean
-  /** Shown in the config inspector — not used for enforcement. */
-  guarded?: boolean
-}
-
-/** RouteObject + our meta. `handle` is React Router's official escape hatch. */
-type AppRoute = RouteObject & {
-  handle?: RouteMeta
-  children?: AppRoute[]
-}
-
-export const routes: AppRoute[] = [
-  {
-    path: "/",
-    element: <RootLayout />,
-    children: [
-      {
-        index: true,
-        element: <HomePage />,
-        handle: { navLabel: "Home", navEnd: true },
-      },
-      {
-        path: "roster",
-        element: <RosterPage />,
-        handle: { navLabel: "Roster" },
-      },
-      {
-        // Nested layout + its own index and child. No navLabel: you reach
-        // this by clicking a member, not from the top-level menu.
-        path: "roster/:memberId",
-        element: <MemberLayout />,
-        children: [
-          { index: true, element: <MemberProfilePage /> },
-          { path: "shifts", element: <MemberShiftsPage /> },
-        ],
-      },
-      {
-        // A pathless route: the guard wraps a GROUP of children and
-        // contributes no URL segment of its own.
-        element: <RequireAuth />,
-        children: [
-          {
-            path: "admin",
-            element: <AdminPage />,
-            handle: { navLabel: "Admin", guarded: true },
-          },
-        ],
-      },
-      { path: "login", element: <LoginPage /> },
-      { path: "*", element: <NotFoundPage /> },
-    ],
-  },
-]
-```
-
-**Read it against Lab 18.3's JSX and note that nothing structural changed.** `<Route path="x">` became
-`{ path: "x" }`, `element={<X />}` became `element: <X />`, nesting became `children`, and `index` went
-from a boolean prop to `index: true`. The two forms compile to the same route tree — `Routes`/`Route`
-builds this array internally.
-
-Four things the data form makes possible, all of which the JSX form cannot do:
-
-- **`handle`** carries arbitrary metadata. This is a real React Router field, not a hack; it's ignored
-  by matching and handed back to you by `useMatches` in data and framework mode.
-- **The tree is enumerable.** You can walk it, filter it, and generate things from it — which is step 2.
-- **It's assertable in a test.** "Every guarded page is inside a guard" and "no two routes share a
-  path" become unit tests over a value, with nothing rendered.
-- **It's the input `createBrowserRouter` wants** (Lab 18.5), so this file is also the migration path.
-
-> **TS Note.** `AppRoute` extends `RouteObject` and **redeclares `children`** as `AppRoute[]`. Without
-> that line, `children` stays `RouteObject[]` and your `handle` type is lost one level down — the
-> metadata would type-check at the top and silently widen to `unknown` inside `children`. Recursive
-> types need the recursive field restated; it's the most common mistake when typing a config tree.
-
-### 2. Deriving the nav from the config
-
-Create `src/demos/18-routing/crew/layouts/DerivedNav.tsx`:
-
-```tsx
-import { NavLink } from "react-router"
-import { Badge, Nav } from "react-bootstrap"
-import { routes } from "../routes"
-
-/** Flatten the config into the routes that asked to be in a menu. */
-function navItems() {
-  const top = routes[0]?.children ?? []
-
-  return top
-    .flatMap((route) => (route.children && !route.path ? route.children : [route]))
-    .filter((route) => route.handle?.navLabel)
-    .map((route) => ({
-      to: route.index ? "/" : `/${route.path}`,
-      label: route.handle!.navLabel!,
-      end: route.handle?.navEnd ?? false,
-      guarded: route.handle?.guarded ?? false,
-    }))
-}
-
-export default function DerivedNav() {
-  const items = navItems()
-
-  return (
-    <Nav variant="tabs" className="px-2 pt-2">
-      {items.map((item) => (
-        <Nav.Link as={NavLink} key={item.to} to={item.to} end={item.end}>
-          {item.label}
-          {item.guarded && (
-            <Badge bg="warning" text="dark" className="ms-1" title="behind RequireAuth">
-              🔒
-            </Badge>
-          )}
-        </Nav.Link>
-      ))}
-    </Nav>
-  )
-}
-```
-
-The `flatMap` is the interesting line. A pathless guard route contributes no URL, so its **children**
-are the navigable pages — the nav has to see through the wrapper. That single expression is why
-`admin` appears in the menu at all, and it's a good illustration of why config-as-data is worth it:
-the guard's existence is now the *reason* the lock badge renders, rather than a comment somewhere
-hoping both lists stay in sync.
-
-Then in `RootLayout.tsx`, replace the hard-coded `<Nav>…</Nav>` block with:
-
-```tsx
-import DerivedNav from "./DerivedNav"
-
-// ...in place of the <Nav variant="tabs"> block:
-<DerivedNav />
-```
-
-> Keep the signed-in indicator that was inside the old `<Nav>`; move it into `DerivedNav`, or put it
-> in the card header beside the URL bar. It's chrome, not navigation.
-
-### 3. Rendering the config
-
-Create `src/demos/18-routing/ConfigRoutesLab.tsx`:
-
-```tsx
-import { MemoryRouter, useRoutes } from "react-router"
-import { Card } from "react-bootstrap"
-import DemoCard from "@/lab/DemoCard"
-import { AuthProvider } from "./crew/auth"
-import { routes } from "./crew/routes"
-
-/** useRoutes must be called INSIDE a router — hence this tiny component. */
-function ConfigRoutes() {
-  return useRoutes(routes)
-}
-
-/** Walks the config and prints it, to make the "routes are data" point literal. */
-function ConfigTree() {
-  const lines: string[] = []
-
-  const walk = (list: typeof routes, depth: number) => {
-    for (const route of list) {
-      const path = route.index ? "(index)" : route.path ?? "(pathless)"
-      const meta = route.handle?.navLabel ? `  ← nav: ${route.handle.navLabel}` : ""
-      lines.push(`${"  ".repeat(depth)}${path}${meta}`)
-      if (route.children) walk(route.children, depth + 1)
-    }
-  }
-  walk(routes, 0)
-
-  return (
-    <Card body className="mt-3 bg-body-tertiary">
-      <div className="small fw-semibold text-muted mb-2">
-        The config, walked at runtime
-      </div>
-      <pre className="lab-pre small mb-0">{lines.join("\n")}</pre>
-    </Card>
-  )
-}
-
-export default function ConfigRoutesLab() {
-  return (
-    <DemoCard
-      title="Routes as a config object"
-      claim="The same app, declared as data instead of JSX — so the navigation can be generated from the route tree instead of maintained beside it."
-      level="depth"
-      notice={
-        <ul className="mb-0">
-          <li>
-            The tabs are <strong>generated</strong>. Nothing in{" "}
-            <code>RootLayout</code> lists them any more.
-          </li>
-          <li>
-            Add a <code>navLabel</code> to the <code>login</code> route in{" "}
-            <code>routes.tsx</code> and it appears in the menu — one edit, one place.
-          </li>
-          <li>
-            The panel below is the config <em>walked at runtime</em>. Routes are a value
-            you can iterate; JSX <code>&lt;Route&gt;</code> elements are not.
-          </li>
-          <li>
-            The 🔒 on Admin is derived from it sitting inside the pathless guard route — the
-            nav sees the structure, not a duplicated list.
-          </li>
-        </ul>
-      }
-    >
-      <AuthProvider>
-        <MemoryRouter initialEntries={["/"]}>
-          <ConfigRoutes />
-        </MemoryRouter>
-      </AuthProvider>
-      <ConfigTree />
-    </DemoCard>
-  )
-}
-```
-
-Register as `{ id: "route-config", chapter: "18 — Routing", title: "Routes as a config", element: <ConfigRoutesLab /> }`.
-
-**What to notice:**
-
-1. **The app behaves identically** to Lab 18.3. Same URLs, same guard, same 404. The route declaration
-   is an implementation detail, which is exactly why you can migrate to it incrementally.
-2. **`useRoutes` is a hook**, so it must be called inside `MemoryRouter` — which is why the one-line
-   `ConfigRoutes` component exists. Calling it in `ConfigRoutesLab` itself throws "useRoutes may be
-   used only in the context of a Router", and that error is worth causing once on purpose.
-3. **Adding a page is now one edit.** In Lab 18.3, a new top-level page meant a `<Route>` *and* a
-   `<Nav.Link>`. Here the nav derives from the config, so forgetting is impossible.
-
-**Experiments:**
-
-1. **Add a route with `handle: { navLabel: "Login" }`** to the `login` entry. It appears in the tabs
-   immediately. Now delete the whole `login` route and note the tab disappears *and* the guard's
-   redirect target 404s — the config made both consequences visible in one place.
-2. **Test the config without rendering.** Add a scratch file and assert something real:
-   ```ts
-   const paths = routes[0].children!.map((r) => r.path).filter(Boolean)
-   console.assert(new Set(paths).size === paths.length, "duplicate route paths")
-   ```
-   This is the argument in miniature: you cannot write that assertion against JSX.
-3. **Move `admin` out of the guard** (make it a direct child of `/`). The 🔒 badge vanishes on its own,
-   because the badge was derived from position in the tree rather than hard-coded. Then put it back.
-4. **Break the recursive type.** In `routes.tsx`, delete the `children?: AppRoute[]` line from
-   `AppRoute`. The top-level `handle` still type-checks, but the one on `admin` — nested inside
-   `children` — now errors or widens. That line is the whole reason the config is typed all the way
-   down.
-5. **Add a second derived thing.** Generate a `<datalist>` of every static path in the config and wire
-   it to a "go to" input with `useNavigate`. Twenty lines, and it can never be out of date.
-
----
-
-## 🧪 Lab 18.5 — Data mode: loaders instead of effects
+## 🧪 Lab 18.10 — Data mode: loaders instead of effects
 
 **Level:** optional
 
-The same app a third time, in **data mode**. The point of doing it on an app you
-already know is that the diff is the lesson: you delete every loading state, every `useEffect`, and
-every `AbortController`, and you add a `loader` per route.
+The crew app once more, in **data mode**. The point of doing it on an app you already know is that
+the diff is the lesson: you delete every loading state, every `useEffect` and every
+`AbortController`, and you add a `loader` per route.
+
+This lab writes new files alongside the declarative ones rather than editing them, so Labs 18.1–18.8
+keep working and you can flip between the two versions in the sidebar.
 
 This is where React Router is heading, and it's the API a new project should probably start with — but
 it only makes sense once you can see what it replaces.
 
 ### 1. A fake async data source
 
-The crew data has been a synchronous array, which hides the whole problem. Create
+The crew data has been a synchronous array all through Part A, which hides the whole problem. Create
 `src/demos/18-routing/crew/api.ts`:
 
 ```ts
@@ -21270,7 +21686,7 @@ export const dataRoutes: RouteObject[] = [
 ]
 ```
 
-Compare with Lab 18.4's config: identical shape, two new keys. `loader` is the data, `errorElement` is
+Compare with Lab 18.8's config: identical shape, two new keys. `loader` is the data, `errorElement` is
 the failure. Nothing about the tree changed — which is why writing routes as data in the first place
 made this a small edit.
 
@@ -21520,7 +21936,15 @@ effect-based nesting produces a waterfall by construction.
 
 ---
 
-## 🧪 Lab 18.6 — Framework mode: the same app, typed end to end
+---
+
+---
+
+**Part C — Framework mode.** One lab, in its own project.
+
+---
+
+## 🧪 Lab 18.11 — Framework mode: the same app, typed end to end
 
 **Level:** optional
 
@@ -21567,7 +21991,7 @@ export default { ssr: false } satisfies Config
 
 ### 2. The data, and the route config
 
-Create `app/data/crew.ts` — the same four rows as Lab 18.3:
+Create `app/data/crew.ts` — the same four rows as Lab 18.1:
 
 ```ts
 export type Role = "engineer" | "designer" | "ops"
@@ -21613,8 +22037,8 @@ export default [
 ] satisfies RouteConfig
 ```
 
-Three lines of config, and it is the complete URL map of the app. Compare it with Lab 18.3's JSX tree
-and Lab 18.4's `RouteObject[]`: same tree, third notation.
+Three lines of config, and it is the complete URL map of the app. Compare it with Lab 18.5's JSX tree
+and Lab 18.8's `RouteObject[]`: same tree, third notation.
 
 ### 3. A layout route module
 
@@ -21647,7 +22071,7 @@ export default function Layout() {
 ```
 
 `Outlet`, `Link`, `useLocation`, `useNavigation` — all imported from `react-router`, all behaving
-exactly as they did in the previous three labs. **Nothing you learned is invalidated.**
+exactly as they did all through Part A. **Nothing you learned is invalidated.**
 
 ### 4. Two route modules, and the typing payoff
 
@@ -21742,9 +22166,9 @@ server is running.
 **What to notice — the three things you cannot get in the other modes:**
 
 1. **`loaderData` needs no cast.** Hover it: `{ member: CrewMember }`, inferred from the `loader`'s
-   return type. Compare with Lab 18.5, where `useLoaderData() as CrewMember` was a promise to the
+   return type. Compare with Lab 18.10, where `useLoaderData() as CrewMember` was a promise to the
    compiler — the exact §17.5 problem. Here there is nothing to promise.
-2. **`params.memberId` is `string`.** Every `if (!id) return <NotFound />` in Labs 18.3 and 18.4
+2. **`params.memberId` is `string`.** Every `if (!memberId)` guard in Labs 18.4 and 18.5
    existed because the router couldn't see the route pattern. The generated types can.
 3. **One file owns one URL.** The loader, the component, the error boundary and the `<title>` for
    `/member/:memberId` are in `member.tsx` and nowhere else. Nothing to keep in sync across a config
@@ -21754,7 +22178,7 @@ server is running.
 
 1. **Break the loader's return type.** Change it to `return { crewMember: member }` and leave the
    component reading `loaderData.member`. Compile error, in the component, naming the field. Do the
-   equivalent in Lab 18.5 (change the loader, leave the cast) and it compiles and crashes at runtime.
+   equivalent in Lab 18.10 (change the loader, leave the cast) and it compiles and crashes at runtime.
    **This is the whole argument for framework mode in one experiment.**
 2. **Type a wrong path.** In `roster.tsx`, misspell the link target as `/membr/...`. It still
    compiles, because a template string is just a string, and you find out by clicking. Now import
@@ -21776,6 +22200,8 @@ server is running.
 > **Keep or delete?** This project has served its purpose once you've run the experiments. Nothing in
 > `react-lab` depends on it. Keep it around if your next project might be framework mode — the
 > scaffold is the fastest honest way to evaluate that.
+
+---
 
 ---
 
@@ -25938,12 +26364,17 @@ Seventy-plus demos, in the order the notes introduce them. **Core** labs are the
 | 17.3 `useFetch` + union state | depth | One generic hook, four states, no impossible combinations | `17-fetching/UseFetchLab.tsx` |
 | 17.4 Validate with zod | depth | A cast is a claim; a schema is a check | `17-fetching/ZodLab.tsx` |
 | 17.5 TanStack Query | optional | Caching, dedup, optimistic updates with rollback | `17-fetching/QueryLab.tsx` |
-| 18.1 Router shell | core | Real URLs, history, active links, in-app 404 | `RouterApp.tsx` |
-| 18.2 URL as state | depth | Filters in the query string are shareable and refresh-proof | `18-routing/UrlStateLab.tsx` |
-| 18.3 A nested-route app | core | Layout routes, index routes, params, `Outlet` context, a pathless guard and a 404 — in one small app | `18-routing/CrewAppLab.tsx` + `18-routing/crew/*` |
-| 18.4 Routes as a config | depth | The route tree as data, so the navigation is generated from it rather than maintained beside it | `18-routing/ConfigRoutesLab.tsx` + `crew/routes.tsx` |
-| 18.5 Data mode & loaders | optional | Loaders fetch before rendering, in parallel, with cancellation and `errorElement` — the pages have no loading code | `18-routing/DataRouterLab.tsx` + `crew/dataRoutes.tsx` |
-| 18.6 Framework mode | optional | `routes.ts`, route modules, and generated types — `loaderData` needs no cast and `params` is non-optional | **its own project** (`npx create-react-router@latest`) |
+| 18.1 Pages, no router | core | What you write without a router — and the three things it can't do | `18-routing/CrewLab.tsx` + `crew/pages/*` |
+| 18.2 First routes | core | `Routes`/`Route`/`Link` delete the hand-rolled view state | `CrewLab.tsx` |
+| 18.3 Layout route & 404 | core | `Outlet`, `index`, `NavLink` + `end`, `path="*"` | `crew/layouts/RootLayout.tsx` |
+| 18.4 Dynamic segments | core | `:memberId` and `useParams` — always `string \| undefined` | `crew/pages/MemberPage.tsx` |
+| 18.5 Nested layouts | core | A sub-nav, relative links, and `Outlet` context | `crew/layouts/MemberLayout.tsx` |
+| 18.6 URL as state | core | `useSearchParams`, push vs replace, validate don't cast | `crew/pages/RosterPage.tsx` |
+| 18.7 Route guards | depth | A pathless route, `Navigate replace`, and the return trip via `location.state` | `crew/auth.tsx` |
+| 18.8 Routes as a config | depth | The tree as data, so the nav is generated from it rather than maintained beside it | `crew/routes.tsx` + `crew/layouts/DerivedNav.tsx` |
+| 18.9 A real `BrowserRouter` | depth | The same ideas with real URLs and real history — the lab shell itself | `RouterApp.tsx` |
+| 18.10 Data mode & loaders | optional | Loaders fetch before rendering, in parallel, with cancellation and `errorElement` — the pages have no loading code | `18-routing/DataRouterLab.tsx` + `crew/dataRoutes.tsx` |
+| 18.11 Framework mode | optional | `routes.ts`, route modules, and generated types — `loaderData` needs no cast and `params` is non-optional | **its own project** (`npx create-react-router@latest`) |
 | 19.1 Error boundaries | core | Containment per subtree; nothing from handlers or promises | `19-errors/ErrorBoundaryLab.tsx` |
 | 19.2 `Suspense` & `lazy` | depth | "Not ready" and "it broke" are different mechanisms | `19-errors/SuspenseLab.tsx` |
 | 20.1 Compound components | depth | Parts share state via context; consumers own layout | `20-patterns/CompoundLab.tsx` |
@@ -26026,9 +26457,7 @@ import FetchByHandLab from "@/demos/17-fetching/FetchByHandLab"
 import RaceConditionLab from "@/demos/17-fetching/RaceConditionLab"
 import UseFetchLab from "@/demos/17-fetching/UseFetchLab"
 import ZodLab from "@/demos/17-fetching/ZodLab"
-import UrlStateLab from "@/demos/18-routing/UrlStateLab"
-import CrewAppLab from "@/demos/18-routing/CrewAppLab"
-import ConfigRoutesLab from "@/demos/18-routing/ConfigRoutesLab"
+import CrewLab from "@/demos/18-routing/CrewLab"
 import DataRouterLab from "@/demos/18-routing/DataRouterLab"
 import ErrorBoundaryLab from "@/demos/19-errors/ErrorBoundaryLab"
 import SuspenseLab from "@/demos/19-errors/SuspenseLab"
@@ -26129,13 +26558,10 @@ export const demos: Demo[] = [
   { id: "use-fetch", chapter: "17 — Fetching", title: "useFetch + union state", element: <UseFetchLab /> },
   { id: "zod", chapter: "17 — Fetching", title: "Validate with zod", element: <ZodLab /> },
 
-  // Needs router context — only works under RouterApp (Lab 18.1)
-  { id: "url-state", chapter: "18 — Routing", title: "URL as state", element: <UrlStateLab /> },
-
-  // These three carry their OWN router (MemoryRouter / createMemoryRouter),
-  // so they work under either shell — hash or RouterApp.
-  { id: "crew-app", chapter: "18 — Routing", title: "A nested-route app", element: <CrewAppLab /> },
-  { id: "route-config", chapter: "18 — Routing", title: "Routes as a config", element: <ConfigRoutesLab /> },
+  // Both carry their OWN router (MemoryRouter / createMemoryRouter), so they
+  // work under either shell — the hash shell or RouterApp from Lab 18.9.
+  // crew-app is registered in Lab 18.1 and improves through Lab 18.8.
+  { id: "crew-app", chapter: "18 — Routing", title: "Crew app (built up)", element: <CrewLab /> },
   { id: "data-mode", chapter: "18 — Routing", title: "Data mode & loaders", element: <DataRouterLab /> },
 
   { id: "error-boundary", chapter: "19 — Errors", title: "Error boundaries", element: <ErrorBoundaryLab /> },
@@ -26390,7 +26816,7 @@ You now have every fundamental needed to read and write production React with Ty
 
 - **react-hook-form + zod** — replace hand-rolled form state. Zod schemas generate types, so validation and types never drift apart. Lab 8.4 built the manual version; you'll appreciate what the library does.
 - **TanStack Query** — server state done properly, with excellent TypeScript inference. Lab 17.5 is a starting point; the docs on `staleTime` vs `gcTime`, and on infinite queries, are worth reading in full.
-- **react-router**'s data and framework modes — covered in §18.12 and §18.13. If you only did the declarative labs, Lab 18.5 and Lab 18.6 are the natural next hour.
+- **react-router**'s data and framework modes — covered in §18.12 and §18.13. If you only did the declarative labs, Labs 18.10 and 18.11 are the natural next hour.
 
 **Then**
 
