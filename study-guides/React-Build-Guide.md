@@ -267,8 +267,6 @@ Seventeen steps. Run the app after each one.
 from another means a field is only ever added in one place. Getting this right first is what makes
 everything downstream cheap.
 
-Everything from here happens in the **`taskboard`** project. Switch terminals.
-
 Start with the domain types, because they're the contract the whole app is written against. Create `src/types.ts`:
 
 ```ts
@@ -2028,7 +2026,7 @@ api.interceptors.response.use(
 
 ### 2. Keep it offline
 
-Until there's a server, give the instance the lab's mock adapter. Create `src/api/mockAdapter.ts`, an in-memory stand-in for a real server so the project runs offline:
+Until there's a real server, give the instance a mock adapter — an in-memory stand-in that lets the whole data layer run offline. Create `src/api/mockAdapter.ts`:
 
 ```ts
 import type { AxiosAdapter, AxiosRequestConfig } from "axios"

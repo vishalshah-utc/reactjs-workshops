@@ -18613,9 +18613,11 @@ useEffect(() => {
 
 Put the calls in a module per resource, not in components. Each function does three things: make the request, validate the response, return domain data.
 
+This is the shape to copy into a real project — `api/client.ts` from §17.8, a schema module beside it, and one module per resource:
+
 ```ts
 // src/api/tasks.ts
-import { api } from "@/api/client"
+import { api } from "@/api/client"          // the instance from §17.8
 import { TaskSchema, TaskListSchema, type NewTask, type Task } from "@/schemas/task"
 
 export async function listTasks(signal?: AbortSignal): Promise<Task[]> {
@@ -21570,7 +21572,7 @@ npm install @reduxjs/toolkit react-redux
 ```ts
 // src/store/tasksSlice.ts
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
-import type { Task } from "@/schemas/task"
+import type { Task } from "@/schemas/task"   // or wherever your Task type lives
 
 const initialState: Task[] = []
 
@@ -22698,7 +22700,7 @@ export const useTaskStore = create<TaskState>()(
           }),
       })),
       {
-        name: "taskboard.tasks",
+        name: "lab.tasks",
         // Persist only part of the store — don't save transient UI state
         partialize: (s) => ({ tasks: s.tasks }),
         version: 1,
@@ -24231,7 +24233,7 @@ You now have every fundamental needed to read and write production React with Ty
 - **Server-side React** — Next.js or React Router in framework mode: Server Components, streaming, and the data-loading model that follows from them. Everything in this document still applies inside client components.
 - **Deployment** — `npm run build` (which type-checks), then Vercel, Netlify, or any static host. Add `npm run test:run` and `tsc --noEmit` to CI.
 
-**Extend TaskBoard yourself.** The most valuable exercise now is adding features without a guide. Roughly in order of difficulty:
+**Extend TaskBoard yourself.** If you worked through the [build guide](./React-Build-Guide.md), the most valuable exercise now is adding features to it without a guide. Roughly in order of difficulty:
 
 1. **Due dates** with `<Form.Control type="date">`, and an "overdue" badge — derived, of course, not stored.
 2. **Sorting** by priority or creation date. Add a `SortKey` union and put it in the URL alongside the filter.
