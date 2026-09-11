@@ -58,7 +58,7 @@ and lab there, then the matching step here.*
 | [11](#-build-step-11--profile-taskboard-no-code-changes) | Profiling (no code) | React DevTools Profiler, when *not* to memoise |
 | [12](#-build-step-12--load-seed-tasks-from-an-api) | Load tasks from an API | `fetch`, union state, race conditions, `AbortController` |
 | [13](#-build-step-13--an-axios-api-layer) | An axios API layer | Instances, interceptors, error normalisation |
-| [14](#-build-step-14--routing-and-url-state-in-taskboard) | Routing and URL state | react-router, `useParams`, `useSearchParams` |
+| [14](#-build-step-14--routing-and-url-state-in-taskboard) | Routing and URL state | react-router (declarative mode), `Outlet`, `useSearchParams` |
 | [15](#-build-step-15--boundaries-in-taskboard) | Error boundaries | Class components, `getDerivedStateFromError` |
 | [16](#-build-step-16--tests-for-taskboard) | A test suite | Vitest, Testing Library, query priority |
 | [17](#-build-step-17--migrate-the-store-to-redux-toolkit) | Redux Toolkit store | `createSlice`, typed hooks, selectors, thunks |
@@ -2412,16 +2412,77 @@ export default function App() {
 }
 ```
 
-> **v7 has a second way to declare routes.** Everything above is the **component API** —
-> `<BrowserRouter>` wrapping `<Routes>`. v7 also has the **data router**
-> (`createBrowserRouter` + `<RouterProvider>`), where each route declares a `loader` and the router
-> fetches before rendering. It's the better architecture for data-heavy apps and it's what a new
-> project would probably start with. TaskBoard deliberately stays on the component API, for two
-> reasons: the data layer you built in steps 12 and 13 is the thing being taught here, and a loader
-> would hide it; and the component API is what the overwhelming majority of existing code uses, so
-> it's what you'll meet first on a real team. Both ship in the same package, and the concepts —
-> nesting, `Outlet`, params, the URL as state — are identical either way. The demo guide's Lab 18.5
-> converts a small app from one to the other if you want to see the diff.
+### Which mode is this, and why
+
+React Router v7 can be used three ways — the docs call them **modes** — and picking one is a real
+decision rather than a style preference. Everything above is **declarative mode**: `<BrowserRouter>`
+wrapping `<Routes>`, routes declared as JSX inside the React tree.
+
+| Mode | Entry point | Adds |
+|---|---|---|
+| **Declarative** | `<BrowserRouter>` + `<Routes>` | URL matching, navigation, active links |
+| **Data** | `createBrowserRouter` + `<RouterProvider>` | `loader` / `action` per route, pending states, automatic revalidation |
+| **Framework** | a Vite plugin (`@react-router/dev`) | generated route types, type-safe `href`, code splitting, SSR |
+
+Each is a superset of the one before it, and all three ship in the same `react-router` package —
+moving from declarative to data mode installs nothing new.
+
+**So why is TaskBoard declarative?** Work the decision against what this app actually is:
+
+| Question | TaskBoard | Points to |
+|---|---|---|
+| Do you need SSR, SEO, or a fast first paint on slow networks? | No — it's a personal task board behind no index | Declarative / Data |
+| Do you already have a data layer that owns fetching and pending states? | **Yes** — the axios layer and `ApiError` from Build Step 13, plus the union load state from Step 12 | **Declarative** |
+| Are you fighting loading-spinner cascades in nested routes? | No — the route tree is one level deep | Declarative |
+| Are you adding routing to an app that already has its own build and state? | **Yes** — thirteen steps of it | **Declarative / Data** |
+| Do you want `params` typed non-optional and `href()` compile-checked? | Nice, but there's one route param in the whole app | (not decisive) |
+
+The second row is the one that settles it. **Loaders and a data layer are two answers to the same
+question** — "when does this data arrive, and who owns the pending state?" — and running both means
+two systems compete for it. You built the axios layer deliberately; a loader would sit on top of it
+and hide it.
+
+That is also the honest reason this guide teaches declarative mode rather than the newest thing: it's
+what the overwhelming majority of existing React code uses, so it's what you'll meet first on a real
+team, and every concept in it — nesting, `Outlet`, `index` routes, params, the URL as state —
+transfers to the other two modes unchanged.
+
+**What would change in data mode.** Concretely, so you're not taking this on trust. `App.tsx` becomes:
+
+```tsx
+// The router is built ONCE, outside any component — that's what defines data mode
+const router = createBrowserRouter([
+  {
+    Component: Layout,
+    children: [
+      { index: true, Component: BoardPage, loader: () => api.listTasks() },
+      { path: "settings", Component: SettingsPage },
+      { path: "*", Component: NotFound },
+    ],
+    errorElement: <RouteError />,
+  },
+])
+
+export default function App() {
+  return <RouterProvider router={router} />
+}
+```
+
+and then, in `BoardPage`, `const tasks = useLoaderData() as Task[]` replaces the context read. What
+you'd gain: Build Step 12's `useEffect`, `AbortController` and three-state union all disappear, and
+the spinner becomes one `useNavigation().state` check. What you'd lose: the tasks would belong to a
+route rather than to the app, so navigating to Settings and back would refetch them; you'd need
+`shouldRevalidate` to stop that, and the Context/Redux store from Steps 9 and 17 would have nothing
+left to do. **For a client-state app, that's a bad trade.** For a server-authoritative app — where the
+list really does live in a database and every mutation should refetch — it's the right one.
+
+> **Framework mode isn't a step-14 decision at all.** It owns `vite.config.ts`, expects an `app/`
+> directory with `routes.ts` and one module per route, and generates types into the project. Adopting
+> it would restructure everything built in Steps 1–13, which makes it a project-founding choice, not
+> a routing choice. The demo guide's §18.13 and Lab 18.6 cover it in its own scaffold.
+
+The demo guide's §18.14 has the full decision table, and Labs 18.5 and 18.6 build the same small app
+in data mode and framework mode if you want to feel the difference rather than read about it.
 
 **Verify:**
 
@@ -3251,7 +3312,7 @@ What you installed, and what each one bought you:
 | `zod` | 5 | One runtime schema that is also the TypeScript type, via `z.infer`. |
 | `@hookform/resolvers` | 5 | The bridge: hands zod's errors to react-hook-form's `formState`. |
 | `axios` | 13 | Instances, interceptors, and errors that reject instead of resolving. |
-| `react-router` | 14 | Routes, and the URL as a place to keep state. (v7 — the old name was `react-router-dom`.) |
+| `react-router` | 14 | Routes, and the URL as a place to keep state. v7, used in **declarative mode** — see Step 14 for why, not data or framework mode. (The old package name was `react-router-dom`.) |
 | `vitest` + Testing Library | 16 | Tests that use the app the way a user does. |
 | `@reduxjs/toolkit` + `react-redux` | 17 | A store outside the tree, with Immer and typed hooks. |
 
