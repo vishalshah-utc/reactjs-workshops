@@ -2,7 +2,7 @@
 
 **What this is:** the teaching half of a two-document workshop. Every React concept is explained from
 first principles and then practised in a **small isolated lab demo** you can run, poke at, and
-deliberately break. There are 23 concept sections and 91 labs, all living in one playground project.
+deliberately break. There are 23 concept sections and 92 labs, all living in one playground project.
 
 **Who it's for.** Two audiences, same document:
 
@@ -186,7 +186,7 @@ Three runtime packages, because they do different jobs:
 
 React-Bootstrap ships its own TypeScript definitions, so there is no `@types/react-bootstrap` to install. (If you see instructions telling you to install it, they're out of date.)
 
-Some later sections add one dependency each, installed when you reach them: `react-hook-form` and `zod` (§8), `@tanstack/react-query` and `axios` (§17), `react-router-dom` (§18), `vitest` and Testing Library (§21), `@reduxjs/toolkit` and `react-redux` (§22), `zustand` (§23).
+Some later sections add one dependency each, installed when you reach them: `react-hook-form` and `zod` (§8), `@tanstack/react-query` and `axios` (§17), `react-router` (§18), `vitest` and Testing Library (§21), `@reduxjs/toolkit` and `react-redux` (§22), `zustand` (§23).
 
 > **Version note.** The stable line is `react-bootstrap@2.x`, which targets Bootstrap 5. A `3.0.0-beta` line exists that targets React 19 specifically. Vite's current template scaffolds React 19, and stable v2 (2.10.7+) works with it — but if you hit type conflicts around refs or `Navbar`, either pin React 18 or try the beta with `npm install react-bootstrap@next`. Check [react-bootstrap.github.io](https://react-bootstrap.github.io/) for the current recommendation, since this will have moved on.
 
@@ -19078,17 +19078,18 @@ Register as `{ id: "axios-client", chapter: "17 — Fetching", title: "Instance 
 
 React has no built-in router. It renders one component tree; it has no opinion about the address bar.
 A router's whole job is to **turn the current URL into a component tree**, and to change the URL
-without reloading the page. `react-router-dom` is the common choice.
+without reloading the page. `react-router` is the standard choice, and this section is written
+against **v7**.
 
 ```bash
-npm install react-router-dom
+npm install react-router
 ```
 
-Here is a complete router — every essential piece, in one file, so you have the shape in your head
-before the parts are explained:
+Here is a complete router in **declarative mode** — every essential piece, in one file, so you have
+the shape in your head before the parts are explained. (There are two other modes; §18.1 maps them.)
 
 ```tsx
-import { BrowserRouter, Routes, Route, NavLink, Outlet, useParams } from "react-router-dom"
+import { BrowserRouter, Routes, Route, NavLink, Outlet, useParams } from "react-router"
 import { Navbar, Nav, Container } from "react-bootstrap"
 
 function Layout() {
@@ -19133,7 +19134,54 @@ down the tree to it, and renders each ancestor's element with the next one insid
 `/tasks/42` the result is `<Layout><TaskDetail /></Layout>` — you never wrote that composition
 anywhere, and that is the point.
 
-## 18.1 The pieces
+## 18.1 Three modes, one library
+
+React Router v7 can be used three different ways, and the docs call them **modes**. They are not
+three libraries or three migration stages — they're three amounts of the same library, and each one
+is a superset of the one before it.
+
+| Mode | You write | You get | Entry point |
+|---|---|---|---|
+| **Declarative** | `<Routes>` and `<Route>` inside your React tree | URL → component matching, navigation, active links | `<BrowserRouter>` |
+| **Data** | A route config *outside* React, with `loader` and `action` per route | All of the above, plus data loading, mutations, pending states, revalidation | `createBrowserRouter` + `<RouterProvider>` |
+| **Framework** | A `routes.ts` config and one module per route | All of the above, plus type-safe `href`, generated route types, automatic code splitting, SSR and static rendering | a Vite plugin (`@react-router/dev`) |
+
+From the docs, near-verbatim, because the distinctions are worth getting exactly right:
+
+- **Declarative** "enables basic routing features like matching URLs to components, navigating around
+  the app, and providing active states with APIs like `<Link>`, `useNavigate`, and `useLocation`."
+- **Data** — "By moving route configuration outside of React rendering, Data Mode adds data loading,
+  actions, pending states and more with APIs like `loader`, `action`, and `useFetcher`."
+- **Framework** "wraps Data Mode with a Vite plugin to add the full React Router experience with:
+  type-safe `href`, type-safe Route Module API, intelligent code splitting, SPA, SSR, and static
+  rendering strategies, and more."
+
+**This section teaches them in that order**, because each mode's concepts are prerequisites for the
+next. Nesting, `Outlet`, params and the-URL-as-state are identical in all three; if you learn them in
+declarative mode you have learned them for all of them.
+
+- **§18.2–§18.11 — Declarative.** The bulk of the section, and the bulk of the React code you'll meet
+  in existing projects. Labs 18.1 to 18.4.
+- **§18.12 — Data.** What moving the config out of React buys you, and what it costs. Lab 18.5.
+- **§18.13 — Framework.** The full-stack option, and why it's a project decision rather than a
+  library one. Lab 18.6.
+- **§18.14 — Choosing.** The honest decision table.
+
+> **One package.** All three modes ship in `react-router`. There is nothing to install when moving
+> between declarative and data mode — you change how you declare routes, not what you depend on.
+> Framework mode is the exception: it adds `@react-router/dev` and takes over the Vite build.
+
+> **The package is `react-router`, not `react-router-dom`.** v7 merged them. Almost every tutorial,
+> blog post and Stack Overflow answer you'll find says `react-router-dom` — that's v6, and its APIs
+> are otherwise nearly identical, which is what makes the confusion durable. A `react-router-dom`
+> package still exists on npm at the v7 version, but it contains nothing except a dependency on
+> `react-router`, so installing it won't error — it will just put you back on the old import path.
+
+---
+
+**Part A — Declarative mode.** §18.2 to §18.11, and Labs 18.1 to 18.4.
+
+## 18.2 The pieces
 
 | Piece | Job |
 |---|---|
@@ -19152,7 +19200,7 @@ anywhere, and that is the point.
 | `useMatch` | "Does the current URL match this pattern?" |
 | `path="*"` | Catch unmatched URLs — your 404 |
 
-## 18.2 Choosing a router — and the server config `BrowserRouter` needs
+## 18.3 Choosing a router — and the server config `BrowserRouter` needs
 
 Three routers ship, and the choice has consequences beyond aesthetics.
 
@@ -19219,7 +19267,7 @@ that prefix before matching. They are independent, and both are required.
 > **This is the single most common "it works locally, it 404s in production" bug in React.** It is
 > not a React bug, a build bug, or a router bug — it's a missing server rewrite. Check it first.
 
-## 18.3 Nested routes, layout routes, and `Outlet`
+## 18.4 Nested routes, layout routes, and `Outlet`
 
 Nesting is what makes a router worth having, and it's the part people use least.
 
@@ -19269,7 +19317,7 @@ the child's dependency explicit rather than global.
 > (`Outlet context={{ member } satisfies MemberContext}` and `useOutletContext<MemberContext>()`) so
 > at least the two ends are written against one definition.
 
-## 18.4 Two React-Bootstrap integration details
+## 18.5 Two React-Bootstrap integration details
 
 **`as={NavLink}`** is React-Bootstrap's polymorphic prop (§20.3). It renders `Nav.Link`'s Bootstrap styling using React Router's `NavLink` element, so you get correct styles **and** client-side navigation. Most React-Bootstrap components accept `as`, and it's fully typed: the target element's props become available, which is why `to` type-checks.
 
@@ -19288,7 +19336,7 @@ style an active link without relying on Bootstrap's class name:
 
 **Never use a plain `<a href>` for internal links.** It triggers a full page reload, throwing away all your state and re-downloading the bundle. `Link` and `NavLink` intercept the click and update history instead.
 
-## 18.5 Navigating: `Link`, `NavLink`, and `useNavigate`
+## 18.6 Navigating: `Link`, `NavLink`, and `useNavigate`
 
 Three ways to change the URL, and they are not interchangeable.
 
@@ -19319,11 +19367,11 @@ search box updating on every keystroke — should replace. Get this wrong on a s
 requires one press per character typed.
 
 > **React Router does not restore scroll position.** A `Link` to a new route leaves you scrolled
-> wherever you were, which feels broken. There's no built-in fix in the component API; drop in a
+> wherever you were, which feels broken. There's no built-in fix in declarative mode; drop in a
 > `useEffect(() => window.scrollTo(0, 0), [pathname])` component at the layout level, or use
-> `<ScrollRestoration />` if you're on a data router.
+> `<ScrollRestoration />` if you're in data or framework mode.
 
-## 18.6 Route params, precisely
+## 18.7 Route params, precisely
 
 ```tsx
 <Route path="roster/:memberId/shifts/:shiftId" element={<Shift />} />
@@ -19350,7 +19398,7 @@ const { memberId, shiftId } = useParams()     // both string | undefined
 > That `if` is not defensive paranoia — it's how the component gets a `string` instead of a
 > `string | undefined`, and every line after it gets simpler.
 
-## 18.7 The URL is state too
+## 18.8 The URL is state too
 
 This is the idea that matters most in this section. Filters, search terms, the active tab, sort order, pagination and the selected item are often **better in the query string** than in component state:
 
@@ -19390,59 +19438,6 @@ The costs are real but small: values are always strings (so you validate them �
 What does *not* belong there: a half-typed form, whether a dropdown is open, a hover state, anything
 secret, and anything large. The URL is a public, length-limited, user-editable string.
 
-## 18.8 Routes as data: the config object
-
-Everything so far declared routes as JSX. The same tree can be an **array of plain objects**, and
-`useRoutes` renders it:
-
-```tsx
-import { useRoutes, type RouteObject } from "react-router-dom"
-
-const routes: RouteObject[] = [
-  {
-    path: "/",
-    element: <RootLayout />,
-    children: [
-      { index: true, element: <Home /> },
-      { path: "roster", element: <Roster /> },
-      {
-        path: "roster/:memberId",
-        element: <MemberLayout />,
-        children: [
-          { index: true, element: <Profile /> },
-          { path: "shifts", element: <Shifts /> },
-        ],
-      },
-      { path: "*", element: <NotFound /> },
-    ],
-  },
-]
-
-export default function App() {
-  return <BrowserRouter>{useRoutes(routes)}</BrowserRouter>
-}
-```
-
-The two forms are **exactly equivalent** — `Routes`/`Route` compiles to this internally. So why write
-the object version?
-
-- **The tree becomes data you can read at runtime.** Derive the navbar, a breadcrumb trail, a sitemap
-  or a permissions audit *from* the config, instead of maintaining a second list beside it that
-  silently drifts out of sync. This is the real payoff, and Lab 18.4 builds it.
-- **You can attach your own metadata.** Add a `title`, an icon, a `requiredRole`, `showInNav: false`.
-  JSX `Route` elements can't carry arbitrary props; objects can carry anything.
-- **It's testable without rendering.** A route config is a value. You can assert that every path is
-  unique, that nothing is unreachable, that every guarded page really is inside the guard.
-- **It's the shape the data router requires.** `createBrowserRouter` takes this array, so writing
-  routes as data now is also how you avoid a rewrite later (§18.11).
-
-The cost is that `element` holds JSX inside a data structure, which reads oddly at first and means the
-config file imports every page — so pair it with `lazy` (§18.9) if bundle size matters.
-
-**Which should you use?** JSX for a handful of routes: it's less indirection and it's what most code
-and most tutorials use. The object config once the tree is big enough that you want to *generate*
-something from it — which, in practice, is the moment you add a second navigation menu.
-
 ## 18.9 Code splitting routes
 
 Routes are the natural code-splitting boundary, because a user who never visits Settings should never download it:
@@ -19474,7 +19469,7 @@ skeleton shaped like the page it's replacing, for instance.
 A route guard is just a component that decides whether to render its children or redirect:
 
 ```tsx
-import { Navigate, Outlet, useLocation } from "react-router-dom"
+import { Navigate, Outlet, useLocation } from "react-router"
 
 function RequireAuth() {
   const { user } = useAuth()
@@ -19518,13 +19513,77 @@ type AuthState =
   | { status: "anonymous" }
 ```
 
-## 18.11 Data routers: loaders, actions, and `errorElement`
+## 18.11 Routes as a config object — still declarative mode
 
-React Router also offers a **data router** API. Instead of components fetching in effects, each route
-declares a `loader`, and the router calls it *before* rendering the route:
+Everything so far declared routes as JSX. The same tree can be an **array of plain objects**, and
+`useRoutes` renders it:
 
 ```tsx
-import { createBrowserRouter, RouterProvider, useLoaderData } from "react-router-dom"
+import { useRoutes, type RouteObject } from "react-router"
+
+const routes: RouteObject[] = [
+  {
+    path: "/",
+    element: <RootLayout />,
+    children: [
+      { index: true, element: <Home /> },
+      { path: "roster", element: <Roster /> },
+      {
+        path: "roster/:memberId",
+        element: <MemberLayout />,
+        children: [
+          { index: true, element: <Profile /> },
+          { path: "shifts", element: <Shifts /> },
+        ],
+      },
+      { path: "*", element: <NotFound /> },
+    ],
+  },
+]
+
+export default function App() {
+  return <BrowserRouter>{useRoutes(routes)}</BrowserRouter>
+}
+```
+
+The two forms are **exactly equivalent** — `Routes`/`Route` compiles to this internally, and both run
+inside `<BrowserRouter>`. **This is still declarative mode**, which is the point worth being careful
+about: a config-shaped route tree is not data mode. Data mode is defined by moving the config *out of
+React rendering* (`createBrowserRouter`, §18.12) so the router can fetch before it renders.
+`useRoutes` is a hook — it runs during render, like any other.
+
+So why write the object version?
+
+- **The tree becomes data you can read at runtime.** Derive the navbar, a breadcrumb trail, a sitemap
+  or a permissions audit *from* the config, instead of maintaining a second list beside it that
+  silently drifts out of sync. This is the real payoff, and Lab 18.4 builds it.
+- **You can attach your own metadata.** Add a `title`, an icon, a `requiredRole`, `showInNav: false`.
+  JSX `Route` elements can't carry arbitrary props; objects can carry anything.
+- **It's testable without rendering.** A route config is a value. You can assert that every path is
+  unique, that nothing is unreachable, that every guarded page really is inside the guard.
+- **It's the shape data mode requires.** `createBrowserRouter` takes this same array, so writing
+  routes as a config now is most of the work of moving to data mode later (§18.12). This is the
+  bridge between the two modes, and it's why it's the last declarative subsection.
+
+The cost is that `element` holds JSX inside a data structure, which reads oddly at first and means the
+config file imports every page — so pair it with `lazy` (§18.9) if bundle size matters.
+
+**Which should you use?** JSX for a handful of routes: it's less indirection and it's what most code
+and most tutorials use. The object config once the tree is big enough that you want to *generate*
+something from it — which, in practice, is the moment you add a second navigation menu.
+
+---
+
+**Part B — Data mode.** §18.12, and Lab 18.5.
+
+## 18.12 Data mode: loaders, actions, and `errorElement`
+
+**Data mode** takes the route config from §18.11 and moves it out of React entirely — you build the
+router once, outside any component, and hand it to `<RouterProvider>`. That one change is what lets
+the router run code *before* rendering a route, which is where `loader` comes from:
+
+```tsx
+import { createBrowserRouter, RouterProvider, useLoaderData } from "react-router"
 
 const router = createBrowserRouter([
   {
@@ -19547,6 +19606,13 @@ function Member() {
 <RouterProvider router={router} />
 ```
 
+> **`element:` or `Component:`?** v7 accepts both. `element: <Member />` takes a rendered element —
+> the v6 spelling, and what you must use if you need to pass props. `Component: Member` takes the
+> component itself and lets the router render it, which is what the official docs use and what
+> framework mode does under the hood. Prefer `Component` in new data-mode code: it's less to type,
+> and it lets the router control mounting (which matters for `HydrateFallback`). They are otherwise
+> interchangeable, so mixing them in one config is legal — just not tidy.
+
 What this buys you, concretely:
 
 | Problem | The effect-based answer | The loader answer |
@@ -19567,15 +19633,233 @@ addition.
 > endpoint crashes somewhere far away. React Router v7 adds generated route types that close this
 > gap; until you're on it, the schema is the answer.
 
-**Learn the component API first.** It's what most existing code uses, it's what every tutorial shows,
-and the concepts — nesting, params, the URL as state — transfer directly. Lab 18.5 converts one app
-from one API to the other so you can see exactly what changes.
+**Learn declarative mode first.** It's what most existing code uses, it's what every tutorial shows,
+and the concepts — nesting, params, the URL as state — transfer unchanged. Lab 18.5 converts one app
+from declarative to data mode so you can see exactly what moves.
 
-## 18.12 Routing mistakes that cost an afternoon
+---
+
+**Part C — Framework mode.** §18.13, and Lab 18.6.
+
+## 18.13 Framework mode
+
+Framework mode wraps data mode in a Vite plugin and takes responsibility for the whole app: routing,
+the build, code splitting, and — if you want it — the server. This is the mode that used to be called
+Remix. React Router v7 *is* Remix v3, renamed.
+
+The important thing to understand first: **this is not an API you add to an existing app.** It owns
+`vite.config.ts`, it generates types into your project, and it expects a particular file layout. You
+adopt it when you start a project, or as a deliberate migration.
+
+### Setting it up
+
+```bash
+npx create-react-router@latest crew-framework
+cd crew-framework
+npm i
+npm run dev
+```
+
+That scaffold gives you:
+
+| File | What it is |
+|---|---|
+| `vite.config.ts` | wires in the `@react-router/dev` plugin |
+| `react-router.config.ts` | framework config — chiefly `ssr: true \| false` |
+| `app/root.tsx` | the root route: your `<html>` document, `<Meta />`, `<Links />`, `<Outlet />` |
+| `app/routes.ts` | **the route config** — the whole URL map, in one file |
+| `app/entry.client.tsx` / `entry.server.tsx` | the two entry points (optional; generated on request) |
+
+### The route config
+
+Routes are declared with helpers from `@react-router/dev/routes`, which read as a tree:
+
+```ts
+// app/routes.ts
+import { type RouteConfig, index, route, layout, prefix } from "@react-router/dev/routes"
+
+export default [
+  index("./routes/home.tsx"),
+
+  layout("./routes/crew/layout.tsx", [
+    ...prefix("roster", [
+      index("./routes/crew/roster.tsx"),
+      route(":memberId", "./routes/crew/member.tsx", [
+        index("./routes/crew/profile.tsx"),
+        route("shifts", "./routes/crew/shifts.tsx"),
+      ]),
+    ]),
+  ]),
+
+  route("*", "./routes/not-found.tsx"),
+] satisfies RouteConfig
+```
+
+Four helpers, and they map onto things you already know from declarative mode:
+
+| Helper | Declarative equivalent |
+|---|---|
+| `route(path, file, children?)` | `<Route path element>` |
+| `index(file)` | `<Route index element>` |
+| `layout(file, children)` | a pathless `<Route element>` — a wrapper contributing no URL segment |
+| `prefix(path, routes)` | a path segment applied to a group, **without** a parent component |
+
+`prefix` is the one with no declarative counterpart, and it's genuinely useful: it groups routes under
+`/roster` without forcing a layout component to exist just to hold the segment.
+
+> There's also `relative(dir)` for splitting a large config across files, and a separate
+> `@react-router/fs-routes` package if you'd rather derive routes from the file system
+> (`export default flatRoutes() satisfies RouteConfig`). The explicit config is easier to reason
+> about and easier to grep, which is why it's the default.
+
+### The route module
+
+Each file named in `routes.ts` is a **route module**, and what it *exports* is the API. This is the
+part that feels genuinely different: instead of a component that fetches, you have a module that
+declares everything about a URL in one place.
+
+```tsx
+// app/routes/crew/member.tsx
+import { isRouteErrorResponse, useRouteError } from "react-router"
+import type { Route } from "./+types/member"      // ← generated, see below
+import { getMember } from "../../data/crew.server"
+
+/** Runs on the server before the component renders. */
+export async function loader({ params }: Route.LoaderArgs) {
+  const member = await getMember(params.memberId)
+  if (!member) throw new Response("Not found", { status: 404 })
+  return { member }
+}
+
+/** Handles <Form method="post"> submissions to this route, then revalidates the loader. */
+export async function action({ request, params }: Route.ActionArgs) {
+  const form = await request.formData()
+  await toggleOnCall(params.memberId, form.get("onCall") === "true")
+  return { ok: true }
+}
+
+export function meta({ data }: Route.MetaArgs) {
+  return [{ title: data ? data.member.name : "Crew" }]
+}
+
+/** loaderData is TYPED from the loader's return value. No cast, no generic. */
+export default function Member({ loaderData }: Route.ComponentProps) {
+  return <h1>{loaderData.member.name}</h1>
+}
+
+/** Scoped to this route: a failure here doesn't take down the layout. */
+export function ErrorBoundary() {
+  const error = useRouteError()
+  if (isRouteErrorResponse(error)) return <h1>{error.status} — {error.statusText}</h1>
+  return <h1>Something broke</h1>
+}
+```
+
+The full set of exports a route module may have:
+
+| Export | Job |
+|---|---|
+| `default` | the component; receives `loaderData`, `actionData`, `params`, `matches` as **props** |
+| `loader` | data, on the server, before render |
+| `clientLoader` | data, in the browser — instead of or in addition to `loader` |
+| `action` / `clientAction` | mutations, with automatic loader revalidation afterwards |
+| `ErrorBoundary` | the fallback when anything in this route throws |
+| `HydrateFallback` | what renders on first load while a `clientLoader` runs |
+| `meta` / `links` | `<title>`, `<meta>` and `<link>` tags for this route |
+| `headers` | HTTP response headers when server rendering |
+| `handle` | arbitrary metadata, read back via `useMatches` |
+| `shouldRevalidate` | opt out of automatic revalidation |
+
+### The part that actually changes how it feels: generated types
+
+```tsx
+import type { Route } from "./+types/member"
+```
+
+That import doesn't exist on disk in the way it looks. The Vite plugin **generates** a types file per
+route from `routes.ts`, and `Route.ComponentProps`, `Route.LoaderArgs` and `Route.ActionArgs` are
+derived from *your* loader and *your* URL pattern. Which means:
+
+- **`loaderData` is typed from the loader's return type.** No `useLoaderData() as Member` cast — the
+  §17.5 boundary problem from data mode simply doesn't arise, because the type is inferred rather
+  than asserted.
+- **`params.memberId` is `string`, not `string | undefined`**, because the plugin can see that
+  `:memberId` is a required segment of this route's pattern. Every `if (!id) return <NotFound />`
+  guard in the declarative labs exists only because the router couldn't know that. Here it can.
+- **`href("/roster/:memberId", { memberId })` is type-checked** — a typo in a path is a compile error
+  rather than a 404 discovered by a user.
+
+> **TS Note.** This is the strongest type safety of the three modes, and it's the best argument for
+> framework mode on a large app. It's also the reason framework mode can't be a library you sprinkle
+> on: the types come from a build step that has to own the build. Run `npx react-router typegen`
+> after editing `routes.ts` if your editor hasn't caught up — the generated files live in
+> `.react-router/`, which belongs in `.gitignore`.
+
+### What you give up
+
+- **It owns the build.** `@react-router/dev` replaces the React plugin in `vite.config.ts`. If you
+  have a bespoke build, this is a negotiation.
+- **A server, unless you opt out.** SSR is the default. `ssr: false` in `react-router.config.ts`
+  gives you an SPA build, which is the setting a Bootstrap-and-an-API app like TaskBoard would use —
+  but you should choose it knowingly rather than discover it.
+- **A project shape.** `app/`, `routes.ts`, route modules. Conventional, and pleasant once you're in
+  it, but not negotiable.
+- **A bigger conceptual surface** — loaders vs clientLoaders, actions vs clientActions, `.server`
+  modules, hydration. Worth it for a product; heavy for a widget.
+
+## 18.14 Choosing a mode
+
+The docs give direct guidance, and it's good guidance, so here it is with the reasoning made explicit.
+
+**Use Framework mode if you:**
+
+- are new enough to routing that you don't yet have an opinion — the defaults are good ones
+- were otherwise considering Next.js, TanStack Start, SvelteKit, Astro or Solid Start
+- are coming from Remix (v7 *is* the next version after Remix v2)
+- are migrating away from Next.js
+
+**Use Data mode if you:**
+
+- want loaders, actions and pending states, but want to keep control of bundling, the server, and
+  your own data abstractions
+- already started a data router back in v6.4 and are happy with it (data mode is that same API)
+
+**Use Declarative mode if you:**
+
+- want the simplest possible thing that routes
+- are coming from v6 and are happy with `<BrowserRouter>`
+- **already have a data layer** — TanStack Query, RTK Query, your own hooks — that handles caching and
+  pending states, so loaders would be a second answer to a question you've already answered
+
+That last bullet is the one that decides it most often in practice, and it's why this guide's own
+projects stay declarative: §17 built a fetch layer, §22 built a store, and adding loaders on top
+would mean two systems both claiming to own "when does this data arrive".
+
+**A decision procedure, if the bullets don't settle it:**
+
+| Question | If yes |
+|---|---|
+| Do you need SSR, SEO, or a meaningful first paint on slow networks? | Framework |
+| Is this an internal tool or a dashboard behind a login? | Declarative or Data — SSR buys you little |
+| Do you already have TanStack Query / RTK Query? | Declarative |
+| Are you fighting loading-spinner cascades in nested routes? | Data |
+| Do you want `params` typed non-optional and `href()` checked? | Framework |
+| Are you adding routing to an existing app with its own build? | Declarative or Data |
+
+**What migration actually costs.** Declarative → Data is a real refactor but a bounded one: the route
+tree becomes a config (§18.11 is exactly that step), then fetching moves from effects into loaders,
+one route at a time. Data → Framework is bigger, because it changes the build and the project layout,
+but the route config and the loaders survive largely intact — which is the reason the modes are worth
+understanding as a progression rather than as three unrelated choices.
+
+**What doesn't change in any direction:** nesting, `Outlet`, `index` routes, layout routes, params,
+`Link`/`NavLink`, and the URL as state. That's most of this section, and it's why it comes first.
+
+## 18.15 Routing mistakes that cost an afternoon
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Works when clicked, 404 on refresh | No SPA fallback on the server | §18.2's rewrite rule |
+| Works when clicked, 404 on refresh | No SPA fallback on the server | §18.3's rewrite rule |
 | Blank page in production, fine locally | App served from a subpath | Set `base` **and** `basename` |
 | Every nav link is highlighted | `NavLink to="/"` without `end` | Add `end` |
 | `useNavigate` / `useParams` throws "may be used only in the context of a Router" | Hook called outside the provider — often in the component that *renders* `BrowserRouter` | Move the hook into a child of the router |
@@ -19585,6 +19869,12 @@ from one API to the other so you can see exactly what changes.
 | `path="/shifts"` inside a parent never matches | Absolute child path not prefixed by the parent's | Make it relative: `path="shifts"` |
 | Redirect loop between guard and login | `Navigate` without `replace`, or the login page is inside the guard | Add `replace`; keep `/login` outside |
 | Params are `"42"` and comparisons fail | Params are strings, always | Convert and validate at the boundary |
+| `Cannot find module 'react-router-dom'` | v7 merged the packages | Import from `react-router` |
+| A v6 tutorial's code doesn't compile | v6 used `react-router-dom`, and v5 used `Switch`/`useHistory` | Check which major version the article predates |
+| `loader` never runs | You're in declarative mode — `<Routes>` has no loaders | Move to data mode (§18.12), or fetch in the component |
+| `./+types/...` won't resolve | Framework mode types aren't generated yet | `npx react-router typegen` |
+
+---
 
 ---
 
@@ -19595,7 +19885,7 @@ from one API to the other so you can see exactly what changes.
 The exercise promised back in Part 0.5. You'll rebuild the demo shell's navigation with React Router, which is a much better way to learn routing than a hello-world app — you already understand exactly what the thing does.
 
 ```bash
-npm install react-router-dom
+npm install react-router
 ```
 
 Create `src/RouterApp.tsx`:
@@ -19612,7 +19902,7 @@ import {
   useNavigate,
   useLocation,
   Navigate,
-} from "react-router-dom"
+} from "react-router"
 import { Alert, Button, Container, Nav, Navbar, Row, Col, Spinner } from "react-bootstrap"
 import { Beaker } from "react-bootstrap-icons"
 import { demos, chapters } from "@/demos/registry"
@@ -19768,7 +20058,7 @@ npm run dev
 Create `src/demos/18-routing/UrlStateLab.tsx`:
 
 ```tsx
-import { useSearchParams } from "react-router-dom"
+import { useSearchParams } from "react-router"
 import { Alert, Badge, Button, ButtonGroup, Card, Col, Form, ListGroup, Row } from "react-bootstrap"
 import { useState } from "react"
 import DemoCard from "@/lab/DemoCard"
@@ -20081,7 +20371,7 @@ exists (§18.10):
 
 ```tsx
 import { createContext, useContext, useState, type ReactNode } from "react"
-import { Navigate, Outlet, useLocation } from "react-router-dom"
+import { Navigate, Outlet, useLocation } from "react-router"
 
 type AuthState =
   | { status: "anonymous" }
@@ -20139,7 +20429,7 @@ auth from Context and the destination from the router, and it returns `<Outlet /
 **3. `layouts/RootLayout.tsx`** — the chrome every page shares, rendered once and never unmounted:
 
 ```tsx
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom"
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router"
 import { Badge, Button, Card, Nav } from "react-bootstrap"
 import { useAuth } from "../auth"
 
@@ -20197,7 +20487,7 @@ export default function RootLayout() {
 **4. `layouts/MemberLayout.tsx`** — the nested layout, and the most instructive file in the lab:
 
 ```tsx
-import { NavLink, Outlet, useParams } from "react-router-dom"
+import { NavLink, Outlet, useParams } from "react-router"
 import { Alert, Badge, Nav } from "react-bootstrap"
 import { crew, type CrewMember } from "../data"
 
@@ -20258,7 +20548,7 @@ Three decisions worth pausing on:
 **5. `pages/HomePage.tsx`**:
 
 ```tsx
-import { Link } from "react-router-dom"
+import { Link } from "react-router"
 import { ListGroup } from "react-bootstrap"
 import { crew } from "../data"
 
@@ -20287,7 +20577,7 @@ export default function HomePage() {
 **6. `pages/RosterPage.tsx`** — the list, with its filters in the query string:
 
 ```tsx
-import { Link, useSearchParams } from "react-router-dom"
+import { Link, useSearchParams } from "react-router"
 import { Badge, Button, ButtonGroup, Form, ListGroup } from "react-bootstrap"
 import { crew, isRole, ROLES, type Role } from "../data"
 
@@ -20365,7 +20655,7 @@ export default function RosterPage() {
 **7. `pages/MemberProfilePage.tsx`** — note how little it needs to know:
 
 ```tsx
-import { useOutletContext } from "react-router-dom"
+import { useOutletContext } from "react-router"
 import { ListGroup } from "react-bootstrap"
 import type { MemberContext } from "../layouts/MemberLayout"
 
@@ -20386,7 +20676,7 @@ export default function MemberProfilePage() {
 **8. `pages/MemberShiftsPage.tsx`**:
 
 ```tsx
-import { useOutletContext } from "react-router-dom"
+import { useOutletContext } from "react-router"
 import { Alert, ListGroup } from "react-bootstrap"
 import type { MemberContext } from "../layouts/MemberLayout"
 
@@ -20430,7 +20720,7 @@ export default function AdminPage() {
 
 ```tsx
 // pages/LoginPage.tsx
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router"
 import { Button, Card, Form } from "react-bootstrap"
 import { useState } from "react"
 import { useAuth } from "../auth"
@@ -20473,7 +20763,7 @@ export default function LoginPage() {
 
 ```tsx
 // pages/NotFoundPage.tsx
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation } from "react-router"
 import { Alert } from "react-bootstrap"
 
 export default function NotFoundPage() {
@@ -20491,7 +20781,7 @@ export default function NotFoundPage() {
 **10. `CrewAppLab.tsx`** — the route tree, and the only file that knows the whole shape:
 
 ```tsx
-import { MemoryRouter, Route, Routes } from "react-router-dom"
+import { MemoryRouter, Route, Routes } from "react-router"
 import DemoCard from "@/lab/DemoCard"
 import { AuthProvider, RequireAuth } from "./crew/auth"
 import RootLayout from "./crew/layouts/RootLayout"
@@ -20508,7 +20798,7 @@ export default function CrewAppLab() {
   return (
     <DemoCard
       title="A complete nested-route app"
-      claim="Nesting, params, Outlet context, a pathless guard and a catch-all — the whole component API in one small app, running in a MemoryRouter so it doesn't fight the lab shell."
+      claim="Nesting, params, Outlet context, a pathless guard and a catch-all — the whole of declarative mode in one small app, running in a MemoryRouter so it doesn't fight the lab shell."
       level="core"
       notice={
         <ul className="mb-0">
@@ -20628,7 +20918,7 @@ You'll reuse every page and layout from Lab 18.3 unchanged. Only the route decla
 Create `src/demos/18-routing/crew/routes.tsx`. This is the whole shape of the app in one value:
 
 ```tsx
-import type { RouteObject } from "react-router-dom"
+import type { RouteObject } from "react-router"
 import { RequireAuth } from "./auth"
 import RootLayout from "./layouts/RootLayout"
 import MemberLayout from "./layouts/MemberLayout"
@@ -20712,7 +21002,7 @@ builds this array internally.
 Four things the data form makes possible, all of which the JSX form cannot do:
 
 - **`handle`** carries arbitrary metadata. This is a real React Router field, not a hack; it's ignored
-  by matching and handed back to you by `useMatches` on a data router.
+  by matching and handed back to you by `useMatches` in data and framework mode.
 - **The tree is enumerable.** You can walk it, filter it, and generate things from it — which is step 2.
 - **It's assertable in a test.** "Every guarded page is inside a guard" and "no two routes share a
   path" become unit tests over a value, with nothing rendered.
@@ -20728,7 +21018,7 @@ Four things the data form makes possible, all of which the JSX form cannot do:
 Create `src/demos/18-routing/crew/layouts/DerivedNav.tsx`:
 
 ```tsx
-import { NavLink } from "react-router-dom"
+import { NavLink } from "react-router"
 import { Badge, Nav } from "react-bootstrap"
 import { routes } from "../routes"
 
@@ -20790,7 +21080,7 @@ import DerivedNav from "./DerivedNav"
 Create `src/demos/18-routing/ConfigRoutesLab.tsx`:
 
 ```tsx
-import { MemoryRouter, useRoutes } from "react-router-dom"
+import { MemoryRouter, useRoutes } from "react-router"
 import { Card } from "react-bootstrap"
 import DemoCard from "@/lab/DemoCard"
 import { AuthProvider } from "./crew/auth"
@@ -20897,11 +21187,11 @@ Register as `{ id: "route-config", chapter: "18 — Routing", title: "Routes as 
 
 ---
 
-## 🧪 Lab 18.5 — The data router: loaders instead of effects
+## 🧪 Lab 18.5 — Data mode: loaders instead of effects
 
 **Level:** optional
 
-The same app a third time, on React Router's **data router** API. The point of doing it on an app you
+The same app a third time, in **data mode**. The point of doing it on an app you
 already know is that the diff is the lesson: you delete every loading state, every `useEffect`, and
 every `AbortController`, and you add a `loader` per route.
 
@@ -20930,7 +21220,7 @@ export async function fetchMember(id: string, signal?: AbortSignal): Promise<Cre
   if (signal?.aborted) throw new DOMException("Aborted", "AbortError")
 
   const member = crew.find((m) => m.id === id)
-  // Throwing a Response is the data router's idiom for "this is a 404, not a crash"
+  // Throwing a Response is data mode's idiom for "this is a 404, not a crash"
   if (!member) throw new Response(`No crew member "${id}"`, { status: 404 })
   return member
 }
@@ -20946,7 +21236,7 @@ tells you whether to render "not found" or "something broke".
 Create `src/demos/18-routing/crew/dataRoutes.tsx`:
 
 ```tsx
-import type { RouteObject } from "react-router-dom"
+import type { RouteObject } from "react-router"
 import { fetchCrew, fetchMember } from "./api"
 import DataRootLayout from "./layouts/DataRootLayout"
 import DataRosterPage from "./pages/DataRosterPage"
@@ -20989,7 +21279,7 @@ made this a small edit.
 Create `src/demos/18-routing/crew/layouts/DataRootLayout.tsx`:
 
 ```tsx
-import { Link, Outlet, useLocation, useMatches, useNavigation } from "react-router-dom"
+import { Link, Outlet, useLocation, useMatches, useNavigation } from "react-router"
 import { Badge, Card, ProgressBar } from "react-bootstrap"
 
 /** Route metadata typed at the point of use — useMatches returns `unknown` handles. */
@@ -21030,7 +21320,7 @@ export default function DataRootLayout() {
         </nav>
 
         {/* Dimmed rather than replaced: the old data stays on screen while the
-            next route loads, which is the whole feel of a data router. */}
+            next route loads, which is the whole feel of data mode. */}
         <div style={{ opacity: busy ? 0.45 : 1, transition: "opacity 150ms" }}>
           <Outlet />
         </div>
@@ -21049,7 +21339,7 @@ that fetches.
 Create `src/demos/18-routing/crew/pages/DataRosterPage.tsx`:
 
 ```tsx
-import { Link, useLoaderData } from "react-router-dom"
+import { Link, useLoaderData } from "react-router"
 import { ListGroup } from "react-bootstrap"
 import type { CrewMember } from "../data"
 
@@ -21074,7 +21364,7 @@ export default function DataRosterPage() {
 Create `src/demos/18-routing/crew/pages/DataMemberPage.tsx`:
 
 ```tsx
-import { Link, useLoaderData } from "react-router-dom"
+import { Link, useLoaderData } from "react-router"
 import { Badge, ListGroup } from "react-bootstrap"
 import type { CrewMember } from "../data"
 
@@ -21103,7 +21393,7 @@ export default function DataMemberPage() {
 Create `src/demos/18-routing/crew/pages/RouteErrorPage.tsx`:
 
 ```tsx
-import { Link, isRouteErrorResponse, useRouteError } from "react-router-dom"
+import { Link, isRouteErrorResponse, useRouteError } from "react-router"
 import { Alert } from "react-bootstrap"
 
 export default function RouteErrorPage() {
@@ -21135,7 +21425,7 @@ export default function RouteErrorPage() {
 Create `src/demos/18-routing/DataRouterLab.tsx`:
 
 ```tsx
-import { RouterProvider, createMemoryRouter } from "react-router-dom"
+import { RouterProvider, createMemoryRouter } from "react-router"
 import DemoCard from "@/lab/DemoCard"
 import { dataRoutes } from "./crew/dataRoutes"
 
@@ -21145,7 +21435,7 @@ const router = createMemoryRouter(dataRoutes, { initialEntries: ["/"] })
 export default function DataRouterLab() {
   return (
     <DemoCard
-      title="The data router: loaders instead of effects"
+      title="Data mode: loaders instead of effects"
       claim="Each route declares how to get its data; the router fetches before rendering, cancels superseded navigations, and gives you one global pending state. The pages have no loading code at all."
       level="optional"
       notice={
@@ -21178,7 +21468,7 @@ export default function DataRouterLab() {
 }
 ```
 
-Register as `{ id: "data-router", chapter: "18 — Routing", title: "Data router & loaders", element: <DataRouterLab /> }`.
+Register as `{ id: "data-mode", chapter: "18 — Routing", title: "Data mode & loaders", element: <DataRouterLab /> }`.
 
 **What to notice — the diff is the lesson:**
 
@@ -21220,12 +21510,272 @@ effect-based nesting produces a waterfall by construction.
 6. **Add a mutation.** Give the member route an `action` and render a
    `<Form method="post">` with a "toggle on-call" button. The router runs the action, then
    **revalidates the loaders automatically** — the refetch-after-mutate dance disappears. This is the
-   half of the data-router API this lab doesn't cover, and it's the more impressive half.
+   half of data mode this lab doesn't cover, and it's the more impressive half.
 
-> **Which API should you use?** New app, data-heavy: the data router, and pair it with TanStack Query
-> for caching — loaders fetch, Query remembers. Existing app, or mostly-client state: the component
-> API is fine and is what the rest of this guide uses. The concepts — nesting, params, the URL as
-> state — are identical either way, which is why they were worth learning first.
+> **Which mode should you use?** §18.14 has the full answer. Short version: new app, data-heavy —
+> data mode, paired with TanStack Query for caching (loaders fetch, Query remembers), or framework
+> mode if you also want SSR and generated types. Existing app, or mostly-client state: declarative
+> mode is fine, and it's what the rest of this guide uses. The concepts — nesting, params, the URL as
+> state — are identical in all three, which is why they were worth learning first.
+
+---
+
+## 🧪 Lab 18.6 — Framework mode: the same app, typed end to end
+
+**Level:** optional
+
+**This lab does not run in `react-lab`.** Framework mode owns `vite.config.ts` and generates types
+into the project, so it needs a project of its own. That constraint *is* the lesson: declarative and
+data mode are libraries you add, framework mode is a framework you start with.
+
+Budget 30–40 minutes. The goal isn't a finished app — it's to see typed `loaderData`, a non-optional
+`params`, and a `routes.ts` tree, so that §18.14's decision has something concrete behind it.
+
+### 1. Scaffold
+
+```bash
+npx create-react-router@latest crew-framework
+cd crew-framework
+npm i
+npm run dev          # → http://localhost:5173
+```
+
+Look at what you were given before changing anything:
+
+```
+crew-framework/
+├── react-router.config.ts     ← ssr: true | false
+├── vite.config.ts             ← the @react-router/dev plugin, NOT @vitejs/plugin-react
+└── app/
+    ├── root.tsx               ← the <html> document itself
+    ├── routes.ts              ← the entire URL map
+    └── routes/home.tsx        ← one route module
+```
+
+**Open `app/root.tsx` and notice that you are rendering `<html>`, `<head>` and `<body>` yourself**,
+with `<Meta />`, `<Links />` and `<Scripts />` placed by hand. That's the clearest signal of what
+changed: in declarative mode React Router rendered *inside* your page; here it renders the page.
+
+Since this app has no server-side data, opt out of SSR so the comparison stays fair:
+
+```ts
+// react-router.config.ts
+import type { Config } from "@react-router/dev/config"
+
+export default { ssr: false } satisfies Config
+```
+
+### 2. The data, and the route config
+
+Create `app/data/crew.ts` — the same four rows as Lab 18.3:
+
+```ts
+export type Role = "engineer" | "designer" | "ops"
+
+export interface CrewMember {
+  id: string
+  name: string
+  role: Role
+  onCall: boolean
+  shifts: string[]
+}
+
+const crew: CrewMember[] = [
+  { id: "ada",   name: "Ada Lovelace", role: "engineer", onCall: true,  shifts: ["Mon 09:00", "Thu 14:00"] },
+  { id: "grace", name: "Grace Hopper", role: "engineer", onCall: false, shifts: ["Tue 09:00"] },
+  { id: "kata",  name: "Katherine J.", role: "ops",      onCall: true,  shifts: ["Wed 22:00"] },
+  { id: "may",   name: "May Ling",     role: "designer", onCall: false, shifts: [] },
+]
+
+const delay = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+export async function listCrew(): Promise<CrewMember[]> {
+  await delay(400)
+  return crew
+}
+
+export async function getMember(id: string): Promise<CrewMember | undefined> {
+  await delay(400)
+  return crew.find((m) => m.id === id)
+}
+```
+
+Replace `app/routes.ts`:
+
+```ts
+import { type RouteConfig, index, route, layout } from "@react-router/dev/routes"
+
+export default [
+  layout("./routes/layout.tsx", [
+    index("./routes/roster.tsx"),
+    route("member/:memberId", "./routes/member.tsx"),
+  ]),
+] satisfies RouteConfig
+```
+
+Three lines of config, and it is the complete URL map of the app. Compare it with Lab 18.3's JSX tree
+and Lab 18.4's `RouteObject[]`: same tree, third notation.
+
+### 3. A layout route module
+
+Create `app/routes/layout.tsx`:
+
+```tsx
+import { Link, Outlet, useLocation, useNavigation } from "react-router"
+
+export default function Layout() {
+  const navigation = useNavigation()
+  const location = useLocation()
+  const busy = navigation.state === "loading"
+
+  return (
+    <div style={{ fontFamily: "system-ui", maxWidth: 640, margin: "2rem auto" }}>
+      <header style={{ display: "flex", gap: 12, alignItems: "center" }}>
+        <strong>Crew</strong>
+        <Link to="/">Roster</Link>
+        <code style={{ marginLeft: "auto", fontSize: 12 }}>{location.pathname}</code>
+      </header>
+
+      <div style={{ height: 3, background: busy ? "#0d6efd" : "transparent", margin: "8px 0" }} />
+
+      <main style={{ opacity: busy ? 0.5 : 1, transition: "opacity 150ms" }}>
+        <Outlet />
+      </main>
+    </div>
+  )
+}
+```
+
+`Outlet`, `Link`, `useLocation`, `useNavigation` — all imported from `react-router`, all behaving
+exactly as they did in the previous three labs. **Nothing you learned is invalidated.**
+
+### 4. Two route modules, and the typing payoff
+
+Create `app/routes/roster.tsx`:
+
+```tsx
+import { Link } from "react-router"
+import type { Route } from "./+types/roster"
+import { listCrew } from "../data/crew"
+
+export async function loader() {
+  return { members: await listCrew() }
+}
+
+export function meta(): Route.MetaDescriptors {
+  return [{ title: "Crew roster" }]
+}
+
+export default function Roster({ loaderData }: Route.ComponentProps) {
+  // loaderData.members is CrewMember[] — INFERRED from the loader above.
+  return (
+    <ul>
+      {loaderData.members.map((m) => (
+        <li key={m.id}>
+          <Link to={`/member/${m.id}`}>{m.name}</Link> — {m.role}
+        </li>
+      ))}
+    </ul>
+  )
+}
+```
+
+Create `app/routes/member.tsx`:
+
+```tsx
+import { Link, isRouteErrorResponse, useRouteError } from "react-router"
+import type { Route } from "./+types/member"
+import { getMember } from "../data/crew"
+
+export async function loader({ params }: Route.LoaderArgs) {
+  // params.memberId is `string`, NOT `string | undefined` — the generated type
+  // knows :memberId is a required segment of this route's pattern.
+  const member = await getMember(params.memberId)
+  if (!member) throw new Response(`No crew member "${params.memberId}"`, { status: 404 })
+  return { member }
+}
+
+export default function Member({ loaderData }: Route.ComponentProps) {
+  const { member } = loaderData
+  return (
+    <>
+      <h2>{member.name}</h2>
+      <p>{member.role}{member.onCall ? " · on call" : ""}</p>
+      <ul>{member.shifts.map((s) => <li key={s}>{s}</li>)}</ul>
+      <Link to="/">← roster</Link>
+    </>
+  )
+}
+
+/** Scoped to this route: the layout and the nav survive a failure here. */
+export function ErrorBoundary() {
+  const error = useRouteError()
+
+  if (isRouteErrorResponse(error)) {
+    return (
+      <>
+        <h2>{error.status} — not found</h2>
+        <p>{String(error.data)}</p>
+        <Link to="/">← roster</Link>
+      </>
+    )
+  }
+  return <h2>Something broke</h2>
+}
+```
+
+**Run it:**
+
+```bash
+npm run dev
+```
+
+If `./+types/member` shows as unresolved, the plugin hasn't generated types yet:
+
+```bash
+npx react-router typegen
+```
+
+Those files land in `.react-router/` (gitignored). The plugin regenerates them on save once the dev
+server is running.
+
+**What to notice — the three things you cannot get in the other modes:**
+
+1. **`loaderData` needs no cast.** Hover it: `{ member: CrewMember }`, inferred from the `loader`'s
+   return type. Compare with Lab 18.5, where `useLoaderData() as CrewMember` was a promise to the
+   compiler — the exact §17.5 problem. Here there is nothing to promise.
+2. **`params.memberId` is `string`.** Every `if (!id) return <NotFound />` in Labs 18.3 and 18.4
+   existed because the router couldn't see the route pattern. The generated types can.
+3. **One file owns one URL.** The loader, the component, the error boundary and the `<title>` for
+   `/member/:memberId` are in `member.tsx` and nowhere else. Nothing to keep in sync across a config
+   file and a component file.
+
+**Experiments:**
+
+1. **Break the loader's return type.** Change it to `return { crewMember: member }` and leave the
+   component reading `loaderData.member`. Compile error, in the component, naming the field. Do the
+   equivalent in Lab 18.5 (change the loader, leave the cast) and it compiles and crashes at runtime.
+   **This is the whole argument for framework mode in one experiment.**
+2. **Type a wrong path.** In `roster.tsx`, misspell the link target as `/membr/...`. It still
+   compiles, because a template string is just a string, and you find out by clicking. Now import
+   `href` from `react-router` and build the link with `href("/member/:memberId", { memberId: m.id })`
+   instead — misspell the *pattern* this time and it is a compile error.
+3. **Delete the `ErrorBoundary`** from `member.tsx` and visit `/member/nobody`. The error rises to the
+   root boundary and takes the layout with it. Put it back and only the panel fails. Same containment
+   decision as §19.3, made per route module.
+4. **Add an `action`.** Give `member.tsx` an `action` that flips `onCall`, and render a
+   `<Form method="post"><button name="onCall" value="true">…</button></Form>`. Submit it and note the
+   loader re-runs **by itself** — no refetch call, no invalidation key. That automatic revalidation is
+   the feature that's hardest to reproduce by hand.
+5. **Turn SSR back on** (`ssr: true`), reload, and view source. The HTML now contains the roster.
+   Then add a `.server.ts` suffix to the data module and note it's excluded from the client bundle.
+   This is the point past which "routing library" stops being an accurate description.
+6. **Count what's missing.** There is no `useState`, no `useEffect`, no `AbortController`, no loading
+   boolean and no error branch in either route module. Then look back at Lab 17.1.
+
+> **Keep or delete?** This project has served its purpose once you've run the experiments. Nothing in
+> `react-lab` depends on it. Keep it around if your next project might be framework mode — the
+> scaffold is the fastest honest way to evaluate that.
 
 ---
 
@@ -21244,6 +21794,10 @@ effect-based nesting produces a waterfall by construction.
 11. Why must an embedded routed demo use `MemoryRouter` rather than `BrowserRouter`?
 12. A `loader` and a `useEffect` fetch both get data for a route. Name two problems the loader solves that the effect doesn't.
 13. `useOutletContext<T>()` and `useLoaderData() as T` have the same weakness. What is it?
+14. Name React Router v7's three modes, and the one thing that distinguishes data mode from declarative mode.
+15. You rewrite your route tree as a `RouteObject[]` and render it with `useRoutes`. Which mode are you in?
+16. Framework mode types `params.memberId` as `string` rather than `string | undefined`. How can it know that when declarative mode can't?
+17. You already use TanStack Query. Which mode does that argue for, and why?
 
 Answers in [Appendix B](#appendix-b--concept-check-answers).
 
@@ -25388,7 +25942,8 @@ Seventy-plus demos, in the order the notes introduce them. **Core** labs are the
 | 18.2 URL as state | depth | Filters in the query string are shareable and refresh-proof | `18-routing/UrlStateLab.tsx` |
 | 18.3 A nested-route app | core | Layout routes, index routes, params, `Outlet` context, a pathless guard and a 404 — in one small app | `18-routing/CrewAppLab.tsx` + `18-routing/crew/*` |
 | 18.4 Routes as a config | depth | The route tree as data, so the navigation is generated from it rather than maintained beside it | `18-routing/ConfigRoutesLab.tsx` + `crew/routes.tsx` |
-| 18.5 Data router & loaders | optional | Loaders fetch before rendering, in parallel, with cancellation and `errorElement` — the pages have no loading code | `18-routing/DataRouterLab.tsx` + `crew/dataRoutes.tsx` |
+| 18.5 Data mode & loaders | optional | Loaders fetch before rendering, in parallel, with cancellation and `errorElement` — the pages have no loading code | `18-routing/DataRouterLab.tsx` + `crew/dataRoutes.tsx` |
+| 18.6 Framework mode | optional | `routes.ts`, route modules, and generated types — `loaderData` needs no cast and `params` is non-optional | **its own project** (`npx create-react-router@latest`) |
 | 19.1 Error boundaries | core | Containment per subtree; nothing from handlers or promises | `19-errors/ErrorBoundaryLab.tsx` |
 | 19.2 `Suspense` & `lazy` | depth | "Not ready" and "it broke" are different mechanisms | `19-errors/SuspenseLab.tsx` |
 | 20.1 Compound components | depth | Parts share state via context; consumers own layout | `20-patterns/CompoundLab.tsx` |
@@ -25581,7 +26136,7 @@ export const demos: Demo[] = [
   // so they work under either shell — hash or RouterApp.
   { id: "crew-app", chapter: "18 — Routing", title: "A nested-route app", element: <CrewAppLab /> },
   { id: "route-config", chapter: "18 — Routing", title: "Routes as a config", element: <ConfigRoutesLab /> },
-  { id: "data-router", chapter: "18 — Routing", title: "Data router & loaders", element: <DataRouterLab /> },
+  { id: "data-mode", chapter: "18 — Routing", title: "Data mode & loaders", element: <DataRouterLab /> },
 
   { id: "error-boundary", chapter: "19 — Errors", title: "Error boundaries", element: <ErrorBoundaryLab /> },
   { id: "suspense", chapter: "19 — Errors", title: "Suspense & lazy", element: <SuspenseLab /> },
@@ -25768,7 +26323,11 @@ Answer from memory first. If you can answer all of these, you can read and write
 10. Enumerate it. A config is a value, so you can generate navigation, breadcrumbs and sitemaps from it, attach your own metadata via `handle`, and assert things about it in tests without rendering. JSX `<Route>` elements are opaque until rendered.
 11. Routers can't nest — the inner one would fight the outer one for the address bar. `MemoryRouter` keeps history in an array instead of the browser, which is also why it's the right router for tests and Storybook.
 12. Any two of: loaders on the matched branch run in parallel instead of waterfalling (an effect can only start after its component mounts, which requires its parent to have rendered); the router cancels superseded navigations, so no race-condition bookkeeping; `request.signal` is provided; failures route to `errorElement` instead of needing an error branch per page; pending state is one global `useNavigation().state`.
-13. Both are **casts, not checks**. The type argument is a claim the library accepts without verifying, so a parent passing the wrong shape — or an endpoint that changed — fails somewhere far from the cause. Validate with a schema, or at minimum share one exported type between both ends.
+13. Both are **casts, not checks**. The type argument is a claim the library accepts without verifying, so a parent passing the wrong shape — or an endpoint that changed — fails somewhere far from the cause. Validate with a schema, or at minimum share one exported type between both ends. (Framework mode is the one place this goes away, because the type is *inferred* from the loader rather than asserted.)
+14. **Declarative**, **data**, and **framework**. Data mode moves the route config **out of React rendering** — you build the router outside any component — which is what allows the router to run a `loader` *before* rendering the route. Declarative mode's `<Routes>` is rendered as part of the tree, so there's no "before" for it to act in.
+15. **Still declarative mode.** `useRoutes` is a hook: it runs during render, inside `<BrowserRouter>`. A config-shaped route tree is not data mode — the config's *location* is what matters, not its syntax. It is, however, most of the work of moving to data mode, which is why §18.11 sits where it does.
+16. Because the Vite plugin **generates** types from `routes.ts`, so it can see that `:memberId` is a required segment of that route's pattern. Declarative mode's `useParams` is a generic hook with no access to the route config, so it has to admit the param might be missing. This is the difference between a type that's inferred from your configuration and one you asserted by hand.
+17. **Declarative.** Loaders and a query library are two answers to the same question — "when does this data arrive, and who caches it". Running both means two systems own fetching. Use loaders *with* Query only deliberately (loaders fetch, Query remembers); otherwise pick one.
 
 **§19 — Errors & Suspense**
 
@@ -25831,7 +26390,7 @@ You now have every fundamental needed to read and write production React with Ty
 
 - **react-hook-form + zod** — replace hand-rolled form state. Zod schemas generate types, so validation and types never drift apart. Lab 8.4 built the manual version; you'll appreciate what the library does.
 - **TanStack Query** — server state done properly, with excellent TypeScript inference. Lab 17.5 is a starting point; the docs on `staleTime` vs `gcTime`, and on infinite queries, are worth reading in full.
-- **react-router**'s data APIs — `createBrowserRouter` with `loader` and `action`, which fetch before rendering and eliminate loading-spinner cascades.
+- **react-router**'s data and framework modes — covered in §18.12 and §18.13. If you only did the declarative labs, Lab 18.5 and Lab 18.6 are the natural next hour.
 
 **Then**
 
