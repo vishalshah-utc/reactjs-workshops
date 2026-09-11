@@ -34,7 +34,7 @@ Rules that will make this go well:
 file is given in full. You do not need another document to complete it.
 
 **The companion document.** [`React-Demo-Guide.md`](./React-Demo-Guide.md) is the teaching half:
-23 concept sections and 88 small isolated lab demos, each with one moving part, where the concepts
+23 concept sections and 91 small isolated lab demos, each with one moving part, where the concepts
 used here are explained from first principles and deliberately broken. If a step's *why* leaves you
 wanting more depth, that's where the depth lives. The recommended rhythm in a workshop is *concept
 and lab there, then the matching step here.*
