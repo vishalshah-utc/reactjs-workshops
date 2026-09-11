@@ -149,12 +149,14 @@ Pairs with the build guide's 17 steps. Times assume demoing the Core labs and le
 
 | Tool | Version | Check with |
 |---|---|---|
-| Node.js | 20 LTS or newer | `node -v` |
+| Node.js | **22.22 or newer** | `node -v` |
 | npm | comes with Node | `npm -v` |
 | Editor | VS Code + ESLint, Prettier | — |
 | Browser | Chrome/Edge + [React Developer Tools](https://react.dev/learn/react-developer-tools) | — |
 
 Install React DevTools before you start — several labs ask you to look at the Components and Profiler tabs, and there's no substitute.
+
+> **Why Node 22.22 and not 20.** React Router v8 (§18) declares `engines: node >=22.22.0` and peers of `react >=19.2.7`. Everything else in this guide runs on Node 20, so if you're pinned to 20 you can do §1–§17 and §19–§23 — but §18's labs won't install. Check with `node -v` and `npm ls react` before the workshop, not during it.
 
 You should be comfortable with modern JavaScript before starting: arrow functions, destructuring, spread/rest, template literals, `map`/`filter`/`reduce`, modules, optional chaining, and promises/`async`-`await`. React is a small library; it just assumes fluent JavaScript. If `[...arr, x]` and `{ ...obj, k: v }` aren't second nature, spend an hour on those first — they appear on nearly every page of this document.
 
@@ -19079,7 +19081,7 @@ Register as `{ id: "axios-client", chapter: "17 — Fetching", title: "Instance 
 React has no built-in router. It renders one component tree; it has no opinion about the address bar.
 A router's whole job is to **turn the current URL into a component tree**, and to change the URL
 without reloading the page. `react-router` is the standard choice, and this section is written
-against **v7**.
+against **v8** (8.3 at the time of writing).
 
 ```bash
 npm install react-router
@@ -19136,7 +19138,7 @@ anywhere, and that is the point.
 
 ## 18.1 Three modes, one library
 
-React Router v7 can be used three different ways, and the docs call them **modes**. They are not
+React Router v8 can be used three different ways, and the docs call them **modes**. They are not
 three libraries or three migration stages — they're three amounts of the same library, and each one
 is a superset of the one before it.
 
@@ -19166,16 +19168,26 @@ declarative mode you have learned them for all of them.
 - **§18.13 — Framework.** The full-stack option, and why it's a project decision rather than a
   library one. Lab 18.11.
 - **§18.14 — Choosing.** The honest decision table.
+- **§18.15 — Older versions.** How to date a codebase, and the staged v7 → v8 upgrade.
 
 > **One package.** All three modes ship in `react-router`. There is nothing to install when moving
 > between declarative and data mode — you change how you declare routes, not what you depend on.
 > Framework mode is the exception: it adds `@react-router/dev` and takes over the Vite build.
 
-> **The package is `react-router`, not `react-router-dom`.** v7 merged them. Almost every tutorial,
-> blog post and Stack Overflow answer you'll find says `react-router-dom` — that's v6, and its APIs
-> are otherwise nearly identical, which is what makes the confusion durable. A `react-router-dom`
-> package still exists on npm at the v7 version, but it contains nothing except a dependency on
-> `react-router`, so installing it won't error — it will just put you back on the old import path.
+> **The package is `react-router`, not `react-router-dom`.** v7 merged them and **v8 removed
+> `react-router-dom` outright** — its last release was 7.18.3, so `npm install react-router-dom`
+> now silently pins you to v7. Almost every tutorial, blog post and Stack Overflow answer you'll
+> find says `react-router-dom`, because that was the name for v4 through v6, and the APIs are
+> otherwise near-identical — which is what makes the confusion durable.
+>
+> One exception to "everything comes from `react-router`": the **DOM entry point**,
+> `react-router/dom`, is where `RouterProvider` and `HydratedRouter` live. Both are also re-exported
+> from the bare package, so either import works — but `react-router/dom` is what the upgrade guide
+> uses, and it's the right habit.
+
+> **Version floors.** v8 needs **Node ≥ 22.22** and **React ≥ 19.2.7**, and framework mode also wants
+> Vite 7+. These are much higher than v7's (Node 20, React 18), and they're the most likely reason a
+> fresh `npm install react-router` fails on someone's machine.
 
 ---
 
@@ -19606,10 +19618,11 @@ function Member() {
 <RouterProvider router={router} />
 ```
 
-> **`element:` or `Component:`?** v7 accepts both. `element: <Member />` takes a rendered element —
+> **`element:` or `Component:`?** v8 accepts both. `element: <Member />` takes a rendered element —
 > the v6 spelling, and what you must use if you need to pass props. `Component: Member` takes the
 > component itself and lets the router render it, which is what the official docs use and what
-> framework mode does under the hood. Prefer `Component` in new data-mode code: it's less to type,
+> framework mode does under the hood, and what the v8 docs use throughout. Prefer `Component` in new
+> data-mode code: it's less to type,
 > and it lets the router control mounting (which matters for `HydrateFallback`). They are otherwise
 > interchangeable, so mixing them in one config is legal — just not tidy.
 
@@ -19630,8 +19643,8 @@ addition.
 > **TS Note.** `useLoaderData()` returns `unknown`-shaped data that the library types as `any`. The
 > cast above is **exactly the `axios.get<T>()` problem from §17.5**: a promise to the compiler, not a
 > check. Parse it — `const member = MemberSchema.parse(useLoaderData())` — or accept that a changed
-> endpoint crashes somewhere far away. React Router v7 adds generated route types that close this
-> gap; until you're on it, the schema is the answer.
+> endpoint crashes somewhere far away. Framework mode's generated route types close this gap
+> outright (§18.13); in data mode, a schema is the answer.
 
 **Learn declarative mode first.** It's what most existing code uses, it's what every tutorial shows,
 and the concepts — nesting, params, the URL as state — transfer unchanged. Lab 18.10 converts one app
@@ -19644,8 +19657,9 @@ from declarative to data mode so you can see exactly what moves.
 ## 18.13 Framework mode
 
 Framework mode wraps data mode in a Vite plugin and takes responsibility for the whole app: routing,
-the build, code splitting, and — if you want it — the server. This is the mode that used to be called
-Remix. React Router v7 *is* Remix v3, renamed.
+the build, code splitting, and — if you want it — the server. This is the mode that grew out of
+Remix: Remix v2's successor was released as React Router v7, and framework mode is its direct
+descendant.
 
 The important thing to understand first: **this is not an API you add to an existing app.** It owns
 `vite.config.ts`, it generates types into your project, and it expects a particular file layout. You
@@ -19738,8 +19752,9 @@ export async function action({ request, params }: Route.ActionArgs) {
   return { ok: true }
 }
 
-export function meta({ data }: Route.MetaArgs) {
-  return [{ title: data ? data.member.name : "Crew" }]
+export function meta({ loaderData }: Route.MetaArgs) {
+  // v8 removed the `data` argument — it's `loaderData` everywhere now
+  return [{ title: loaderData ? loaderData.member.name : "Crew" }]
 }
 
 /** loaderData is TYPED from the loader's return value. No cast, no generic. */
@@ -19815,7 +19830,7 @@ The docs give direct guidance, and it's good guidance, so here it is with the re
 
 - are new enough to routing that you don't yet have an opinion — the defaults are good ones
 - were otherwise considering Next.js, TanStack Start, SvelteKit, Astro or Solid Start
-- are coming from Remix (v7 *is* the next version after Remix v2)
+- are coming from Remix (React Router v7 was Remix v2's successor, and framework mode is where that lineage continues)
 - are migrating away from Next.js
 
 **Use Data mode if you:**
@@ -19855,7 +19870,44 @@ understanding as a progression rather than as three unrelated choices.
 **What doesn't change in any direction:** nesting, `Outlet`, `index` routes, layout routes, params,
 `Link`/`NavLink`, and the URL as state. That's most of this section, and it's why it comes first.
 
-## 18.15 Routing mistakes that cost an afternoon
+## 18.15 Arriving on an older version
+
+Most React code you meet will not be on v8. The version you land in changes the vocabulary more than
+the concepts, so it's worth being able to date a codebase — or a blog post — at a glance.
+
+| Tell | Version |
+|---|---|
+| `<Switch>`, `useHistory`, `exact` | v5 or earlier |
+| `react-router-dom` imports, `<Routes>`/`<Route element>` | v6 |
+| `react-router` imports, `createBrowserRouter`, `routes.ts` | v7 |
+| `react-router/dom` for `RouterProvider`, `loaderData` in `meta` | v8 |
+
+**v6 → v7** is mostly a rename: change `react-router-dom` to `react-router` and the APIs carry over
+almost untouched. That's why v6 tutorials remain useful reading.
+
+**v7 → v8** is a real upgrade, and the official path is to do it in stages rather than in one jump:
+
+1. **Get to the latest v7 first** (`npm install react-router@7`) — not to v8 directly.
+2. **Turn on the future flags while still on v7**, so each behaviour change lands on its own:
+   `v8_middleware`, `v8_splitRouteModules`, `v8_viteEnvironmentApi`, `v8_passThroughRequests`,
+   `v8_trailingSlashAwareDataRequests`. Fix what breaks, one flag at a time.
+3. **Make the code changes**: drop `react-router-dom`; take `RouterProvider` and `HydratedRouter`
+   from `react-router/dom`; rename `data` to `loaderData` in `meta`, in `matches[i]`, and in
+   `useMatches()`.
+4. **Raise the floors**: Node ≥ 22.22, React ≥ 19.2.7, and Vite 7 for framework mode. In practice
+   this is the step that actually blocks teams, because it's a platform upgrade rather than a library
+   one.
+5. **Then** `npm install react-router@latest`.
+
+> **The staged flags are the whole trick.** Each `future.v8_*` flag is a v8 behaviour you can adopt
+> while still on a version that supports the old one, so a failure tells you exactly which change
+> caused it. Upgrading the package first and debugging afterwards throws that information away — and
+> this pattern (ship breaking changes as opt-in flags a major early) is worth recognising, because
+> several libraries do it.
+
+---
+
+## 18.16 Routing mistakes that cost an afternoon
 
 | Symptom | Cause | Fix |
 |---|---|---|
@@ -19869,8 +19921,10 @@ understanding as a progression rather than as three unrelated choices.
 | `path="/shifts"` inside a parent never matches | Absolute child path not prefixed by the parent's | Make it relative: `path="shifts"` |
 | Redirect loop between guard and login | `Navigate` without `replace`, or the login page is inside the guard | Add `replace`; keep `/login` outside |
 | Params are `"42"` and comparisons fail | Params are strings, always | Convert and validate at the boundary |
-| `Cannot find module 'react-router-dom'` | v7 merged the packages | Import from `react-router` |
+| `Cannot find module 'react-router-dom'` | v7 merged the packages; v8 deleted the old one | Import from `react-router` |
 | A v6 tutorial's code doesn't compile | v6 used `react-router-dom`, and v5 used `Switch`/`useHistory` | Check which major version the article predates |
+| `Unsupported engine` on install | v8 needs Node ≥ 22.22 and React ≥ 19.2.7 | Upgrade Node, or pin `react-router@7` |
+| `data` is undefined in `meta` | v8 renamed it | Use `loaderData` — also in `matches[i]` and `useMatches()` |
 | `loader` never runs | You're in declarative mode — `<Routes>` has no loaders | Move to data mode (§18.12), or fetch in the component |
 | `./+types/...` won't resolve | Framework mode types aren't generated yet | `npx react-router typegen` |
 
@@ -22220,7 +22274,7 @@ server is running.
 11. Why must an embedded routed demo use `MemoryRouter` rather than `BrowserRouter`?
 12. A `loader` and a `useEffect` fetch both get data for a route. Name two problems the loader solves that the effect doesn't.
 13. `useOutletContext<T>()` and `useLoaderData() as T` have the same weakness. What is it?
-14. Name React Router v7's three modes, and the one thing that distinguishes data mode from declarative mode.
+14. Name React Router v8's three modes, and the one thing that distinguishes data mode from declarative mode.
 15. You rewrite your route tree as a `RouteObject[]` and render it with `useRoutes`. Which mode are you in?
 16. Framework mode types `params.memberId` as `string` rather than `string | undefined`. How can it know that when declarative mode can't?
 17. You already use TanStack Query. Which mode does that argue for, and why?

@@ -76,12 +76,14 @@ you're short on time.
 
 | Tool | Version | Check with |
 |---|---|---|
-| Node.js | 20 LTS or newer | `node -v` |
+| Node.js | **22.22 or newer** | `node -v` |
 | npm | comes with Node | `npm -v` |
 | Editor | VS Code + ESLint, Prettier | — |
 | Browser | Chrome/Edge + [React Developer Tools](https://react.dev/learn/react-developer-tools) | — |
 
 Install React DevTools before you start — step 11 is entirely about reading the Profiler, and there's no substitute.
+
+> **Why Node 22.22 and not 20.** Build Step 14 installs React Router v8, which declares `engines: node >=22.22.0` and a peer of `react >=19.2.7`. Steps 1–13 and 15–17 run fine on Node 20; step 14 won't install. Check `node -v` and `npm ls react` before you start.
 
 You should be comfortable with modern JavaScript: arrow functions, destructuring, spread/rest, template literals, `map`/`filter`/`reduce`, modules, optional chaining, and promises/`async`-`await`. React is a small library; it just assumes fluent JavaScript. If `[...arr, x]` and `{ ...obj, k: v }` aren't second nature, spend an hour on those first — they appear on nearly every page of this document.
 
@@ -2165,13 +2167,16 @@ layout route means the header and container are declared once for every page.
 npm install react-router
 ```
 
-> **The package is `react-router`, not `react-router-dom`.** React Router v7 merged the two: what
-> used to be `react-router-dom` is now just `react-router`, and every component and hook below is
-> imported from it. This matters because almost every tutorial, blog post and Stack Overflow answer
-> you'll find says `react-router-dom` — that's v6. The APIs in this step are unchanged between the
-> two; only the package name is. (A `react-router-dom` package still exists on npm as a
-> compatibility shim, so installing it won't error — it will just quietly put you on the old
-> import path.) v7 needs Node 20+ and React 18+, both of which this project already has.
+> **The package is `react-router`, not `react-router-dom`.** v7 merged the two, and **v8 removed
+> `react-router-dom` entirely** — its last release was 7.18.3, so `npm install react-router-dom`
+> today silently pins you two majors back. Every component and hook below is imported from
+> `react-router`. This matters because almost every tutorial, blog post and Stack Overflow answer
+> says `react-router-dom` — that was the name for v4 through v6 — while the APIs used here are
+> otherwise unchanged, which is what makes the confusion stick.
+>
+> **Check your versions before running this.** v8 requires **Node ≥ 22.22** and
+> **React ≥ 19.2.7**. `node -v` and `npm ls react` will tell you; a mismatch shows up as an
+> `Unsupported engine` warning and then a confusing runtime failure.
 
 Two goals: a Settings page (to justify a router at all), and moving the filter and search into the URL (to justify it properly).
 
@@ -2414,14 +2419,14 @@ export default function App() {
 
 ### Which mode is this, and why
 
-React Router v7 can be used three ways — the docs call them **modes** — and picking one is a real
+React Router v8 can be used three ways — the docs call them **modes** — and picking one is a real
 decision rather than a style preference. Everything above is **declarative mode**: `<BrowserRouter>`
 wrapping `<Routes>`, routes declared as JSX inside the React tree.
 
 | Mode | Entry point | Adds |
 |---|---|---|
 | **Declarative** | `<BrowserRouter>` + `<Routes>` | URL matching, navigation, active links |
-| **Data** | `createBrowserRouter` + `<RouterProvider>` | `loader` / `action` per route, pending states, automatic revalidation |
+| **Data** | `createBrowserRouter` + `<RouterProvider>` (from `react-router/dom`) | `loader` / `action` per route, pending states, automatic revalidation |
 | **Framework** | a Vite plugin (`@react-router/dev`) | generated route types, type-safe `href`, code splitting, SSR |
 
 Each is a superset of the one before it, and all three ship in the same `react-router` package —
@@ -2450,6 +2455,9 @@ transfers to the other two modes unchanged.
 **What would change in data mode.** Concretely, so you're not taking this on trust. `App.tsx` becomes:
 
 ```tsx
+import { createBrowserRouter } from "react-router"
+import { RouterProvider } from "react-router/dom"   // the DOM entry, in v8
+
 // The router is built ONCE, outside any component — that's what defines data mode
 const router = createBrowserRouter([
   {
@@ -3312,7 +3320,7 @@ What you installed, and what each one bought you:
 | `zod` | 5 | One runtime schema that is also the TypeScript type, via `z.infer`. |
 | `@hookform/resolvers` | 5 | The bridge: hands zod's errors to react-hook-form's `formState`. |
 | `axios` | 13 | Instances, interceptors, and errors that reject instead of resolving. |
-| `react-router` | 14 | Routes, and the URL as a place to keep state. v7, used in **declarative mode** — see Step 14 for why, not data or framework mode. (The old package name was `react-router-dom`.) |
+| `react-router` | 14 | Routes, and the URL as a place to keep state. v8, used in **declarative mode** — see Step 14 for why, not data or framework mode. Needs Node ≥ 22.22 and React ≥ 19.2.7. (`react-router-dom` was the old name and no longer exists.) |
 | `vitest` + Testing Library | 16 | Tests that use the app the way a user does. |
 | `@reduxjs/toolkit` + `react-redux` | 17 | A store outside the tree, with Immer and typed hooks. |
 
