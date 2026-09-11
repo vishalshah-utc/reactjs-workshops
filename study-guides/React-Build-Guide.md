@@ -116,7 +116,7 @@ React-Bootstrap ships its own TypeScript definitions, so there is no `@types/rea
 |---|---|
 | 5 | `npm install react-hook-form zod @hookform/resolvers` |
 | 13 | `npm install axios` |
-| 14 | `npm install react-router-dom` |
+| 14 | `npm install react-router` |
 | 16 | `npm install -D vitest @testing-library/react @testing-library/user-event @testing-library/jest-dom jsdom` |
 | 17 | `npm install @reduxjs/toolkit react-redux` |
 
@@ -2162,8 +2162,16 @@ component state, because that makes a view shareable, bookmarkable and refresh-p
 layout route means the header and container are declared once for every page.
 
 ```bash
-npm install react-router-dom
+npm install react-router
 ```
+
+> **The package is `react-router`, not `react-router-dom`.** React Router v7 merged the two: what
+> used to be `react-router-dom` is now just `react-router`, and every component and hook below is
+> imported from it. This matters because almost every tutorial, blog post and Stack Overflow answer
+> you'll find says `react-router-dom` — that's v6. The APIs in this step are unchanged between the
+> two; only the package name is. (A `react-router-dom` package still exists on npm as a
+> compatibility shim, so installing it won't error — it will just quietly put you on the old
+> import path.) v7 needs Node 20+ and React 18+, both of which this project already has.
 
 Two goals: a Settings page (to justify a router at all), and moving the filter and search into the URL (to justify it properly).
 
@@ -2172,7 +2180,7 @@ Create `src/pages/BoardPage.tsx` — the current board, moved out of `App`:
 ```tsx
 import { useState } from "react"
 import { Alert, Spinner } from "react-bootstrap"
-import { useSearchParams } from "react-router-dom"
+import { useSearchParams } from "react-router"
 import TaskList from "@/components/TaskList"
 import AddTaskForm from "@/components/AddTaskForm"
 import TaskToolbar from "@/components/TaskToolbar"
@@ -2326,7 +2334,7 @@ Update `src/components/Header.tsx` to carry the navigation:
 
 ```tsx
 import { Navbar, Container, Nav } from "react-bootstrap"
-import { NavLink } from "react-router-dom"
+import { NavLink } from "react-router"
 import { CheckCircleFill } from "react-bootstrap-icons"
 
 interface HeaderProps {
@@ -2363,7 +2371,7 @@ export default function Header({ title, subtitle }: HeaderProps) {
 And `src/App.tsx` becomes the route tree:
 
 ```tsx
-import { BrowserRouter, Routes, Route, Outlet, Link } from "react-router-dom"
+import { BrowserRouter, Routes, Route, Outlet, Link } from "react-router"
 import { Alert, Container } from "react-bootstrap"
 import Header from "@/components/Header"
 import BoardPage from "@/pages/BoardPage"
@@ -2403,6 +2411,17 @@ export default function App() {
   )
 }
 ```
+
+> **v7 has a second way to declare routes.** Everything above is the **component API** —
+> `<BrowserRouter>` wrapping `<Routes>`. v7 also has the **data router**
+> (`createBrowserRouter` + `<RouterProvider>`), where each route declares a `loader` and the router
+> fetches before rendering. It's the better architecture for data-heavy apps and it's what a new
+> project would probably start with. TaskBoard deliberately stays on the component API, for two
+> reasons: the data layer you built in steps 12 and 13 is the thing being taught here, and a loader
+> would hide it; and the component API is what the overwhelming majority of existing code uses, so
+> it's what you'll meet first on a real team. Both ship in the same package, and the concepts —
+> nesting, `Outlet`, params, the URL as state — are identical either way. The demo guide's Lab 18.5
+> converts a small app from one to the other if you want to see the diff.
 
 **Verify:**
 
@@ -2479,10 +2498,17 @@ export default class ErrorBoundary extends Component<Props, State> {
 (promises, `setTimeout`). Those don't run during render, so they never reach a boundary — handle them
 with an ordinary `try`/`catch` and an error state.
 
+> **A styling aside.** The fallback's second button is a `<Link>` with Bootstrap's button classes
+> (`className="btn btn-sm btn-outline-secondary"`) rather than `<Button as={Link}>`. Both render the
+> same markup, but React-Bootstrap's `as` prop can't always reconcile its own prop types with the
+> target component's, and the usual workaround is a cast like `as={Link as never}` — which switches
+> off type checking on exactly the prop you were trying to type. Reach for the class names instead:
+> it's less code and it stays type-safe.
+
 Now layer two boundaries into `App.tsx`:
 
 ```tsx
-import { BrowserRouter, Routes, Route, Outlet, Link } from "react-router-dom"
+import { BrowserRouter, Routes, Route, Outlet, Link } from "react-router"
 import { Alert, Button, Container } from "react-bootstrap"
 import ErrorBoundary from "@/components/ErrorBoundary"
 import Header from "@/components/Header"
@@ -2498,9 +2524,9 @@ function PageError({ error, reset }: { error: Error; reset: () => void }) {
         <Button size="sm" variant="outline-danger" onClick={reset}>
           Try again
         </Button>
-        <Button size="sm" variant="outline-secondary" as={Link as never} to="/">
+        <Link to="/" className="btn btn-sm btn-outline-secondary">
           Back to the board
-        </Button>
+        </Link>
       </div>
     </Alert>
   )
@@ -3225,7 +3251,7 @@ What you installed, and what each one bought you:
 | `zod` | 5 | One runtime schema that is also the TypeScript type, via `z.infer`. |
 | `@hookform/resolvers` | 5 | The bridge: hands zod's errors to react-hook-form's `formState`. |
 | `axios` | 13 | Instances, interceptors, and errors that reject instead of resolving. |
-| `react-router-dom` | 14 | Routes, and the URL as a place to keep state. |
+| `react-router` | 14 | Routes, and the URL as a place to keep state. (v7 — the old name was `react-router-dom`.) |
 | `vitest` + Testing Library | 16 | Tests that use the app the way a user does. |
 | `@reduxjs/toolkit` + `react-redux` | 17 | A store outside the tree, with Immer and typed hooks. |
 
