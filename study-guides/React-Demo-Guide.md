@@ -1,40 +1,53 @@
-# ReactJS Fundamentals with TypeScript & Bootstrap — Study Notes, Concept Labs & Guided Project
+# React with TypeScript & Bootstrap — Demo & Concept Guide
 
-**What this is:** a self-contained course covering React's core concepts. Every concept is explained, then practised in a **small isolated lab demo** you can run and poke at, and only then applied to a **real app** you build step by step.
+**What this is:** the teaching half of a two-document workshop. Every React concept is explained from
+first principles and then practised in a **small isolated lab demo** you can run, poke at, and
+deliberately break. There are 23 concept sections and 88 labs, all living in one playground project.
 
-**Two things you'll build:**
+**Who it's for.** Two audiences, same document:
 
-| Project | Purpose |
+| You are | How to use it |
 |---|---|
-| **`react-lab`** | A playground app with Bootstrap pre-wired and a sidebar of demos. You add one or more components per concept and see that concept in isolation, with nothing else to distract you. |
-| **`taskboard`** | The real app: a task board with adding, completing, deleting, editing, filtering, searching, stats, persistence, routing and tests. Typed end-to-end. |
+| **Running the workshop** | This is your demo script. Each lab is a component you can build live or have pre-built, with "what to notice" and a set of deliberate breakages to run in front of the room. The prose is the explanation; the experiments are the lesson. |
+| **Learning on your own** | Work top to bottom. Read the concept, build the lab, run the experiments, then answer the concept check from memory. |
 
-The reason for two projects is simple. A concept demo should have *exactly one* moving part so that when something changes on screen you know precisely why. A real app has dozens of moving parts, which is what makes it realistic — and what makes it a terrible place to learn what `useCallback` does. So: learn in the lab, apply in the app.
+**The companion document.** [`React-Build-Guide.md`](./React-Build-Guide.md) is the other half: a
+17-step guided exercise where participants build a real app — **TaskBoard** — applying these concepts
+for themselves. It is self-contained, so it can be worked through independently or in parallel with
+this guide. The recommended rhythm is *concept here, lab here, then the matching build step there*.
 
-**Language:** TypeScript (`.tsx`). No prior TypeScript experience assumed — types are introduced gradually, starting from the simplest useful ones.
+**One project.** Everything in this guide lives in **`react-lab`**: a Vite + TypeScript + Bootstrap
+playground with a sidebar of demos. Adding a lab is a two-file change — write the component, add one
+line to a registry.
+
+The reason the labs are isolated is simple. A concept demo should have *exactly one* moving part, so
+that when something changes on screen you know precisely why. A real app has dozens of moving parts,
+which is what makes it realistic — and what makes it a terrible place to learn what `useCallback`
+does. So: learn in the lab, apply in the app.
+
+**Language:** TypeScript (`.tsx`). No prior TypeScript experience assumed — types are introduced
+gradually, starting from the simplest useful ones. Part 0.8 is a warm-up if you need one.
 
 ---
 
 ## How to use these notes
 
-Work top to bottom. The document alternates between five kinds of section:
+The document alternates between four kinds of section:
 
 | Section | Marker | What it is |
 |---|---|---|
 | **Concept** | `#` heading | The React idea explained from first principles, with the mechanics spelled out. |
 | **TS Note** | `> **TS Note.**` | How TypeScript changes, improves, or complicates that concept. |
 | **Lab** | 🧪 | A small, self-contained demo component you add to `react-lab`. Includes the full code, where to put it, how to run it, what to watch, and experiments to run. |
-| **Build Step** | 🔨 | Code you add to the TaskBoard project. Every build step leaves the app in a **working, runnable state**. |
-| **Concept check** | ✅ | A handful of questions with answers. Do these from memory before looking. |
+| **Concept check** | ✅ | A handful of questions with answers in [Appendix B](#appendix-b--concept-check-answers). Do these from memory before looking. |
 
 Rules that will make this go well:
 
 1. **Run every lab.** Reading about a stale closure teaches you the words. Watching a counter refuse to reach 2 teaches you the thing.
 2. **Type the code at least once** rather than only pasting. Muscle memory matters more than you'd think.
 3. **Do the experiments.** Each lab ends with two or three deliberate breakages. Breaking code on purpose, predicting the result, and being wrong is the fastest way to build an accurate mental model.
-4. **Run the app after every build step.** If it breaks, fix it before moving on — errors compound.
-5. **Read the TypeScript errors.** They're verbose, but they're almost always telling you something true. Start at the *last* line of the message, which usually names the actual mismatch.
-6. Keep the browser console *and* your editor's Problems panel open. TypeScript catches things before you ever run the app.
+4. **Read the TypeScript errors.** They're verbose, but they're almost always telling you something true. Start at the *last* line of the message, which usually names the actual mismatch.
+5. Keep the browser console *and* your editor's Problems panel open. TypeScript catches things before you ever run the app.
 
 ### If you're short on time
 
@@ -46,27 +59,37 @@ Every lab is marked with a priority:
 
 A one-day workshop does the Core labs. A week of self-study does everything.
 
+### Notes for the trainer
+
+- **Pre-build the harness.** Part 0.5 is scaffolding, not teaching. Have `react-lab` cloned and running before the room arrives; walking through `DemoCard` and the registry live costs 40 minutes and teaches nothing that §1 doesn't teach better.
+- **Demo the breakage, not the fix.** The experiments at the end of each lab are the highest-value part of this document. Predict out loud, change the line, be wrong in front of the room. That is the whole pedagogy.
+- **Every lab is independently runnable**, so you can jump. If the room is strong on one topic, skip to that section's labs; nothing later depends on an earlier lab's code except where a section explicitly builds on its own previous file.
+- **§22 and §23 are alternatives to each other**, both readable straight after §14. Pick one for a short workshop.
+
 ---
 
 ## Suggested schedule
 
-| Block | Sections | Labs | Build steps |
+Pairs with the build guide's 17 steps. Times assume demoing the Core labs and leaving the build steps as practice.
+
+| Block | Sections | Labs | Build steps to set as practice |
 |---|---|---|---|
 | **Setup** (45 min) | Part 0, Part 0.5 | Lab harness | — |
 | **TypeScript warm-up** (45 min) | Part 0.8 | 0.1 | — |
 | **Session 1** (2 h) — describing UI | §1–§5 | 1.1–5.2 | 1, 2, 3 |
-| **Session 2** (2.5 h) — interactivity | §6–§8 | 6.1–8.5 | 4, 5 |
-| **Session 3** (2 h) — structuring state | §9–§12 | 9.1–12.6 | 6, 7, 8 |
-| **Session 4** (2.5 h) — scaling up | §13–§16 | 13.1–16.6 | 9, 10 |
-| **Session 5** (2 h) — the outside world | §17–§19 | 17.1–19.2 | 11, 12 |
-| **Session 6** (1.5 h) — patterns & tests | §20–§21 | 20.1–21.2 | 13 |
+| **Session 2** (2.5 h) — interactivity | §6–§8 | 6.1–8.12 | 4, 5 |
+| **Session 3** (2 h) — structuring state | §9–§12 | 9.1–12.4 | 6, 7, 8 |
+| **Session 4** (2.5 h) — scaling up | §13–§16 | 13.1–16.4 | 9, 10, 11 |
+| **Session 5** (2 h) — the outside world | §17–§19 | 17.1–19.2 | 12, 13, 14, 15 |
+| **Session 6** (1.5 h) — patterns & tests | §20–§21 | 20.1–21.2 | 16 |
+| **Session 7** (1.5 h) — state at scale | §22 *or* §23 | 22.1–22.3 / 23.1–23.2 | 17 |
 
 ---
 
 ## Table of contents
 
 **Setup**
-- [Part 0 — Environment & the two projects](#part-0--environment--the-two-projects)
+- [Part 0 — Environment & the lab project](#part-0--environment--the-lab-project)
 - [Part 0.5 — The lab harness](#part-05--the-lab-harness)
 - [Part 0.8 — TypeScript orientation](#part-08--typescript-orientation)
 
@@ -120,7 +143,7 @@ A one-day workshop does the Core labs. A week of self-study does everything.
 
 ---
 
-# Part 0 — Environment & the two projects
+# Part 0 — Environment & the lab project
 
 ## 0.1 Prerequisites
 
@@ -135,27 +158,21 @@ Install React DevTools before you start — several labs ask you to look at the 
 
 You should be comfortable with modern JavaScript before starting: arrow functions, destructuring, spread/rest, template literals, `map`/`filter`/`reduce`, modules, optional chaining, and promises/`async`-`await`. React is a small library; it just assumes fluent JavaScript. If `[...arr, x]` and `{ ...obj, k: v }` aren't second nature, spend an hour on those first — they appear on nearly every page of this document.
 
-## 0.2 Create both projects
-
-Work in one parent folder so the two projects sit side by side:
+## 0.2 Create the project
 
 ```bash
 mkdir react-workshop && cd react-workshop
-
-# 1. The concept playground
 npm create vite@latest react-lab -- --template react-ts
-
-# 2. The guided project
-npm create vite@latest taskboard -- --template react-ts
 ```
 
 The `react-ts` template gives you TypeScript configured correctly out of the box — `tsconfig.json`, `tsconfig.app.json`, `.tsx` files, and type checking wired into the build.
 
-## 0.3 Install dependencies in both
+> If you are also doing the [build guide](./React-Build-Guide.md), create its project as a sibling now — `npm create vite@latest taskboard -- --template react-ts` — and apply 0.3 through 0.5 to both. Two projects side by side, two dev servers, two browser tabs.
 
-Run this in **each** project directory:
+## 0.3 Install dependencies
 
 ```bash
+cd react-lab
 npm install
 npm install react-bootstrap bootstrap react-bootstrap-icons
 npm install -D @types/node
@@ -169,13 +186,15 @@ Three runtime packages, because they do different jobs:
 
 React-Bootstrap ships its own TypeScript definitions, so there is no `@types/react-bootstrap` to install. (If you see instructions telling you to install it, they're out of date.)
 
+Some later sections add one dependency each, installed when you reach them: `react-hook-form` and `zod` (§8), `@tanstack/react-query` and `axios` (§17), `react-router-dom` (§18), `vitest` and Testing Library (§21), `@reduxjs/toolkit` and `react-redux` (§22), `zustand` (§23).
+
 > **Version note.** The stable line is `react-bootstrap@2.x`, which targets Bootstrap 5. A `3.0.0-beta` line exists that targets React 19 specifically. Vite's current template scaffolds React 19, and stable v2 (2.10.7+) works with it — but if you hit type conflicts around refs or `Navbar`, either pin React 18 or try the beta with `npm install react-bootstrap@next`. Check [react-bootstrap.github.io](https://react-bootstrap.github.io/) for the current recommendation, since this will have moved on.
 
 If you want to see the exact versions this document was written against, run `npm ls react react-dom react-bootstrap bootstrap typescript` and keep the output somewhere. When something behaves differently from the text a year from now, that list is the first thing to check.
 
 ## 0.4 Import the Bootstrap stylesheet
 
-Bootstrap's CSS must be imported **once**, at the app's entry point, before your own styles. In **both** projects, open `src/main.tsx`:
+Bootstrap's CSS must be imported **once**, at the app's entry point, before your own styles. Open `src/main.tsx`:
 
 ```tsx
 import { StrictMode } from "react"
@@ -195,9 +214,11 @@ Import order matters because CSS rules of equal specificity are applied in sourc
 
 Note the `!` after `getElementById("root")`. That's TypeScript's **non-null assertion** — `getElementById` returns `HTMLElement | null`, and you're telling the compiler you know the element exists because it's in `index.html`. Vite's template includes this already.
 
-Now empty out `src/index.css` in both projects (delete everything Vite put there — it fights Bootstrap) and delete `src/App.css`.
+**Leave `<StrictMode>` on.** Several labs depend on it: it double-invokes components and effects in development specifically to surface impurity and missing cleanup. Labs 1.3, 11.1 and 11.2 are about exactly that.
 
-Add these two small utilities to `src/index.css` in both projects; Bootstrap doesn't ship them and several components below use them:
+Now empty out `src/index.css` (delete everything Vite put there — it fights Bootstrap) and delete `src/App.css`.
+
+Add these two small utilities to `src/index.css`; Bootstrap doesn't ship them and several components below use them:
 
 ```css
 /* Bootstrap has no dashed-border utility */
@@ -218,7 +239,7 @@ Add these two small utilities to `src/index.css` in both projects; Bootstrap doe
 
 Optional but strongly recommended, and used by every code sample from here on: it turns `../../components/TaskCard` into `@/components/TaskCard`, which stays correct when you move files.
 
-Do this in **both** projects. Add to **`tsconfig.json`**:
+Add to **`tsconfig.json`**:
 
 ```json
 {
@@ -264,25 +285,23 @@ export default defineConfig({
 
 Both halves are required: **TypeScript** needs `paths` to resolve types, and **Vite** needs `resolve.alias` to resolve the actual module at build time. Configure one without the other and you get either red squiggles or a runtime failure.
 
-## 0.6 Run both at once
-
-Two terminals:
+## 0.6 Run it
 
 ```bash
-# terminal 1
 cd react-lab && npm run dev        # → http://localhost:5173
+```
 
-# terminal 2
+If you're running the build guide's project too, pin its port so the URL doesn't move around:
+
+```bash
 cd taskboard && npm run dev -- --port 5174   # → http://localhost:5174
 ```
 
-Vite would pick 5174 automatically for the second server anyway, but pinning it means the URL doesn't move around, which matters when you have it bookmarked for two days.
-
-Keep both tabs open all week. You'll flip between them constantly.
+Vite would pick 5174 automatically for the second server anyway, but pinning it matters when you have it bookmarked for two days. Keep both tabs open all week — you'll flip between them constantly.
 
 ## 0.7 Verify
 
-Replace `src/App.tsx` in **taskboard** with:
+`src/App.tsx` gets replaced properly in Part 0.5, so for a two-minute smoke test just put this in it:
 
 ```tsx
 import { Button, Container } from "react-bootstrap"
@@ -290,14 +309,14 @@ import { Button, Container } from "react-bootstrap"
 export default function App() {
   return (
     <Container className="py-5 text-center">
-      <h1 className="mb-3">TaskBoard</h1>
+      <h1 className="mb-3">react-lab</h1>
       <Button variant="primary">Setup works</Button>
     </Container>
   )
 }
 ```
 
-A blue Bootstrap button on a centred, padded container means everything is wired. `react-lab`'s `App.tsx` gets replaced properly in Part 0.5, so leave it for now.
+A blue Bootstrap button on a centred, padded container means everything is wired.
 
 Also confirm the type-checker runs:
 
@@ -319,6 +338,7 @@ npm run build
 | Port 5173 already in use | Another Vite server is running. `npm run dev -- --port 5175`, or stop the other one. |
 | Editor shows errors the terminal doesn't | The editor's TypeScript version differs from the project's. VS Code: ⇧⌘P → "TypeScript: Select TypeScript Version" → "Use Workspace Version". |
 | `crypto.randomUUID is not a function` | You're on an insecure origin or old Node. It works on `localhost` and over HTTPS; on Node it needs 19+. |
+| A demo renders twice / an effect logs twice | That's Strict Mode, and it's intentional. See Labs 1.3 and 11.1. |
 
 ---
 
@@ -3269,177 +3289,6 @@ Register as `{ id: "data-down", chapter: "3 — Props", title: "Data down, event
 
 ---
 
-## 🔨 Build Step 1 — Types and app shell
-
-Everything from here happens in the **`taskboard`** project. Switch terminals.
-
-Start with the domain types, because they're the contract the whole app is written against. Create `src/types.ts`:
-
-```ts
-export type Priority = "low" | "medium" | "high"
-
-export type Filter = "all" | "active" | "done"
-
-export interface Task {
-  id: string
-  title: string
-  priority: Priority
-  done: boolean
-  readonly createdAt: number
-}
-
-/** A task before it has been given an id and defaults. */
-export type NewTask = Pick<Task, "title" | "priority">
-```
-
-Four decisions worth naming:
-
-- **`Priority` and `Filter` are unions, not `string`.** Every typo becomes a compile error and every `switch` over them can be checked for exhaustiveness.
-- **`createdAt` is `readonly`.** It's set once at creation and must never change; the type now enforces that.
-- **`createdAt` is a `number`** (epoch milliseconds) rather than a `Date`, because it has to survive `JSON.stringify` into `localStorage` in Build Step 7. `Date` would come back as a string and quietly break comparisons.
-- **`NewTask` is derived with `Pick`** rather than being a second hand-written interface. Add a field to `Task` and there's exactly one place to think about.
-
-> **This file changes in Build Step 5.** Once the app has a reason for a zod schema, these types get *derived* from it (`z.infer`) instead of hand-written, so the rules and the types can't drift apart. Writing them by hand now is the right starting point — you can't derive a type from a schema you don't yet have a use for.
-
-Create `src/components/Header.tsx`:
-
-```tsx
-import { Navbar, Container } from "react-bootstrap"
-import { CheckCircleFill } from "react-bootstrap-icons"
-
-interface HeaderProps {
-  title: string
-  subtitle: string
-}
-
-export default function Header({ title, subtitle }: HeaderProps) {
-  return (
-    <Navbar className="bg-white border-bottom py-3">
-      <Container className="d-flex align-items-center gap-3" style={{ maxWidth: 768 }}>
-        <CheckCircleFill className="text-primary" size={24} />
-        <div>
-          <h1 className="h5 mb-0">{title}</h1>
-          <p className="text-muted small mb-0">{subtitle}</p>
-        </div>
-      </Container>
-    </Navbar>
-  )
-}
-```
-
-Replace `src/App.tsx`:
-
-```tsx
-import { Container } from "react-bootstrap"
-import Header from "@/components/Header"
-
-export default function App() {
-  return (
-    <div className="min-vh-100 bg-body-tertiary">
-      <Header title="TaskBoard" subtitle="Everything you're working on, in one place." />
-      <Container className="py-4" style={{ maxWidth: 768 }}>
-        <p className="text-muted">Tasks will appear here.</p>
-      </Container>
-    </div>
-  )
-}
-```
-
-**Run and verify:**
-
-```bash
-npm run dev -- --port 5174
-```
-
-You should see a white header bar with a blue tick icon, a title and a subtitle, on a light grey page. Then:
-
-```bash
-npm run build
-```
-
-It must pass. Getting into the habit now, while there's nothing to fix, means you'll notice the day it starts failing.
-
-**What you just used:** a component, typed props, destructuring, and Bootstrap utility classes (`bg-body-tertiary`, `text-muted`, `d-flex`, `gap-3`). Those utilities are theme-aware in Bootstrap 5.3, so the dark-mode toggle in §14 will need no component changes at all.
-
----
-
-## 🔨 Build Step 2 — A TaskCard with typed props
-
-Create `src/data/seed.ts`:
-
-```ts
-import type { Task } from "@/types"
-
-export const seedTasks: Task[] = [
-  { id: "1", title: "Set up the project",    priority: "high",   done: true,  createdAt: 1 },
-  { id: "2", title: "Learn props and state", priority: "medium", done: false, createdAt: 2 },
-  { id: "3", title: "Build the task form",   priority: "low",    done: false, createdAt: 3 },
-]
-```
-
-Annotating as `Task[]` means a typo in any seed row is caught immediately, right where you wrote it, rather than as a rendering oddity later. Try `priority: "med"` and see.
-
-Create `src/components/TaskCard.tsx`:
-
-```tsx
-import { Card, Badge } from "react-bootstrap"
-import type { Priority, Task } from "@/types"
-
-const priorityVariant = {
-  high: "danger",
-  medium: "primary",
-  low: "secondary",
-} satisfies Record<Priority, string>
-
-interface TaskCardProps {
-  task: Task
-}
-
-export default function TaskCard({ task }: TaskCardProps) {
-  return (
-    <Card className="mb-2">
-      <Card.Body className="d-flex align-items-center justify-content-between gap-3 py-3">
-        <span className="fw-medium">{task.title}</span>
-        <Badge bg={priorityVariant[task.priority]}>{task.priority}</Badge>
-      </Card.Body>
-    </Card>
-  )
-}
-```
-
-Update `App.tsx`'s container:
-
-```tsx
-import { Container } from "react-bootstrap"
-import Header from "@/components/Header"
-import TaskCard from "@/components/TaskCard"
-import { seedTasks } from "@/data/seed"
-
-export default function App() {
-  return (
-    <div className="min-vh-100 bg-body-tertiary">
-      <Header title="TaskBoard" subtitle="Everything you're working on, in one place." />
-      <Container className="py-4" style={{ maxWidth: 768 }}>
-        <TaskCard task={seedTasks[0]} />
-        <TaskCard task={seedTasks[1]} />
-      </Container>
-    </div>
-  )
-}
-```
-
-**Verify:** two cards, each with a title on the left and a coloured priority badge on the right.
-
-`satisfies Record<Priority, string>` is doing real work here: if you later add `"critical"` to the `Priority` union, TypeScript immediately errors on this object for missing a key. The type system reminds you about every place that needs updating — this is the payoff for using unions instead of `string`, and it's exactly what you proved in Lab 0.1.
-
-The lookup object is declared **outside** the component because it never changes; re-creating it on every render would be pointless work and a new object identity each time (which matters in §16).
-
-**Try it yourself:** add `"critical"` to `Priority` in `types.ts` and note where the errors appear — `TaskCard` and nowhere else, so far. Then remove it.
-
-**Checkpoint.** You now have: a typed domain model, two presentational components, and props flowing down. Nothing is interactive yet, and that's deliberate — everything so far is `UI = f(data)` with the data hard-coded. §6 supplies the state that makes the `f` worth having.
-
----
-
 # 4. Rendering lists & keys
 
 You render a list by mapping an array to an array of elements. React renders arrays of elements by rendering each item in order.
@@ -4126,7 +3975,7 @@ No combination of flags to reason about, no stale `isLoading` left over from the
 - **"Nothing exists yet"** → onboarding. Explain what this screen is for and offer the action that creates the first item.
 - **"Nothing matches your filter"** → recovery. Say what was searched for and offer a way to clear the filter.
 
-They're different messages and different buttons, and shipping only one of them is a common polish failure. TaskBoard gets both.
+They're different messages and different buttons, and shipping only one of them is a common polish failure.
 
 ---
 
@@ -4590,76 +4439,6 @@ Register as `{ id: "state-machine", chapter: "5 — Conditional", title: "Imposs
 3. How many combinations do four booleans allow, and how many typically make sense?
 4. In a discriminated union state, why is it better for `tasks` to live inside the `success` member than alongside the status?
 5. Name the two different kinds of empty state and how their messages differ.
-
----
-
-## 🔨 Build Step 3 — Task list with keys and an empty state
-
-Back to **taskboard**.
-
-Create `src/components/TaskList.tsx`:
-
-```tsx
-import TaskCard from "@/components/TaskCard"
-import type { Task } from "@/types"
-
-interface TaskListProps {
-  tasks: Task[]
-}
-
-export default function TaskList({ tasks }: TaskListProps) {
-  if (tasks.length === 0) {
-    return (
-      <div className="border border-2 border-dashed rounded-3 text-center py-5 text-muted">
-        <p className="fw-semibold mb-1 text-body">No tasks yet</p>
-        <p className="small mb-0">Add your first task to get started.</p>
-      </div>
-    )
-  }
-
-  return (
-    <div>
-      {tasks.map((task) => (
-        <TaskCard key={task.id} task={task} />
-      ))}
-    </div>
-  )
-}
-```
-
-The guard clause comes first, so the happy path reads without indentation. This component will grow two more conditions by Build Step 6, and the structure absorbs them without reshaping.
-
-You added `.border-dashed` to `src/index.css` back in Part 0.4. If you skipped it, add it now — Bootstrap has no dashed-border utility:
-
-```css
-.border-dashed {
-  border-style: dashed !important;
-}
-```
-
-Update `App.tsx` to render the list:
-
-```tsx
-import { Container } from "react-bootstrap"
-import Header from "@/components/Header"
-import TaskList from "@/components/TaskList"
-import { seedTasks } from "@/data/seed"
-
-export default function App() {
-  return (
-    <div className="min-vh-100 bg-body-tertiary">
-      <Header title="TaskBoard" subtitle="Everything you're working on, in one place." />
-      <Container className="py-4" style={{ maxWidth: 768 }}>
-        <TaskList tasks={seedTasks} />
-      </Container>
-    </div>
-  )
-}
-```
-
-**Verify:** three cards, and no key warnings in the console.
-
-**Try it yourself:** temporarily pass `tasks={[]}` and confirm the empty state renders. Then pass `tasks={[...seedTasks, ...seedTasks]}` and watch React warn about duplicate keys — a useful error to have seen once, since it's what happens the first time you merge two lists.
 
 ---
 
@@ -6353,146 +6132,6 @@ Register as `{ id: "keyboard", chapter: "7 — Events", title: "Keyboard & focus
 3. Why is `e.target` typed loosely on a mouse event but precisely on a change event?
 4. When do you need to annotate an event parameter's type, and when is it inferred?
 5. What's the difference between `e.key` and `e.code`?
-
----
-
-## 🔨 Build Step 4 — Make tasks completable
-
-State lives in `App` because more than one child will eventually need it. (§9 justifies that properly; for now, take it as given.)
-
-Update `src/components/TaskCard.tsx`:
-
-```tsx
-import { Card, Badge, Button, Form } from "react-bootstrap"
-import { Trash } from "react-bootstrap-icons"
-import type { Priority, Task } from "@/types"
-
-const priorityVariant = {
-  high: "danger",
-  medium: "primary",
-  low: "secondary",
-} satisfies Record<Priority, string>
-
-interface TaskCardProps {
-  task: Task
-  onToggle: (id: string) => void
-  onDelete: (id: string) => void
-}
-
-export default function TaskCard({ task, onToggle, onDelete }: TaskCardProps) {
-  return (
-    <Card className="mb-2">
-      <Card.Body className="d-flex align-items-center gap-3 py-3">
-        <Form.Check
-          type="checkbox"
-          checked={task.done}
-          onChange={() => onToggle(task.id)}
-          aria-label={`Mark ${task.title} as ${task.done ? "not done" : "done"}`}
-        />
-
-        <span
-          className={
-            task.done
-              ? "flex-grow-1 text-muted text-decoration-line-through"
-              : "flex-grow-1 fw-medium"
-          }
-        >
-          {task.title}
-        </span>
-
-        <Badge bg={priorityVariant[task.priority]}>{task.priority}</Badge>
-
-        <Button
-          variant="link"
-          size="sm"
-          className="text-secondary p-1"
-          onClick={() => onDelete(task.id)}
-          aria-label={`Delete ${task.title}`}
-        >
-          <Trash size={16} />
-        </Button>
-      </Card.Body>
-    </Card>
-  )
-}
-```
-
-Update `src/components/TaskList.tsx` to forward the callbacks:
-
-```tsx
-import TaskCard from "@/components/TaskCard"
-import type { Task } from "@/types"
-
-interface TaskListProps {
-  tasks: Task[]
-  onToggle: (id: string) => void
-  onDelete: (id: string) => void
-}
-
-export default function TaskList({ tasks, onToggle, onDelete }: TaskListProps) {
-  if (tasks.length === 0) {
-    return (
-      <div className="border border-2 border-dashed rounded-3 text-center py-5 text-muted">
-        <p className="fw-semibold mb-1 text-body">No tasks yet</p>
-        <p className="small mb-0">Add your first task to get started.</p>
-      </div>
-    )
-  }
-
-  return (
-    <div>
-      {tasks.map((task) => (
-        <TaskCard key={task.id} task={task} onToggle={onToggle} onDelete={onDelete} />
-      ))}
-    </div>
-  )
-}
-```
-
-Update `src/App.tsx`:
-
-```tsx
-import { useState } from "react"
-import { Container } from "react-bootstrap"
-import Header from "@/components/Header"
-import TaskList from "@/components/TaskList"
-import { seedTasks } from "@/data/seed"
-import type { Task } from "@/types"
-
-export default function App() {
-  const [tasks, setTasks] = useState<Task[]>(seedTasks)
-
-  function handleToggle(id: string) {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)))
-  }
-
-  function handleDelete(id: string) {
-    setTasks((prev) => prev.filter((t) => t.id !== id))
-  }
-
-  return (
-    <div className="min-vh-100 bg-body-tertiary">
-      <Header title="TaskBoard" subtitle="Everything you're working on, in one place." />
-      <Container className="py-4" style={{ maxWidth: 768 }}>
-        <TaskList tasks={tasks} onToggle={handleToggle} onDelete={handleDelete} />
-      </Container>
-    </div>
-  )
-}
-```
-
-**Verify:** tick a checkbox and the title gets struck through. Delete tasks until the list is empty and the empty state appears — nobody wrote code to *show* it, it falls out of state changing. That's `UI = f(state)` paying its first dividend.
-
-The app is now interactive, and every one of §6's rules is present in eight lines:
-
-- Both handlers use the **updater form**, so they're correct even if two clicks land in one tick.
-- `map` + spread **replaces** the matching task with a new object and leaves the others' identities intact.
-- `filter` **returns a new array** rather than splicing.
-- `useState<Task[]>(seedTasks)` reads its initial value once; later renders don't re-seed.
-
-Note `Form.Check` uses `onChange`, not a custom `onCheckedChange`. React-Bootstrap components are thin wrappers over real HTML elements, so standard DOM event names apply throughout — which means everything you learned in §7 transfers directly.
-
-**Try it yourself:** change `handleToggle` to mutate (`prev.find(t => t.id === id)!.done = !...; return prev`). The checkbox stops responding. That's Lab 6.3, in your own app.
 
 ---
 
@@ -10553,183 +10192,6 @@ Bootstrap and React give you most of this if you use them as intended — and be
 - **`autoComplete`** on name, username and password fields lets password managers work. `autoComplete="new-password"` on sign-up, `"current-password"` on sign-in.
 
 ---
-## 🔨 Build Step 5 — Add-task form, with react-hook-form + zod
-
-TaskBoard's form is two fields. §8.13 says don't reach for a schema and a form library on a two-field form — so why here?
-
-Because **the schema isn't only for this form.** By the end of the build, "what is a valid task?" has to be answered in four places:
-
-| Place | Build Step |
-|---|---|
-| The add form | 5 |
-| The edit modal — same two fields, same rules | 10 |
-| Data read back from `localStorage` | 7 |
-| Data arriving from an API | 12 |
-
-Write the rules by hand and you write them four times, or — far more likely — once, and then trust the other three. One schema, imported four times, is the honest answer. **The form library is almost incidental**; the schema is the reason.
-
-### 1. One definition of a valid task
-
-Create `src/schemas/task.ts`:
-
-```ts
-import { z } from "zod"
-
-export const PRIORITIES = ["low", "medium", "high"] as const
-
-/** What a form collects: the fields a human types. */
-export const NewTaskSchema = z.object({
-  title: z
-    .string()
-    .trim()
-    .min(1, "Give the task a title.")
-    .max(120, "Keep the title under 120 characters."),
-  priority: z.enum(PRIORITIES),
-})
-
-/** A complete, stored task: the form's fields plus the ones the app assigns. */
-export const TaskSchema = NewTaskSchema.extend({
-  id: z.string().min(1),
-  done: z.boolean(),
-  createdAt: z.number().int().nonnegative(),
-})
-
-export const TaskListSchema = z.array(TaskSchema)
-
-// Types derived from the schemas — never written twice
-export type NewTask = z.infer<typeof NewTaskSchema>
-export type Task = z.infer<typeof TaskSchema>
-export type Priority = z.infer<typeof NewTaskSchema>["priority"]
-```
-
-Three things to notice:
-
-- **`.trim()` before `.min(1)`.** Zod applies `trim` as a transform, so `parsed.data.title` is already trimmed and `"   "` fails the length check. That's the `title.trim()` you'd otherwise write by hand, moved into the definition.
-- **`TaskSchema` extends `NewTaskSchema`** rather than repeating it. Add a field to the form and the stored shape follows automatically.
-- **The types are inferred.** Delete the hand-written `Task`, `NewTask` and `Priority` from `src/types.ts` and re-export from here instead, so there is one source of truth:
-
-```ts
-// src/types.ts
-export type { Task, NewTask, Priority } from "@/schemas/task"
-export type Filter = "all" | "active" | "done"   // a UI concern, not a data one
-```
-
-`Filter` stays hand-written because it isn't data — it never crosses a boundary, so it gains nothing from a schema.
-
-### 2. The form
-
-```bash
-npm install react-hook-form @hookform/resolvers zod
-```
-
-Create `src/components/AddTaskForm.tsx`:
-
-```tsx
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Card, Form, Button, Row, Col } from "react-bootstrap"
-import { Plus } from "react-bootstrap-icons"
-import { NewTaskSchema, PRIORITIES, type NewTask } from "@/schemas/task"
-
-interface AddTaskFormProps {
-  onAdd: (task: NewTask) => void
-}
-
-const emptyTask: NewTask = { title: "", priority: "medium" }
-
-export default function AddTaskForm({ onAdd }: AddTaskFormProps) {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<NewTask>({
-    resolver: zodResolver(NewTaskSchema),
-    mode: "onSubmit",          // a two-field form: don't nag before they try
-    defaultValues: emptyTask,
-  })
-
-  // Only ever called with a valid, trimmed NewTask
-  function onValid(task: NewTask) {
-    onAdd(task)
-    reset(emptyTask)           // clears values AND errors AND touched
-  }
-
-  return (
-    <Card className="mb-4">
-      <Card.Body>
-        <Form onSubmit={handleSubmit(onValid)} noValidate>
-          <Row className="g-3 align-items-start">
-            <Col xs={12} sm>
-              <Form.Group controlId="task-title">
-                <Form.Label>Task</Form.Label>
-                <Form.Control
-                  placeholder="What needs doing?"
-                  isInvalid={Boolean(errors.title)}
-                  {...register("title")}
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.title?.message}
-                </Form.Control.Feedback>
-              </Form.Group>
-            </Col>
-
-            <Col xs={7} sm="auto">
-              <Form.Group controlId="task-priority">
-                <Form.Label>Priority</Form.Label>
-                <Form.Select isInvalid={Boolean(errors.priority)} {...register("priority")}>
-                  {PRIORITIES.map((p) => (
-                    <option key={p} value={p}>
-                      {p[0].toUpperCase() + p.slice(1)}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            </Col>
-
-            <Col xs={5} sm="auto">
-              <Button type="submit" className="w-100 mt-sm-4" disabled={isSubmitting}>
-                <Plus size={18} className="me-1" />
-                Add
-              </Button>
-            </Col>
-          </Row>
-        </Form>
-      </Card.Body>
-    </Card>
-  )
-}
-```
-
-`App.tsx` is unchanged — it still receives a `NewTask` and builds the `Task`:
-
-```tsx
-function handleAdd({ title, priority }: NewTask) {
-  const newTask: Task = {
-    id: crypto.randomUUID(),
-    title,
-    priority,
-    done: false,
-    createdAt: Date.now(),
-  }
-  setTasks((prev) => [newTask, ...prev])
-}
-```
-
-**Verify:** add a task and it appears at the top with the priority you chose. Submit an empty title and the red feedback appears. Type a title made only of spaces and submit — it's still rejected, because `.trim()` runs before `.min(1)`.
-
-### What this build step demonstrates
-
-- **`register`, not `Controller`.** §8.11 and §8.12 used `Controller`, because they were driving custom components. TaskBoard uses raw `Form.Control` and `Form.Select`, which forward refs (§15.5) — so `{...register("title")}` spreads straight on. **This is the simpler of the two paths, and this is where you see it in a real app.**
-- **`mode: "onSubmit"`** rather than `"onTouched"`. §8.5's table in practice: on a two-field form, errors before the first attempt are just nagging. The edit modal in Build Step 10 makes the opposite choice, for a reason.
-- **`reset(emptyTask)`** replaces three `setState` calls and the manual error clearing.
-- **`PRIORITIES` drives the `<option>` list**, so the schema's enum and the dropdown can't disagree.
-- **`.trim()` lives in the schema**, so `onAdd` receives clean data and no component has to remember to trim.
-
-**Try it yourself:** change `mode` to `"onChange"` and type one character into an empty title. The error appears and vanishes as you type — annoying on a form this small, which is exactly why `"onSubmit"` is the right default here. Then add a third field and reconsider.
-
----
-
 ✅ **Concept check 8**
 
 1. Trace the five steps of the controlled loop for one keystroke. Which step puts the character on screen?
@@ -11939,216 +11401,6 @@ Register as `{ id: "selection", chapter: "10 — Derived state", title: "Store t
 
 ---
 
-## 🔨 Build Step 6 — Filters, search, and stats
-
-Create `src/components/TaskStats.tsx`:
-
-```tsx
-import { ProgressBar } from "react-bootstrap"
-
-interface TaskStatsProps {
-  total: number
-  completed: number
-}
-
-export default function TaskStats({ total, completed }: TaskStatsProps) {
-  const percent = total === 0 ? 0 : Math.round((completed / total) * 100)
-
-  return (
-    <div className="mb-3">
-      <div className="d-flex justify-content-between small text-muted mb-1">
-        <span>
-          {completed} of {total} complete
-        </span>
-        <span>{percent}%</span>
-      </div>
-      <ProgressBar now={percent} style={{ height: 6 }} variant="success" />
-    </div>
-  )
-}
-```
-
-`TaskStats` takes two numbers rather than the task array. That's deliberate: the component has no idea what a `Task` is, so it's reusable and trivially testable. **Pass the narrowest data a component can do its job with.**
-
-Create `src/components/TaskToolbar.tsx`:
-
-```tsx
-import { Nav, Form, InputGroup } from "react-bootstrap"
-import { Search } from "react-bootstrap-icons"
-import type { Filter } from "@/types"
-
-interface TaskToolbarProps {
-  filter: Filter
-  onFilterChange: (filter: Filter) => void
-  query: string
-  onQueryChange: (query: string) => void
-}
-
-const filters: { key: Filter; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "active", label: "Active" },
-  { key: "done", label: "Done" },
-]
-
-export default function TaskToolbar({
-  filter,
-  onFilterChange,
-  query,
-  onQueryChange,
-}: TaskToolbarProps) {
-  return (
-    <div className="d-flex flex-column flex-sm-row justify-content-between gap-3 mb-3">
-      <Nav
-        variant="pills"
-        activeKey={filter}
-        onSelect={(key) => key && onFilterChange(key as Filter)}
-      >
-        {filters.map(({ key, label }) => (
-          <Nav.Item key={key}>
-            <Nav.Link eventKey={key}>{label}</Nav.Link>
-          </Nav.Item>
-        ))}
-      </Nav>
-
-      <InputGroup style={{ maxWidth: 260 }}>
-        <InputGroup.Text className="bg-white border-end-0">
-          <Search size={14} className="text-muted" />
-        </InputGroup.Text>
-        <Form.Control
-          className="border-start-0"
-          placeholder="Search tasks"
-          value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
-        />
-      </InputGroup>
-    </div>
-  )
-}
-```
-
-`Nav`'s `onSelect` gives you `string | null`, hence the `key &&` guard and the cast — a good example of TypeScript making you handle a case you'd otherwise forget. If you'd prefer the safe version, the type predicate from §8.4 works here too.
-
-Update `src/App.tsx` completely:
-
-```tsx
-import { useState } from "react"
-import { Container } from "react-bootstrap"
-import Header from "@/components/Header"
-import TaskList from "@/components/TaskList"
-import AddTaskForm from "@/components/AddTaskForm"
-import TaskToolbar from "@/components/TaskToolbar"
-import TaskStats from "@/components/TaskStats"
-import { seedTasks } from "@/data/seed"
-import type { Filter, NewTask, Task } from "@/types"
-
-export default function App() {
-  const [tasks, setTasks] = useState<Task[]>(seedTasks)
-  const [filter, setFilter] = useState<Filter>("all")
-  const [query, setQuery] = useState("")
-
-  function handleAdd({ title, priority }: NewTask) {
-    const newTask: Task = {
-      id: crypto.randomUUID(),
-      title,
-      priority,
-      done: false,
-      createdAt: Date.now(),
-    }
-    setTasks((prev) => [newTask, ...prev])
-  }
-
-  function handleToggle(id: string) {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)))
-  }
-
-  function handleDelete(id: string) {
-    setTasks((prev) => prev.filter((t) => t.id !== id))
-  }
-
-  // ---- derived values (not state) ----
-  const completed = tasks.filter((t) => t.done).length
-
-  const visibleTasks = tasks
-    .filter((t) => {
-      if (filter === "active") return !t.done
-      if (filter === "done") return t.done
-      return true
-    })
-    .filter((t) => t.title.toLowerCase().includes(query.trim().toLowerCase()))
-
-  return (
-    <div className="min-vh-100 bg-body-tertiary">
-      <Header title="TaskBoard" subtitle="Everything you're working on, in one place." />
-      <Container className="py-4" style={{ maxWidth: 768 }}>
-        <AddTaskForm onAdd={handleAdd} />
-        <TaskStats total={tasks.length} completed={completed} />
-        <TaskToolbar
-          filter={filter}
-          onFilterChange={setFilter}
-          query={query}
-          onQueryChange={setQuery}
-        />
-        <TaskList tasks={visibleTasks} onToggle={handleToggle} onDelete={handleDelete} />
-      </Container>
-    </div>
-  )
-}
-```
-
-**Verify:** the pills filter, the search box narrows, and the progress bar tracks completion. Then check the crucial interaction: **filter to "Done" and tick a task off.** It vanishes from view immediately — no code coordinates that, it's just the derivation re-running against new state.
-
-`completed` and `visibleTasks` are recomputed on every render and are therefore never stale. There is exactly one source of truth: `tasks`. Compare that with Lab 10.1's stored counter, which would have needed updating in all three handlers.
-
-Note that `onFilterChange={setFilter}` type-checks only because `setFilter` is `(f: Filter) => void` and the prop expects exactly that. If you'd typed the state as `string`, this would silently accept invalid filters — the union carries its guarantee all the way to the prop boundary.
-
-**Improve the empty state.** `TaskList` now shows "No tasks yet / Add your first task" even when the real problem is that a filter excluded everything. That's §5.4's distinction, and TaskBoard is currently getting it wrong. Fix it by telling the component which situation it's in:
-
-```tsx
-interface TaskListProps {
-  tasks: Task[]
-  /** True when tasks exist but none match the current filter/search. */
-  isFiltered: boolean
-  onToggle: (id: string) => void
-  onDelete: (id: string) => void
-}
-
-// inside the guard clause:
-if (tasks.length === 0) {
-  return (
-    <div className="border border-2 border-dashed rounded-3 text-center py-5 text-muted">
-      {isFiltered ? (
-        <>
-          <p className="fw-semibold mb-1 text-body">Nothing matches</p>
-          <p className="small mb-0">Try a different filter or search term.</p>
-        </>
-      ) : (
-        <>
-          <p className="fw-semibold mb-1 text-body">No tasks yet</p>
-          <p className="small mb-0">Add your first task to get started.</p>
-        </>
-      )}
-    </div>
-  )
-}
-```
-
-And in `App.tsx`:
-
-```tsx
-<TaskList
-  tasks={visibleTasks}
-  isFiltered={tasks.length > 0}
-  onToggle={handleToggle}
-  onDelete={handleDelete}
-/>
-```
-
-`isFiltered` is derived, not stored — it's just `tasks.length > 0` evaluated at the point where both facts are known.
-
-**Try it yourself:** add a "Clear completed" button to the toolbar. You'll need a new callback prop, a handler in `App` using `filter`, and a decision about whether to hide the button when nothing is completed (derive that too).
-
----
-
 # 11. `useEffect` & side effects
 
 Rendering must be pure (§1.4). Anything that reaches outside React — network calls, timers, subscriptions, `localStorage`, document title, direct DOM work, analytics — is a **side effect** and belongs in an event handler or in `useEffect`.
@@ -13239,58 +12491,6 @@ Register as `{ id: "layout-effect", chapter: "11 — Effects", title: "useLayout
 
 ---
 
-## 🔨 Build Step 7 — Persist to localStorage
-
-Update the state declaration in `App.tsx`:
-
-```tsx
-import { useState, useEffect } from "react"
-import { TaskListSchema } from "@/schemas/task"
-
-const STORAGE_KEY = "taskboard.tasks"
-
-// ...inside App:
-const [tasks, setTasks] = useState<Task[]>(() => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (!saved) return seedTasks
-    // Build Step 5's schema, reused. Storage is untrusted input.
-    const parsed = TaskListSchema.safeParse(JSON.parse(saved))
-    return parsed.success ? parsed.data : seedTasks
-  } catch {
-    return seedTasks
-  }
-})
-
-useEffect(() => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks))
-}, [tasks])
-```
-
-**Verify:** add a task, reload the browser. It survives. Open DevTools → Application → Local Storage and watch the value change as you type.
-
-Five deliberate choices here, and each one maps to something from §6 or §11:
-
-1. **Lazy initialiser** (`useState(() => ...)`) reads storage once on mount instead of on every render — §6.6. Without the arrow, `JSON.parse` runs on every keystroke and throws the result away.
-2. **`try`/`catch`** because stored JSON can be corrupt, and `localStorage` throws outright in some privacy modes rather than returning `null`.
-3. **`[tasks]` dependency** so the save runs whenever tasks change — and only then. An empty array would save once, with the seed data, and never again.
-4. **This is a legitimate effect.** It's not deriving anything and it's not responding to a single user action — it's synchronising React state with an external system whenever that state changes. It's on the "yes" side of §11.4's table.
-5. **`TaskListSchema.safeParse`, not `as Task[]`.** `JSON.parse` returns `any`, and a cast would be a *promise* to the compiler rather than a check. Storage is outside your program: a `taskboard.tasks` entry containing `[{"title": 42}]` — left by an older version of your app, or by a user with the console open — would flow straight into typed state and crash somewhere far away.
-
-That's the **second** of the four places Build Step 5's schema is used, and the first where it catches something a cast couldn't. Note the fallback: a failed parse returns the seed tasks rather than throwing, so corrupt storage degrades to a working app instead of a white screen.
-
-**Try it yourself:** run `localStorage.setItem("taskboard.tasks", '[{"title":42}]')` in the console and reload. Valid JSON, wrong shape — `safeParse` rejects it and you get the seed tasks. Now swap `safeParse` back for `as Task[]` and repeat: `TaskCard` renders `42` as a title, or crashes, depending on what it does with it.
-
-**Try it yourself:** with the app open, run this in the browser console and reload:
-
-```js
-localStorage.setItem("taskboard.tasks", "{ broken")
-```
-
-The `catch` recovers and you get the seed tasks back. Now try a subtler corruption — `'[{"id":"1"}]'`, valid JSON of the wrong shape — and note that nothing catches it, because it parsed fine. That's the gap zod closes.
-
----
-
 # 12. Custom hooks
 
 A custom hook is **a function whose name starts with `use` and which calls other hooks.** That's the entire definition. They exist to extract and reuse **stateful logic** — not markup.
@@ -14130,142 +13330,6 @@ Register as `{ id: "rules-of-hooks", chapter: "12 — Custom hooks", title: "Rul
 
 ---
 
-## 🔨 Build Step 8 — Extract custom hooks
-
-Create `src/hooks/useLocalStorage.ts` — the same hook you built in Lab 12.2, now in the real app:
-
-```ts
-import { useState, useEffect } from "react"
-
-export function useLocalStorage<T>(key: string, initialValue: T) {
-  const [value, setValue] = useState<T>(() => {
-    try {
-      const saved = localStorage.getItem(key)
-      return saved !== null ? (JSON.parse(saved) as T) : initialValue
-    } catch {
-      return initialValue
-    }
-  })
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(key, JSON.stringify(value))
-    } catch {
-      // storage full or unavailable — fail quietly
-    }
-  }, [key, value])
-
-  return [value, setValue] as const
-}
-```
-
-Create `src/hooks/useTasks.ts` — all task logic in one place:
-
-```ts
-import { useLocalStorage } from "@/hooks/useLocalStorage"
-import type { NewTask, Task } from "@/types"
-
-export function useTasks(initialTasks: Task[] = []) {
-  const [tasks, setTasks] = useLocalStorage<Task[]>("taskboard.tasks", initialTasks)
-
-  function addTask({ title, priority }: NewTask) {
-    const newTask: Task = {
-      id: crypto.randomUUID(),
-      title,
-      priority,
-      done: false,
-      createdAt: Date.now(),
-    }
-    setTasks((prev) => [newTask, ...prev])
-  }
-
-  function toggleTask(id: string) {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)))
-  }
-
-  function deleteTask(id: string) {
-    setTasks((prev) => prev.filter((t) => t.id !== id))
-  }
-
-  function updateTask(id: string, changes: Partial<Task>) {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...changes } : t)))
-  }
-
-  function clearCompleted() {
-    setTasks((prev) => prev.filter((t) => !t.done))
-  }
-
-  return { tasks, addTask, toggleTask, deleteTask, updateTask, clearCompleted }
-}
-```
-
-`Partial<Task>` on `updateTask` is exactly right: any subset of a task's fields, each still correctly typed. `updateTask(id, { done: "yes" })` is a compile error; `updateTask(id, { title: "New" })` is fine; `updateTask(id, {})` is a valid no-op.
-
-The hook returns an **object**, not a tuple, so no `as const` is needed — object properties keep their types automatically, and there are six of them, which is well past the point where positional returns stop being readable (§12.2).
-
-`App.tsx` becomes dramatically thinner:
-
-```tsx
-import { useState } from "react"
-import { Container } from "react-bootstrap"
-import Header from "@/components/Header"
-import TaskList from "@/components/TaskList"
-import AddTaskForm from "@/components/AddTaskForm"
-import TaskToolbar from "@/components/TaskToolbar"
-import TaskStats from "@/components/TaskStats"
-import { useTasks } from "@/hooks/useTasks"
-import { seedTasks } from "@/data/seed"
-import type { Filter } from "@/types"
-
-export default function App() {
-  const { tasks, addTask, toggleTask, deleteTask } = useTasks(seedTasks)
-  const [filter, setFilter] = useState<Filter>("all")
-  const [query, setQuery] = useState("")
-
-  const completed = tasks.filter((t) => t.done).length
-
-  const visibleTasks = tasks
-    .filter((t) => {
-      if (filter === "active") return !t.done
-      if (filter === "done") return t.done
-      return true
-    })
-    .filter((t) => t.title.toLowerCase().includes(query.trim().toLowerCase()))
-
-  return (
-    <div className="min-vh-100 bg-body-tertiary">
-      <Header title="TaskBoard" subtitle="Everything you're working on, in one place." />
-      <Container className="py-4" style={{ maxWidth: 768 }}>
-        <AddTaskForm onAdd={addTask} />
-        <TaskStats total={tasks.length} completed={completed} />
-        <TaskToolbar
-          filter={filter}
-          onFilterChange={setFilter}
-          query={query}
-          onQueryChange={setQuery}
-        />
-        <TaskList
-          tasks={visibleTasks}
-          isFiltered={tasks.length > 0}
-          onToggle={toggleTask}
-          onDelete={deleteTask}
-        />
-      </Container>
-    </div>
-  )
-}
-```
-
-**Verify:** identical behaviour, and everything still persists. A refactor that changes no behaviour is exactly what you want here — if something broke, the extraction wasn't faithful.
-
-The component now reads as a **description of the UI**: what state exists, what's derived from it, what's rendered. The *how* — id generation, immutable updates, persistence, error handling — moved into hooks. This is the refactor that separates tidy React codebases from sprawling ones, and it's worth noticing how much of `App.tsx`'s length was mechanical.
-
-Note that `filter` and `query` stayed in `App`. They're view state, not task state; putting them in `useTasks` would couple the data layer to the UI's current filtering feature. **Hooks should have one job**, same as components.
-
-**Try it yourself:** wire `clearCompleted` to a button in the toolbar. You'll need a new prop, and you'll want to hide or disable the button when `completed === 0` — derived, of course.
-
----
-
 # 13. `useReducer`
 
 When state updates get complex — many related fields, or transitions that depend on the current state — a reducer centralises the logic in one pure function.
@@ -14352,7 +13416,7 @@ case "added":
   return [{ id: crypto.randomUUID(), createdAt: Date.now(), ...action.payload }, ...state]
 ```
 
-Strict Mode double-invokes reducers in development for exactly this reason, and an impure reducer can produce different results on the two calls. It usually still *works*, which is why this is tolerated in a lot of real code — TaskBoard's reducer in Build Step 9 does it, with a note. The rigorous fix is to generate the id in the **action creator or event handler** and pass it in the action:
+Strict Mode double-invokes reducers in development for exactly this reason, and an impure reducer can produce different results on the two calls. It usually still *works*, which is why this is tolerated in a lot of real code. The rigorous fix is to generate the id in the **action creator or event handler** and pass it in the action:
 
 ```ts
 // ✅ the impurity happens once, outside the reducer
@@ -15171,7 +14235,7 @@ Register as `{ id: "undo-redo", chapter: "13 — useReducer", title: "Undo/redo"
 
 Reducers are pure functions, which makes them the easiest thing in a React codebase to test — no renderer, no DOM, no mocks. If you're going to write tests for one thing, write them for this.
 
-**Install the test runner** (in `react-lab`, or in `taskboard` — the code is the same):
+**Install the test runner** in `react-lab`:
 
 ```bash
 npm install -D vitest
@@ -16351,373 +15415,6 @@ Register as `{ id: "toast-context", chapter: "14 — Context", title: "Toast ser
 
 ---
 
-## 🔨 Build Step 9 — Context + reducer refactor
-
-This replaces the `useTasks` hook from Build Step 8 with a context-backed reducer, so `TaskCard` can talk to the store directly instead of receiving callbacks through two layers. It's the first refactor in TaskBoard that changes the *architecture* rather than just tidying.
-
-Create `src/context/TaskContext.tsx`:
-
-```tsx
-import {
-  createContext,
-  useContext,
-  useReducer,
-  useEffect,
-  useMemo,
-  type ReactNode,
-  type Dispatch,
-} from "react"
-import { TaskListSchema } from "@/schemas/task"
-import type { Priority, Task } from "@/types"
-
-const STORAGE_KEY = "taskboard.tasks"
-
-export type TaskAction =
-  | { type: "added"; id: string; createdAt: number; title: string; priority: Priority }
-  | { type: "toggled"; id: string }
-  | { type: "updated"; id: string; changes: Partial<Task> }
-  | { type: "deleted"; id: string }
-  | { type: "clearedCompleted" }
-
-function tasksReducer(state: Task[], action: TaskAction): Task[] {
-  switch (action.type) {
-    case "added":
-      return [
-        {
-          id: action.id,
-          title: action.title,
-          priority: action.priority,
-          done: false,
-          createdAt: action.createdAt,
-        },
-        ...state,
-      ]
-
-    case "toggled":
-      return state.map((t) => (t.id === action.id ? { ...t, done: !t.done } : t))
-
-    case "updated":
-      return state.map((t) => (t.id === action.id ? { ...t, ...action.changes } : t))
-
-    case "deleted":
-      return state.filter((t) => t.id !== action.id)
-
-    case "clearedCompleted":
-      return state.filter((t) => !t.done)
-
-    default: {
-      const _exhaustive: never = action
-      throw new Error(`Unhandled action: ${JSON.stringify(_exhaustive)}`)
-    }
-  }
-}
-
-function init(fallback: Task[]): Task[] {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved === null) return fallback
-    // Build Step 5's schema again — same guard as Build Step 7's useState initialiser
-    const parsed = TaskListSchema.safeParse(JSON.parse(saved))
-    return parsed.success ? parsed.data : fallback
-  } catch {
-    return fallback
-  }
-}
-
-// ---- two contexts, so dispatch-only consumers never re-render (§14.3) ----
-
-const TasksContext = createContext<Task[] | null>(null)
-const TasksDispatchContext = createContext<Dispatch<TaskAction> | null>(null)
-
-interface TaskProviderProps {
-  children: ReactNode
-  initialTasks?: Task[]
-}
-
-export function TaskProvider({ children, initialTasks = [] }: TaskProviderProps) {
-  const [tasks, dispatch] = useReducer(tasksReducer, initialTasks, init)
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks))
-    } catch {
-      // storage unavailable — fail quietly
-    }
-  }, [tasks])
-
-  return (
-    <TasksDispatchContext.Provider value={dispatch}>
-      <TasksContext.Provider value={tasks}>{children}</TasksContext.Provider>
-    </TasksDispatchContext.Provider>
-  )
-}
-
-export function useTasks(): Task[] {
-  const ctx = useContext(TasksContext)
-  if (!ctx) throw new Error("useTasks must be used inside <TaskProvider>")
-  return ctx
-}
-
-export function useTasksDispatch(): Dispatch<TaskAction> {
-  const ctx = useContext(TasksDispatchContext)
-  if (!ctx) throw new Error("useTasksDispatch must be used inside <TaskProvider>")
-  return ctx
-}
-
-/** Convenience wrappers, so components don't build action objects by hand. */
-export function useTaskActions() {
-  const dispatch = useTasksDispatch()
-  return useMemo(
-    () => ({
-      add: (title: string, priority: Priority) =>
-        dispatch({
-          type: "added",
-          id: crypto.randomUUID(),      // impurity stays OUTSIDE the reducer (§13.3)
-          createdAt: Date.now(),
-          title,
-          priority,
-        }),
-      toggle: (id: string) => dispatch({ type: "toggled", id }),
-      update: (id: string, changes: Partial<Task>) =>
-        dispatch({ type: "updated", id, changes }),
-      remove: (id: string) => dispatch({ type: "deleted", id }),
-      clearCompleted: () => dispatch({ type: "clearedCompleted" }),
-    }),
-    [dispatch]
-  )
-}
-```
-
-Five things to notice, each tracing back to a lab:
-
-1. **`useReducer(reducer, initialArg, init)`** — the third argument is a lazy initialiser, same idea as `useState(() => ...)`. TypeScript infers the state type from the reducer signature, so no explicit generic is needed.
-2. **`id` and `createdAt` are in the action**, generated by `useTaskActions`. The reducer stays pure and testable (§13.3), and Strict Mode's double-invocation can't produce two different ids.
-3. **Two contexts, not one** (§14.3). `dispatch` is stable forever, so `AddTaskForm` — which only dispatches — never re-renders when the task list changes.
-4. **`useTaskActions` is memoised on `[dispatch]`**, which never changes, so the returned object is stable for the lifetime of the component. Callers can pass these functions to memoised children safely.
-5. **Three hooks exported, no contexts.** Consumers don't know or care that there are two providers (§14.1).
-6. **`init` validates rather than casts.** Same `TaskListSchema` as Build Step 7 — the persistence read moved into the provider, and the guard moved with it. A cast here would have quietly undone Build Step 7's work.
-
-Wrap the app in `src/main.tsx`:
-
-```tsx
-import { StrictMode } from "react"
-import { createRoot } from "react-dom/client"
-import "bootstrap/dist/css/bootstrap.min.css"
-import "./index.css"
-import App from "./App.tsx"
-import { TaskProvider } from "@/context/TaskContext"
-import { seedTasks } from "@/data/seed"
-
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <TaskProvider initialTasks={seedTasks}>
-      <App />
-    </TaskProvider>
-  </StrictMode>
-)
-```
-
-`TaskCard` now reaches the store itself — no `onToggle`/`onDelete` props:
-
-```tsx
-import { Card, Badge, Button, Form } from "react-bootstrap"
-import { Trash, Pencil } from "react-bootstrap-icons"
-import { useTaskActions } from "@/context/TaskContext"
-import type { Priority, Task } from "@/types"
-
-const priorityVariant = {
-  high: "danger",
-  medium: "primary",
-  low: "secondary",
-} satisfies Record<Priority, string>
-
-interface TaskCardProps {
-  task: Task
-  onEdit: (task: Task) => void
-}
-
-export default function TaskCard({ task, onEdit }: TaskCardProps) {
-  const { toggle, remove } = useTaskActions()
-
-  return (
-    <Card className="mb-2">
-      <Card.Body className="d-flex align-items-center gap-3 py-3">
-        <Form.Check
-          type="checkbox"
-          checked={task.done}
-          onChange={() => toggle(task.id)}
-          aria-label={`Mark ${task.title} as ${task.done ? "not done" : "done"}`}
-        />
-
-        <span
-          className={
-            task.done
-              ? "flex-grow-1 text-muted text-decoration-line-through"
-              : "flex-grow-1 fw-medium"
-          }
-        >
-          {task.title}
-        </span>
-
-        <Badge bg={priorityVariant[task.priority]}>{task.priority}</Badge>
-
-        <Button
-          variant="link"
-          size="sm"
-          className="text-secondary p-1"
-          onClick={() => onEdit(task)}
-          aria-label={`Edit ${task.title}`}
-        >
-          <Pencil size={16} />
-        </Button>
-
-        <Button
-          variant="link"
-          size="sm"
-          className="text-secondary p-1"
-          onClick={() => remove(task.id)}
-          aria-label={`Delete ${task.title}`}
-        >
-          <Trash size={16} />
-        </Button>
-      </Card.Body>
-    </Card>
-  )
-}
-```
-
-Note that `onEdit` **stayed a prop**. That's deliberate, and worth pausing on: "which task is being edited" is *view state* belonging to `App`, not task data belonging to the store. Putting it in the context would mean the store knows about modals. **Context isn't a dumping ground for everything that's inconvenient to pass** — it's for what genuinely belongs to the whole tree.
-
-Simplify `TaskList.tsx` — it only forwards `onEdit` now:
-
-```tsx
-import TaskCard from "@/components/TaskCard"
-import type { Task } from "@/types"
-
-interface TaskListProps {
-  tasks: Task[]
-  isFiltered: boolean
-  onEdit: (task: Task) => void
-}
-
-export default function TaskList({ tasks, isFiltered, onEdit }: TaskListProps) {
-  if (tasks.length === 0) {
-    return (
-      <div className="border border-2 border-dashed rounded-3 text-center py-5 text-muted">
-        {isFiltered ? (
-          <>
-            <p className="fw-semibold mb-1 text-body">Nothing matches</p>
-            <p className="small mb-0">Try a different filter or search term.</p>
-          </>
-        ) : (
-          <>
-            <p className="fw-semibold mb-1 text-body">No tasks yet</p>
-            <p className="small mb-0">Add your first task to get started.</p>
-          </>
-        )}
-      </div>
-    )
-  }
-
-  return (
-    <div>
-      {tasks.map((task) => (
-        <TaskCard key={task.id} task={task} onEdit={onEdit} />
-      ))}
-    </div>
-  )
-}
-```
-
-Update `AddTaskForm` to use the actions hook instead of an `onAdd` prop:
-
-```tsx
-// replace the props interface and the submit handler:
-import { useTaskActions } from "@/context/TaskContext"
-
-export default function AddTaskForm() {
-  const { add } = useTaskActions()
-  const [title, setTitle] = useState("")
-  const [priority, setPriority] = useState<Priority>("medium")
-  const [error, setError] = useState("")
-
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    if (!title.trim()) {
-      setError("Give the task a title.")
-      return
-    }
-    add(title.trim(), priority)
-    setTitle("")
-    setPriority("medium")
-    setError("")
-  }
-  // ...the JSX is unchanged
-}
-```
-
-And `App.tsx`:
-
-```tsx
-import { useState } from "react"
-import { Container } from "react-bootstrap"
-import Header from "@/components/Header"
-import TaskList from "@/components/TaskList"
-import AddTaskForm from "@/components/AddTaskForm"
-import TaskToolbar from "@/components/TaskToolbar"
-import TaskStats from "@/components/TaskStats"
-import { useTasks } from "@/context/TaskContext"
-import type { Filter, Task } from "@/types"
-
-export default function App() {
-  const tasks = useTasks()
-  const [filter, setFilter] = useState<Filter>("all")
-  const [query, setQuery] = useState("")
-  const [editing, setEditing] = useState<Task | null>(null)
-
-  const completed = tasks.filter((t) => t.done).length
-
-  const visibleTasks = tasks
-    .filter((t) => {
-      if (filter === "active") return !t.done
-      if (filter === "done") return t.done
-      return true
-    })
-    .filter((t) => t.title.toLowerCase().includes(query.trim().toLowerCase()))
-
-  return (
-    <div className="min-vh-100 bg-body-tertiary">
-      <Header title="TaskBoard" subtitle="Everything you're working on, in one place." />
-      <Container className="py-4" style={{ maxWidth: 768 }}>
-        <AddTaskForm />
-        <TaskStats total={tasks.length} completed={completed} />
-        <TaskToolbar
-          filter={filter}
-          onFilterChange={setFilter}
-          query={query}
-          onQueryChange={setQuery}
-        />
-        <TaskList
-          tasks={visibleTasks}
-          isFiltered={tasks.length > 0}
-          onEdit={setEditing}
-        />
-      </Container>
-    </div>
-  )
-}
-```
-
-**Verify:** identical behaviour again. Persistence still works. Compare this `App.tsx` with Build Step 6's — same features, far less plumbing, and `AddTaskForm` now takes no props at all.
-
-**Try it yourself:**
-
-1. Add a "Clear completed" button that calls `clearCompleted()` from `useTaskActions`. The reducer case already exists — you only need the button, and it needs no props from `App` because it can reach the store itself.
-2. Dispatch a misspelled action type from anywhere and read the compile error.
-3. Note the `editing` state is a `Task | null`, which is Lab 10.3's anti-pattern. Change it to `editingId: string | null` and derive the task with `tasks.find(...)`. Then rename a task while its modal is open and confirm the fix.
-
----
-
 # 15. Refs with `useRef`
 
 `useRef` gives you a **mutable box that survives re-renders and does not trigger them.**
@@ -17614,169 +16311,6 @@ Register as `{ id: "forward-ref", chapter: "15 — Refs", title: "forwardRef & h
 5. When is `useImperativeHandle` appropriate, and what should you usually do instead?
 
 ---
-## 🔨 Build Step 10 — Edit modal, reusing the schema
-
-The edit modal collects **the same two fields as the add form, with the same rules.** That makes it the step where Build Step 5's schema stops being a nice idea and starts paying rent — and it removes a `useEffect` that §11.4 would have flagged.
-
-### The problem with the obvious version
-
-Written by hand, an edit form needs to copy the selected task's values into local state, and re-copy them whenever a *different* task is opened:
-
-```tsx
-const [title, setTitle] = useState("")
-const [priority, setPriority] = useState<Priority>("medium")
-
-useEffect(() => {                          // ❌ props → state, the §11.4 anti-pattern
-  if (task) {
-    setTitle(task.title)
-    setPriority(task.priority)
-  }
-}, [task])
-```
-
-That works, and it has three costs: an extra render per open, two sources of truth for the same values, and a whole class of bug where the effect doesn't fire (same task object, changed contents) or fires when you didn't want it to (mid-edit re-render). §11.4's advice is to reset with a **`key`** instead — and that is exactly what makes the react-hook-form version clean.
-
-### The version to build
-
-Create `src/components/EditTaskModal.tsx`:
-
-```tsx
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Modal, Button, Form, Row, Col } from "react-bootstrap"
-import { useTaskActions } from "@/context/TaskContext"
-import { NewTaskSchema, PRIORITIES, type NewTask, type Task } from "@/schemas/task"
-
-interface EditTaskModalProps {
-  task: Task | null
-  show: boolean
-  onHide: () => void
-}
-
-/**
- * The form itself. Mounted fresh for each task (see the `key` below), so
- * `defaultValues` is always right and there is no props-to-state effect.
- */
-function EditTaskFields({ task, onHide }: { task: Task; onHide: () => void }) {
-  const { update } = useTaskActions()
-
-  const {
-    register,
-    handleSubmit,
-    setFocus,
-    formState: { errors, isDirty, isSubmitting },
-  } = useForm<NewTask>({
-    resolver: zodResolver(NewTaskSchema),
-    mode: "onTouched",        // editing: tell them as they go, they already had valid data
-    defaultValues: { title: task.title, priority: task.priority },
-  })
-
-  function onValid(values: NewTask) {
-    update(task.id, values)   // already trimmed and validated by the schema
-    onHide()
-  }
-
-  return (
-    <Form onSubmit={handleSubmit(onValid)} noValidate>
-      <Modal.Body>
-        <Row className="g-3">
-          <Col xs={12}>
-            <Form.Group controlId="edit-title">
-              <Form.Label>Task</Form.Label>
-              <Form.Control
-                isInvalid={Boolean(errors.title)}
-                {...register("title")}
-              />
-              <Form.Control.Feedback type="invalid">
-                {errors.title?.message}
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-
-          <Col xs={12} sm={6}>
-            <Form.Group controlId="edit-priority">
-              <Form.Label>Priority</Form.Label>
-              <Form.Select {...register("priority")}>
-                {PRIORITIES.map((p) => (
-                  <option key={p} value={p}>
-                    {p[0].toUpperCase() + p.slice(1)}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
-        </Row>
-      </Modal.Body>
-
-      <Modal.Footer>
-        <Button variant="secondary" type="button" onClick={onHide}>
-          Cancel
-        </Button>
-        {/* Nothing changed? Nothing to save. */}
-        <Button type="submit" disabled={!isDirty || isSubmitting}>
-          Save changes
-        </Button>
-      </Modal.Footer>
-
-      {/* Expose focus to the parent's onEntered via a hidden hook call */}
-      <FocusOnEnter setFocus={setFocus} />
-    </Form>
-  )
-}
-
-/** Focuses the title once the modal's enter transition finishes. */
-function FocusOnEnter({ setFocus }: { setFocus: (name: "title") => void }) {
-  // The modal is visible by the time this mounts, so focusing here is safe.
-  useEffect(() => {
-    const id = window.setTimeout(() => setFocus("title"), 0)
-    return () => window.clearTimeout(id)
-  }, [setFocus])
-  return null
-}
-
-export default function EditTaskModal({ task, show, onHide }: EditTaskModalProps) {
-  return (
-    <Modal show={show} onHide={onHide} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>Edit task</Modal.Title>
-      </Modal.Header>
-
-      {/* key={task.id} remounts the form for a different task — §4.3.
-          That's what makes defaultValues correct with no effect. */}
-      {task && <EditTaskFields key={task.id} task={task} onHide={onHide} />}
-    </Modal>
-  )
-}
-```
-
-Add `useEffect` to the imports (`import { useEffect } from "react"`).
-
-Render it in `App.tsx`, just inside the `Container`, exactly as before:
-
-```tsx
-<EditTaskModal task={editing} show={editing !== null} onHide={() => setEditing(null)} />
-```
-
-**Verify:** click a pencil icon; the modal opens with that task's values and the title focused. Change the title and press Enter — the card updates. Open a *different* task and its own values appear. Clear the title and the error shows as you leave the field.
-
-### What changed, and why each change matters
-
-- **The props→state `useEffect` is gone.** `key={task.id}` remounts the form, so `defaultValues` is simply right (§4.3). One render instead of two, and one source of truth.
-- **`NewTaskSchema` is imported, not rewritten.** The add form and the edit modal now enforce *identical* rules by construction. Add a `maxLength` and both forms get it.
-- **`mode: "onTouched"` here, `"onSubmit"` in the add form.** Deliberately different: an edit form starts from valid data, so live feedback is helpful rather than nagging. §8.5's table is a per-form decision, not a project-wide one.
-- **`disabled={!isDirty}`** gives you "nothing changed, nothing to save" for free. The hand-rolled version would have needed a comparison against the original task.
-- **`update(task.id, values)`** passes schema-validated, already-trimmed data. No `title.trim()` in sight.
-
-### On the focus helper
-
-The previous version used `<Modal onEntered={() => inputRef.current?.focus()}>` and a `useRef`, which is the cleaner API — but `register` owns the input's ref, so there's no ref of ours to call. RHF's `setFocus("title")` is the equivalent, and it needs to run once the modal is actually visible.
-
-`FocusOnEnter` is a small, honest hack: a null-rendering component whose only job is an effect, mounted inside the form so it can see `setFocus`. If you'd rather keep `onEntered`, lift the form's `setFocus` out with a ref callback — or use react-bootstrap's `autoFocus` on the control and accept that it fires slightly earlier.
-
-**Try it yourself:** delete `key={task.id}` and open two different tasks in turn. The second shows the *first* task's values, because the component was reused and `defaultValues` is only read on mount. That single attribute is doing all the work the old `useEffect` used to.
-
----
-
 # 16. Performance: `memo`, `useMemo`, `useCallback`
 
 Read this section last and apply it least. **Measure before optimising.** Most React apps are fast without any of this, and premature memoisation adds code, adds dependency arrays to get wrong, and has its own runtime cost.
@@ -18589,38 +17123,6 @@ Answers in [Appendix B](#appendix-b--concept-check-answers).
 
 ---
 
-## 🔨 Build Step 11 — Profile TaskBoard (no code changes)
-
-This build step deliberately changes nothing. The exercise is to establish that TaskBoard **does not need optimising**, so you know what "doesn't need it" looks like.
-
-1. Run `npm run dev` in `taskboard` and add about twenty tasks (or paste this into the console and reload):
-
-```js
-localStorage.setItem("taskboard.tasks", JSON.stringify(
-  Array.from({ length: 20 }, (_, i) => ({
-    id: `perf-${i}`,
-    title: `Generated task ${i}`,
-    priority: ["low", "medium", "high"][i % 3],
-    done: i % 4 === 0,
-    createdAt: Date.now() - i * 1000,
-  }))
-))
-```
-
-2. Open DevTools → Profiler → gear → tick **"Highlight updates when components render"**.
-3. Type a character in the search box. Watch the outlines: `App`, `TaskToolbar`, `TaskStats`, `TaskList` and every visible `TaskCard` flash.
-4. Record a profile while typing a few characters and read the commit durations.
-
-**What you should find:** commits in the region of 1–5ms. Every one of those re-renders is "unnecessary" in the sense that most cards produced identical output — and every one is also **completely harmless**, because the total work is a rounding error.
-
-**What to conclude:** if you had wrapped `TaskCard` in `memo` and every handler in `useCallback`, you would have added a dozen lines and a maintenance burden to save nothing measurable. §16.1's ordering exists for this reason.
-
-**When it would change:** if `TaskList` rendered 2,000 cards, or if `TaskCard` did something genuinely expensive (rendering a chart, formatting dates with a heavy library), the same profile would show 40ms+ commits and `memo` would earn its place. **The technique doesn't change; the threshold does.**
-
-**Try it yourself:** tick a checkbox with the highlighter on. Note that `AddTaskForm` does *not* flash, even though it's a sibling — because it only consumes `TasksDispatchContext`, whose value never changes. That's Build Step 9's split-context decision showing up as a measurable property, and it cost nothing to get.
-
----
-
 # 17. Data fetching
 
 Three levels: how it works by hand with `fetch`, how teams actually write it with **axios**, and what a query library does that neither does. Learn the first so you can debug the other two.
@@ -18879,7 +17381,7 @@ Three things this buys you:
 - **`safeParse` returns a discriminated union** (`{ success: true, data }` or `{ success: false, error }`), so handling failure is a narrowing exercise rather than a `try`/`catch`.
 - **Errors point at the boundary**, naming the field and the problem, rather than surfacing three components later as "cannot read property of undefined".
 
-**This is the single best TypeScript habit for anything crossing a network boundary** — and it applies equally to `localStorage` (§11's Build Step 7), URL parameters, and `postMessage`.
+**This is the single best TypeScript habit for anything crossing a network boundary** — and it applies equally to `localStorage`, URL parameters, and `postMessage`.
 
 ## 17.6 In production, use a library
 
@@ -19637,7 +18139,7 @@ export default function ZodLab() {
             apart. One definition, not two.
           </li>
           <li>
-            The same argument applies to <code>localStorage</code> (Build Step 7), URL
+            The same argument applies to <code>localStorage</code>, URL
             params, <code>postMessage</code>, and anything a user can edit.
           </li>
         </ul>
@@ -20556,347 +19058,6 @@ Register as `{ id: "axios-client", chapter: "17 — Fetching", title: "Instance 
 
 ---
 
-## 🔨 Build Step 12 — Load seed tasks from an API
-
-TaskBoard has been seeding from a hard-coded array. Replace that with a fetch, so the app has a real loading state.
-
-Create `src/api/tasks.ts`:
-
-```ts
-// No schema declared here — Build Step 5's is imported. One definition, four boundaries.
-import { TaskListSchema } from "@/schemas/task"
-import type { Task } from "@/types"
-
-const remote: Task[] = [
-  { id: "s1", title: "Read the API contract", priority: "high", done: false, createdAt: 3 },
-  { id: "s2", title: "Set up the project", priority: "medium", done: true, createdAt: 2 },
-  { id: "s3", title: "Write the first test", priority: "low", done: false, createdAt: 1 },
-]
-
-/**
- * Stands in for a real endpoint. Swap the body for a `fetch` and everything
- * around it — including the validation — stays exactly the same.
- */
-export function fetchSeedTasks(signal?: AbortSignal): Promise<Task[]> {
-  return new Promise((resolve, reject) => {
-    const timer = window.setTimeout(() => {
-      const parsed = TaskListSchema.safeParse(remote)
-      if (!parsed.success) {
-        reject(new Error("The server sent unexpected data"))
-        return
-      }
-      resolve(parsed.data)
-    }, 900)
-
-    signal?.addEventListener(
-      "abort",
-      () => {
-        window.clearTimeout(timer)
-        reject(new DOMException("Aborted", "AbortError"))
-      },
-      { once: true }
-    )
-  })
-}
-```
-
-```bash
-npm install zod
-```
-
-Now add the loading path to `TaskProvider`. Add to `src/context/TaskContext.tsx`:
-
-```tsx
-export type LoadStatus =
-  | { status: "loading" }
-  | { status: "error"; message: string }
-  | { status: "ready" }
-
-const LoadStatusContext = createContext<LoadStatus | null>(null)
-
-export function useLoadStatus(): LoadStatus {
-  const ctx = useContext(LoadStatusContext)
-  if (!ctx) throw new Error("useLoadStatus must be used inside <TaskProvider>")
-  return ctx
-}
-```
-
-and update the provider to fetch when storage is empty:
-
-```tsx
-export function TaskProvider({ children }: { children: ReactNode }) {
-  const [tasks, dispatch] = useReducer(tasksReducer, [], () => init([]))
-  const [load, setLoad] = useState<LoadStatus>(() =>
-    // If localStorage already had tasks, there's nothing to fetch.
-    init([]).length > 0 ? { status: "ready" } : { status: "loading" }
-  )
-
-  useEffect(() => {
-    if (load.status !== "loading") return
-    const controller = new AbortController()
-
-    fetchSeedTasks(controller.signal)
-      .then((seed) => {
-        dispatch({ type: "replaced", tasks: seed })
-        setLoad({ status: "ready" })
-      })
-      .catch((err: unknown) => {
-        if (err instanceof Error && err.name === "AbortError") return
-        setLoad({
-          status: "error",
-          message: err instanceof Error ? err.message : String(err),
-        })
-      })
-
-    return () => controller.abort()
-  }, [load.status])
-
-  useEffect(() => {
-    if (load.status !== "ready") return      // don't persist an empty pre-load state
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks))
-    } catch { /* ignore */ }
-  }, [tasks, load.status])
-
-  return (
-    <LoadStatusContext.Provider value={load}>
-      <TasksDispatchContext.Provider value={dispatch}>
-        <TasksContext.Provider value={tasks}>{children}</TasksContext.Provider>
-      </TasksDispatchContext.Provider>
-    </LoadStatusContext.Provider>
-  )
-}
-```
-
-Add the `replaced` action to the union and the reducer:
-
-```ts
-| { type: "replaced"; tasks: Task[] }
-
-// in the switch:
-case "replaced":
-  return action.tasks
-```
-
-The `never` assertion will refuse to compile until you add that case, which is §13.2 doing its job in your own codebase.
-
-Finally, render the three states in `App.tsx`:
-
-```tsx
-const tasks = useTasks()
-const load = useLoadStatus()
-
-// ...inside the Container, replacing <TaskList …>:
-{load.status === "loading" ? (
-  <div className="text-center py-5 text-muted">
-    <Spinner animation="border" className="mb-2" />
-    <div className="small">Loading your tasks…</div>
-  </div>
-) : load.status === "error" ? (
-  <Alert variant="danger">
-    <div className="fw-semibold mb-1">Couldn't load tasks</div>
-    <div className="small">{load.message}</div>
-  </Alert>
-) : (
-  <TaskList tasks={visibleTasks} isFiltered={tasks.length > 0} onEdit={setEditing} />
-)}
-```
-
-**Verify:** clear `localStorage` (`localStorage.clear()` in the console) and reload. You should see the spinner for about a second, then the three fetched tasks. Reload again — instant, because storage now has them and the provider skips the fetch entirely.
-
-**What this build step demonstrates:**
-
-- **Validation at the boundary.** `fetchSeedTasks` returns `Promise<Task[]>` *honestly*, because `safeParse` verified it. No cast, no assumption.
-- **A union for the load state**, not booleans — so a spinner can never appear over an error (§5.3).
-- **`AbortController` cleanup**, so Strict Mode's double-mount cancels the first request rather than racing it (§17.3).
-- **The persistence effect is gated on `status === "ready"`**, or the empty pre-load array would immediately overwrite whatever was in storage. That's a real bug this ordering avoids, and it's worth understanding: two effects touching the same external system need to agree about ordering.
-
-**Try it yourself:** make `fetchSeedTasks` reject (`reject(new Error("503"))`) and confirm the error state renders with the message. Then add a Retry button that sets the status back to `{ status: "loading" }` — the effect's dependency on `load.status` makes that work with no extra machinery.
-
----
-## 🔨 Build Step 13 — An axios API layer
-
-Build Step 12's `fetchSeedTasks` was a `setTimeout` pretending to be a server. Replace it with a real axios client — the shape you'd ship — keeping the fake responses behind an adapter so the app still runs offline.
-
-```bash
-npm install axios
-```
-
-### 1. The client
-
-Create `src/api/client.ts`:
-
-```ts
-import axios from "axios"
-
-export class ApiError extends Error {
-  constructor(message: string, public status?: number) {
-    super(message)
-    this.name = "ApiError"
-  }
-}
-
-export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? "/api",
-  timeout: 8000,
-  headers: { "Content-Type": "application/json" },
-})
-
-// Auth in one place — §17.8
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("taskboard.token")
-  if (token) config.headers.Authorization = `Bearer ${token}`
-  return config
-})
-
-// One error shape for the whole app — §17.8
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (axios.isCancel(error)) return Promise.reject(error)
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 401) {
-        localStorage.removeItem("taskboard.token")
-      }
-      const message =
-        (error.response?.data as { message?: string } | undefined)?.message ?? error.message
-      return Promise.reject(new ApiError(message, error.response?.status))
-    }
-    return Promise.reject(error)
-  }
-)
-```
-
-### 2. Keep it offline
-
-Until there's a server, give the instance the lab's mock adapter. Create `src/api/mockAdapter.ts` — the same file as Lab 17.6, with TaskBoard's seed data:
-
-```ts
-import type { AxiosAdapter, AxiosRequestConfig } from "axios"
-import type { Task } from "@/schemas/task"
-
-const db: Task[] = [
-  { id: "s1", title: "Read the API contract", priority: "high", done: false, createdAt: 3 },
-  { id: "s2", title: "Set up the project", priority: "medium", done: true, createdAt: 2 },
-  { id: "s3", title: "Write the first test", priority: "low", done: false, createdAt: 1 },
-]
-
-export function mockAdapter(delay = 700): AxiosAdapter {
-  return (config: AxiosRequestConfig) =>
-    new Promise((resolve, reject) => {
-      const timer = window.setTimeout(() => {
-        resolve({
-          data: db,
-          status: 200,
-          statusText: "OK",
-          headers: {},
-          config: config as never,
-        } as never)
-      }, delay)
-
-      config.signal?.addEventListener(
-        "abort",
-        () => {
-          window.clearTimeout(timer)
-          reject(Object.assign(new Error("canceled"), { __CANCEL__: true }))
-        },
-        { once: true }
-      )
-    })
-}
-```
-
-and wire it in `client.ts` while you have no backend:
-
-```ts
-import { mockAdapter } from "@/api/mockAdapter"
-
-export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? "/api",
-  timeout: 8000,
-  headers: { "Content-Type": "application/json" },
-  // Delete this one line the day a real server exists. Nothing else changes.
-  adapter: mockAdapter(),
-})
-```
-
-### 3. The resource module
-
-Replace `src/api/tasks.ts`:
-
-```ts
-import { api } from "@/api/client"
-import {
-  TaskSchema,
-  TaskListSchema,
-  type NewTask,
-  type Task,
-} from "@/schemas/task"
-
-export async function listTasks(signal?: AbortSignal): Promise<Task[]> {
-  const res = await api.get("/tasks", { signal })
-  return TaskListSchema.parse(res.data)      // §17.5 — validate, don't cast
-}
-
-export async function createTask(input: NewTask): Promise<Task> {
-  const res = await api.post("/tasks", input)
-  return TaskSchema.parse(res.data)
-}
-
-export async function updateTask(id: string, changes: Partial<NewTask>): Promise<Task> {
-  const res = await api.patch(`/tasks/${id}`, changes)
-  return TaskSchema.parse(res.data)
-}
-
-export async function deleteTask(id: string): Promise<void> {
-  await api.delete(`/tasks/${id}`)
-}
-```
-
-### 4. Use it
-
-In `TaskProvider`, swap the import and the call:
-
-```tsx
-import { listTasks } from "@/api/tasks"
-import { ApiError } from "@/api/client"
-import axios from "axios"
-
-useEffect(() => {
-  if (load.status !== "loading") return
-  const controller = new AbortController()
-
-  listTasks(controller.signal)
-    .then((seed) => {
-      dispatch({ type: "replaced", tasks: seed })
-      setLoad({ status: "ready" })
-    })
-    .catch((err: unknown) => {
-      if (axios.isCancel(err)) return                    // our own abort — not a failure
-      setLoad({
-        status: "error",
-        message: err instanceof ApiError ? err.message : "Couldn't reach the server",
-      })
-    })
-
-  return () => controller.abort()
-}, [load.status])
-```
-
-**Verify:** clear `localStorage` and reload. Spinner for ~700ms, then three tasks. Open the Network tab — nothing there, because the adapter answers in-process. Delete the `adapter` line and you'll see a real (failing) request to `/api/tasks`, which is the point: **the only difference between the mock and production is one line.**
-
-### What this build step demonstrates
-
-- **`baseURL`, `timeout`, auth and error normalisation live on the instance.** Call sites are paths.
-- **`TaskListSchema.parse`, not `axios.get<Task[]>`.** The generic would be a claim; this is a check — and it's the **fourth** place Build Step 5's schema is used.
-- **Components import `listTasks`, not axios.** Swap axios for `fetch`, or for a GraphQL client, and nothing outside `src/api/` changes.
-- **`axios.isCancel` replaces `err.name !== "AbortError"`.** The §17.3 race-condition discipline is unchanged; axios doesn't solve it for you.
-- **The `catch` narrows to `ApiError`**, which the interceptor guaranteed. No component parses `error.response?.data`.
-
-**Try it yourself:** make the adapter return `status: 500` for one reload. The interceptor converts it to an `ApiError`, the provider's error branch renders, and the Retry button (if you built it in Build Step 12) works. Then add a retry-once-on-5xx rule to the response interceptor and watch two attempts in the log — retry belongs there, not in components.
-
----
-
 ✅ **Concept check 17**
 
 1. Does `fetch` reject on a 500 response? What must you check?
@@ -21495,271 +19656,6 @@ Answers in [Appendix B](#appendix-b--concept-check-answers).
 
 ---
 
-## 🔨 Build Step 14 — Routing and URL state in TaskBoard
-
-```bash
-npm install react-router-dom
-```
-
-Two goals: a Settings page (to justify a router at all), and moving the filter and search into the URL (to justify it properly).
-
-Create `src/pages/BoardPage.tsx` — the current board, moved out of `App`:
-
-```tsx
-import { useState } from "react"
-import { Alert, Spinner } from "react-bootstrap"
-import { useSearchParams } from "react-router-dom"
-import TaskList from "@/components/TaskList"
-import AddTaskForm from "@/components/AddTaskForm"
-import TaskToolbar from "@/components/TaskToolbar"
-import TaskStats from "@/components/TaskStats"
-import EditTaskModal from "@/components/EditTaskModal"
-import { useTasks, useLoadStatus } from "@/context/TaskContext"
-import type { Filter, Task } from "@/types"
-
-const isFilter = (v: string): v is Filter =>
-  v === "all" || v === "active" || v === "done"
-
-export default function BoardPage() {
-  const tasks = useTasks()
-  const load = useLoadStatus()
-  const [params, setParams] = useSearchParams()
-  const [editingId, setEditingId] = useState<string | null>(null)
-
-  // Filter and search now live in the URL — shareable and refresh-proof
-  const rawFilter = params.get("filter") ?? "all"
-  const filter: Filter = isFilter(rawFilter) ? rawFilter : "all"
-  const query = params.get("q") ?? ""
-
-  function setFilter(next: Filter) {
-    setParams((prev) => {
-      const p = new URLSearchParams(prev)
-      if (next === "all") p.delete("filter")
-      else p.set("filter", next)
-      return p
-    })
-  }
-
-  function setQuery(next: string) {
-    setParams(
-      (prev) => {
-        const p = new URLSearchParams(prev)
-        if (!next) p.delete("q")
-        else p.set("q", next)
-        return p
-      },
-      { replace: true }        // don't create a history entry per keystroke
-    )
-  }
-
-  // Store the id, derive the task — Lab 10.3
-  const editing: Task | null = tasks.find((t) => t.id === editingId) ?? null
-
-  const completed = tasks.filter((t) => t.done).length
-
-  const visibleTasks = tasks
-    .filter((t) => {
-      if (filter === "active") return !t.done
-      if (filter === "done") return t.done
-      return true
-    })
-    .filter((t) => t.title.toLowerCase().includes(query.trim().toLowerCase()))
-
-  return (
-    <>
-      <AddTaskForm />
-      <TaskStats total={tasks.length} completed={completed} />
-      <TaskToolbar
-        filter={filter}
-        onFilterChange={setFilter}
-        query={query}
-        onQueryChange={setQuery}
-      />
-
-      {load.status === "loading" ? (
-        <div className="text-center py-5 text-muted">
-          <Spinner animation="border" className="mb-2" />
-          <div className="small">Loading your tasks…</div>
-        </div>
-      ) : load.status === "error" ? (
-        <Alert variant="danger">
-          <div className="fw-semibold mb-1">Couldn't load tasks</div>
-          <div className="small">{load.message}</div>
-        </Alert>
-      ) : (
-        <TaskList
-          tasks={visibleTasks}
-          isFiltered={tasks.length > 0}
-          onEdit={(task) => setEditingId(task.id)}
-        />
-      )}
-
-      <EditTaskModal
-        task={editing}
-        show={editing !== null}
-        onHide={() => setEditingId(null)}
-      />
-    </>
-  )
-}
-```
-
-Create `src/pages/SettingsPage.tsx`:
-
-```tsx
-import { Button, Card, Form, ListGroup } from "react-bootstrap"
-import { useTasks, useTaskActions } from "@/context/TaskContext"
-
-export default function SettingsPage() {
-  const tasks = useTasks()
-  const { clearCompleted } = useTaskActions()
-
-  const completed = tasks.filter((t) => t.done).length
-  const byPriority = {
-    high: tasks.filter((t) => t.priority === "high").length,
-    medium: tasks.filter((t) => t.priority === "medium").length,
-    low: tasks.filter((t) => t.priority === "low").length,
-  }
-
-  return (
-    <Card>
-      <Card.Header className="fw-semibold">Settings</Card.Header>
-      <ListGroup variant="flush">
-        <ListGroup.Item className="d-flex justify-content-between">
-          <span>Total tasks</span>
-          <strong>{tasks.length}</strong>
-        </ListGroup.Item>
-        <ListGroup.Item className="d-flex justify-content-between">
-          <span>Completed</span>
-          <strong>{completed}</strong>
-        </ListGroup.Item>
-        <ListGroup.Item className="d-flex justify-content-between">
-          <span>High / medium / low</span>
-          <strong>
-            {byPriority.high} / {byPriority.medium} / {byPriority.low}
-          </strong>
-        </ListGroup.Item>
-      </ListGroup>
-      <Card.Body className="d-flex flex-column gap-2 align-items-start">
-        <Button
-          variant="outline-danger"
-          size="sm"
-          disabled={completed === 0}
-          onClick={clearCompleted}
-        >
-          Clear {completed} completed task{completed === 1 ? "" : "s"}
-        </Button>
-        <Form.Text>
-          Every number on this page is derived from one array. Nothing here is state.
-        </Form.Text>
-      </Card.Body>
-    </Card>
-  )
-}
-```
-
-Update `src/components/Header.tsx` to carry the navigation:
-
-```tsx
-import { Navbar, Container, Nav } from "react-bootstrap"
-import { NavLink } from "react-router-dom"
-import { CheckCircleFill } from "react-bootstrap-icons"
-
-interface HeaderProps {
-  title: string
-  subtitle: string
-}
-
-export default function Header({ title, subtitle }: HeaderProps) {
-  return (
-    <Navbar className="bg-white border-bottom py-3">
-      <Container
-        className="d-flex align-items-center gap-3"
-        style={{ maxWidth: 768 }}
-      >
-        <CheckCircleFill className="text-primary" size={24} />
-        <div className="flex-grow-1">
-          <h1 className="h5 mb-0">{title}</h1>
-          <p className="text-muted small mb-0">{subtitle}</p>
-        </div>
-        <Nav>
-          <Nav.Link as={NavLink} to="/" end>
-            Board
-          </Nav.Link>
-          <Nav.Link as={NavLink} to="/settings">
-            Settings
-          </Nav.Link>
-        </Nav>
-      </Container>
-    </Navbar>
-  )
-}
-```
-
-And `src/App.tsx` becomes the route tree:
-
-```tsx
-import { BrowserRouter, Routes, Route, Outlet, Link } from "react-router-dom"
-import { Alert, Container } from "react-bootstrap"
-import Header from "@/components/Header"
-import BoardPage from "@/pages/BoardPage"
-import SettingsPage from "@/pages/SettingsPage"
-
-function Layout() {
-  return (
-    <div className="min-vh-100 bg-body-tertiary">
-      <Header title="TaskBoard" subtitle="Everything you're working on, in one place." />
-      <Container className="py-4" style={{ maxWidth: 768 }}>
-        <Outlet />
-      </Container>
-    </div>
-  )
-}
-
-function NotFound() {
-  return (
-    <Alert variant="warning">
-      <div className="fw-semibold mb-1">Page not found</div>
-      <Link to="/">Back to the board</Link>
-    </Alert>
-  )
-}
-
-export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route index element={<BoardPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  )
-}
-```
-
-**Verify:**
-
-1. Filter to "Done" and search for something. Check the address bar: `/?filter=done&q=…`.
-2. Copy that URL into a new tab. The board loads with the same filter and search applied.
-3. Press Back. The filter reverts.
-4. Navigate to Settings and back. The board's filter is preserved in the URL, so it comes back exactly as it was.
-5. Visit `/nonsense` — the 404 renders inside the layout.
-
-**Three things this build step got you:**
-
-- **Shareable views**, with no persistence code. §18.3.
-- **`editingId` instead of `editing`**, which fixes Lab 10.3's stale-object bug in the real app. Rename a task while its modal is open and the modal follows.
-- **A `Layout` route with `Outlet`**, so the header and container are declared once for every page — including the 404.
-
-Note that `TaskProvider` stays in `main.tsx`, *outside* the router. That's deliberate: the tasks are app-wide state, and wrapping them inside a route would destroy and re-fetch them on every navigation.
-
-**Try it yourself:** add a `/tasks/:id` route showing one task's detail, linked from each card. You'll need `useParams`, a `tasks.find`, and a `<Navigate to="/" replace />` for an id that doesn't exist — which is the §18.3 TS Note in practice.
-
----
-
 # 19. Error boundaries & Suspense
 
 Two mechanisms for handling the two things that can go wrong while rendering: it **threw**, or it **isn't ready yet**.
@@ -22345,94 +20241,6 @@ Register as `{ id: "suspense", chapter: "19 — Errors", title: "Suspense & lazy
 3. Why must an error boundary be a class component?
 4. How do you reset an error boundary, and what are the two ways?
 5. What's the difference in job between `Suspense` and `ErrorBoundary`?
-
----
-
-## 🔨 Build Step 15 — Boundaries in TaskBoard
-
-Copy `ErrorBoundary.tsx` from the lab into `src/components/ErrorBoundary.tsx` (or install `react-error-boundary`), then layer two boundaries into `App.tsx`:
-
-```tsx
-import { BrowserRouter, Routes, Route, Outlet, Link } from "react-router-dom"
-import { Alert, Button, Container } from "react-bootstrap"
-import ErrorBoundary from "@/components/ErrorBoundary"
-import Header from "@/components/Header"
-import BoardPage from "@/pages/BoardPage"
-import SettingsPage from "@/pages/SettingsPage"
-
-function PageError({ error, reset }: { error: Error; reset: () => void }) {
-  return (
-    <Alert variant="danger">
-      <div className="fw-semibold mb-1">This page couldn't render</div>
-      <div className="small font-monospace mb-3">{error.message}</div>
-      <div className="d-flex gap-2">
-        <Button size="sm" variant="outline-danger" onClick={reset}>
-          Try again
-        </Button>
-        <Button size="sm" variant="outline-secondary" as={Link as never} to="/">
-          Back to the board
-        </Button>
-      </div>
-    </Alert>
-  )
-}
-
-function Layout() {
-  return (
-    <div className="min-vh-100 bg-body-tertiary">
-      <Header title="TaskBoard" subtitle="Everything you're working on, in one place." />
-      <Container className="py-4" style={{ maxWidth: 768 }}>
-        {/* Per-page boundary: a broken page keeps the header and nav usable */}
-        <ErrorBoundary fallback={(error, reset) => <PageError error={error} reset={reset} />}>
-          <Outlet />
-        </ErrorBoundary>
-      </Container>
-    </div>
-  )
-}
-
-export default function App() {
-  return (
-    // App-wide boundary: the last resort, so a layout failure isn't a blank page
-    <ErrorBoundary
-      fallback={(error) => (
-        <Container className="py-5" style={{ maxWidth: 640 }}>
-          <Alert variant="danger">
-            <div className="fw-semibold mb-1">TaskBoard hit an unexpected error</div>
-            <div className="small font-monospace mb-3">{error.message}</div>
-            <Button size="sm" onClick={() => window.location.reload()}>
-              Reload the app
-            </Button>
-          </Alert>
-        </Container>
-      )}
-    >
-      <BrowserRouter>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route index element={<BoardPage />} />
-            <Route path="settings" element={<SettingsPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </ErrorBoundary>
-  )
-}
-```
-
-**Verify it works.** Add a deliberate crash to `SettingsPage`:
-
-```tsx
-// temporarily, at the top of SettingsPage
-if (tasks.length > 0) throw new Error("Deliberate test crash")
-```
-
-Navigate to Settings. You should see the page-level fallback **with the header still there**, and the Board link still working. That's the containment you designed. Remove the throw afterwards.
-
-**Why two layers:** the inner boundary keeps navigation alive when a page fails, which means the user can get themselves out. The outer one exists for failures in the layout or router itself, where there's nothing left to navigate with — so its only sensible action is a reload.
-
-**Try it yourself:** lazy-load `SettingsPage` with `lazy` + `Suspense`, then run `npm run build` and confirm it's a separate chunk. Settings is exactly the kind of page most users never open.
 
 ---
 
@@ -23200,7 +21008,7 @@ await user.click(screen.getByRole("button", { name: "Add" }))
 expect(screen.getByText("Buy milk")).toBeInTheDocument()
 ```
 
-The practical consequence: a good test suite lets you rewrite a component's internals — `useState` to `useReducer`, props to context, class to function — **without touching a single test**. That's exactly the refactor you did in Build Steps 8 and 9, and tests written this way would have proved those refactors were faithful.
+The practical consequence: a good test suite lets you rewrite a component's internals — `useState` to `useReducer`, props to context, class to function — **without touching a single test**. That is exactly the kind of refactor the build guide's later steps perform, and tests written this way would have proved those refactors were faithful.
 
 If a test breaks every time you refactor, it's testing the wrong thing, and it's costing you more than it's giving you.
 
@@ -23718,240 +21526,6 @@ Four things this teaches:
 3. Why does Testing Library prefer `getByRole` over `getByTestId`?
 4. What does `act()` do, and when do you need it?
 5. Name two things worth testing and two things not worth testing in a React codebase.
-
----
-
-## 🔨 Build Step 16 — Tests for TaskBoard
-
-Set up Vitest in `taskboard` exactly as in §21.1, then write the three tests that give the most confidence for the least effort.
-
-**1. The reducer** — `src/context/tasksReducer.test.ts`. First extract the reducer from `TaskContext.tsx` into its own file (`src/context/tasksReducer.ts`) and import it in both places; a pure function in its own module is easier to test and easier to read.
-
-```ts
-import { describe, expect, it } from "vitest"
-import { tasksReducer } from "./tasksReducer"
-import type { Task } from "@/types"
-
-const base: Task[] = [
-  { id: "a", title: "First", priority: "high", done: false, createdAt: 1 },
-  { id: "b", title: "Second", priority: "low", done: true, createdAt: 2 },
-]
-
-describe("tasksReducer", () => {
-  it("adds a task at the front, not done", () => {
-    const next = tasksReducer(base, {
-      type: "added",
-      id: "c",
-      createdAt: 3,
-      title: "Third",
-      priority: "medium",
-    })
-    expect(next).toHaveLength(3)
-    expect(next[0]).toEqual({
-      id: "c",
-      title: "Third",
-      priority: "medium",
-      done: false,
-      createdAt: 3,
-    })
-  })
-
-  it("toggles only the matching task", () => {
-    const next = tasksReducer(base, { type: "toggled", id: "a" })
-    expect(next[0].done).toBe(true)
-    expect(next[1].done).toBe(true)
-  })
-
-  it("applies a partial update", () => {
-    const next = tasksReducer(base, {
-      type: "updated",
-      id: "a",
-      changes: { title: "Renamed" },
-    })
-    expect(next[0].title).toBe("Renamed")
-    expect(next[0].priority).toBe("high")     // untouched
-  })
-
-  it("deletes by id", () => {
-    expect(tasksReducer(base, { type: "deleted", id: "a" }).map((t) => t.id)).toEqual(["b"])
-  })
-
-  it("clears completed tasks", () => {
-    expect(tasksReducer(base, { type: "clearedCompleted" }).map((t) => t.id)).toEqual(["a"])
-  })
-
-  it("replaces the whole list", () => {
-    expect(tasksReducer(base, { type: "replaced", tasks: [] })).toEqual([])
-  })
-
-  it("never mutates its input", () => {
-    const snapshot = JSON.stringify(base)
-    tasksReducer(base, { type: "toggled", id: "a" })
-    tasksReducer(base, { type: "deleted", id: "b" })
-    tasksReducer(base, { type: "clearedCompleted" })
-    expect(JSON.stringify(base)).toBe(snapshot)
-  })
-
-  it("preserves the identity of untouched tasks", () => {
-    const next = tasksReducer(base, { type: "toggled", id: "a" })
-    expect(next[1]).toBe(base[1])
-  })
-})
-```
-
-**2. The add form** — `src/components/AddTaskForm.test.tsx`. It needs the provider, so wrap it:
-
-```tsx
-import { describe, expect, it } from "vitest"
-import { render, screen, waitFor } from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
-import AddTaskForm from "./AddTaskForm"
-import TaskList from "./TaskList"
-import { TaskProvider } from "@/context/TaskContext"
-
-/** Renders the form and a list together, so we can assert on the outcome. */
-function renderWithProvider() {
-  return render(
-    <TaskProvider>
-      <AddTaskForm />
-      <TaskList tasks={[]} isFiltered={false} onEdit={() => {}} />
-    </TaskProvider>
-  )
-}
-
-describe("AddTaskForm", () => {
-  it("requires a title", async () => {
-    const user = userEvent.setup()
-    renderWithProvider()
-
-    await user.click(screen.getByRole("button", { name: /add/i }))
-
-    // The message comes from NewTaskSchema — findBy, because validation is async
-    expect(await screen.findByText("Give the task a title.")).toBeInTheDocument()
-  })
-
-  it("rejects a whitespace-only title", async () => {
-    const user = userEvent.setup()
-    renderWithProvider()
-
-    await user.type(screen.getByLabelText("Task"), "     ")
-    await user.click(screen.getByRole("button", { name: /add/i }))
-
-    // .trim() runs before .min(1) in the schema
-    expect(await screen.findByText("Give the task a title.")).toBeInTheDocument()
-  })
-
-  it("resets the fields after a successful add", async () => {
-    const user = userEvent.setup()
-    renderWithProvider()
-
-    const input = screen.getByLabelText("Task")
-    await user.type(input, "Write the tests")
-    await user.selectOptions(screen.getByLabelText("Priority"), "high")
-    await user.click(screen.getByRole("button", { name: /add/i }))
-
-    await waitFor(() => expect(input).toHaveValue(""))
-    expect(screen.getByLabelText("Priority")).toHaveValue("medium")
-  })
-
-  it("trims the title before adding it", async () => {
-    const user = userEvent.setup()
-    renderWithProvider()
-
-    await user.type(screen.getByLabelText("Task"), "  Padded  ")
-    await user.click(screen.getByRole("button", { name: /add/i }))
-
-    // The schema's .trim() means the stored task has no surrounding spaces
-    expect(await screen.findByText("Padded")).toBeInTheDocument()
-  })
-})
-```
-
-**3. The empty states** — `src/components/TaskList.test.tsx`, because the two-message distinction from Build Step 6 is exactly the kind of detail a future refactor silently breaks:
-
-```tsx
-import { describe, expect, it } from "vitest"
-import { render, screen } from "@testing-library/react"
-import TaskList from "./TaskList"
-import { TaskProvider } from "@/context/TaskContext"
-import type { Task } from "@/types"
-
-const tasks: Task[] = [
-  { id: "a", title: "Visible task", priority: "low", done: false, createdAt: 1 },
-]
-
-function renderList(props: Partial<React.ComponentProps<typeof TaskList>> = {}) {
-  return render(
-    <TaskProvider>
-      <TaskList tasks={tasks} isFiltered={false} onEdit={() => {}} {...props} />
-    </TaskProvider>
-  )
-}
-
-describe("TaskList", () => {
-  it("renders the tasks it is given", () => {
-    renderList()
-    expect(screen.getByText("Visible task")).toBeInTheDocument()
-  })
-
-  it("shows the onboarding empty state when there are no tasks at all", () => {
-    renderList({ tasks: [], isFiltered: false })
-    expect(screen.getByText("No tasks yet")).toBeInTheDocument()
-  })
-
-  it("shows the no-matches empty state when a filter excluded everything", () => {
-    renderList({ tasks: [], isFiltered: true })
-    expect(screen.getByText("Nothing matches")).toBeInTheDocument()
-  })
-})
-```
-
-**4. The schema** — `src/schemas/task.test.ts`. It guards four boundaries now (§Build Step 5), so it's the highest-value test in the project:
-
-```ts
-import { describe, expect, it } from "vitest"
-import { NewTaskSchema, TaskListSchema } from "./task"
-
-describe("NewTaskSchema", () => {
-  it("trims the title", () => {
-    const r = NewTaskSchema.safeParse({ title: "  Buy milk  ", priority: "low" })
-    expect(r.success && r.data.title).toBe("Buy milk")
-  })
-
-  it("rejects a whitespace-only title", () => {
-    expect(NewTaskSchema.safeParse({ title: "   ", priority: "low" }).success).toBe(false)
-  })
-
-  it("rejects an unknown priority", () => {
-    expect(NewTaskSchema.safeParse({ title: "x", priority: "urgent" }).success).toBe(false)
-  })
-})
-
-describe("TaskListSchema", () => {
-  it("rejects storage data of the wrong shape", () => {
-    // exactly the localStorage corruption from Build Step 7
-    expect(TaskListSchema.safeParse([{ title: 42 }]).success).toBe(false)
-  })
-})
-```
-
-**Run them:**
-
-```bash
-npm test
-```
-
-**What you've got for about 130 lines:** every state transition in the reducer verified, the immutability convention locked in, the form's validation and reset behaviour pinned, both empty states protected, and the schema — which now guards the add form, the edit modal, `localStorage` and the API — tested directly.
-
-**Two things changed because the forms use react-hook-form and zod.** Validation is now **asynchronous**, so an assertion straight after a click needs `findBy…` or `waitFor` rather than `getBy…` (§21.3's distinction, met for real). And the error *strings* now live in `NewTaskSchema`, so a message change is one edit in one file — which is also why the schema deserves its own test rather than being tested only through the UI.
-
-**What you deliberately haven't tested:** that Bootstrap renders cards, that the progress bar has the right width, that `useState` was called. None of those would catch a real bug, and all of them would break on the next refactor.
-
-**Try it yourself:**
-
-1. Add `"critical"` to the `Priority` union. Run the tests. The reducer tests still pass (they don't enumerate priorities), but `npm run build` fails on `priorityVariant`. **Types and tests catch different things**, and you want both.
-2. Break the reducer on purpose — change `toggled` to mutate. Two tests fail, and their names tell you what's wrong without you reading the code.
-3. Write a regression test for a bug you actually hit while building TaskBoard. That's the highest-value test you'll write today.
 
 ---
 
@@ -24962,279 +22536,6 @@ Register as `{ id: "redux-thunk", chapter: "22 — Redux Toolkit", title: "creat
 
 ---
 
-## 🔨 Build Step 17 — Migrate the store to Redux Toolkit
-
-Build Step 9 put a reducer behind two contexts. That was the right call at the time, and Lab 14.3 showed its ceiling: **no selective subscription.** Every consumer of `TasksContext` re-renders on every task change, and splitting dispatch off was a workaround, not a fix.
-
-This step swaps the transport. **The reducer survives almost unchanged** — which is the point worth making to participants: you already wrote the hard part in Build Step 9.
-
-```bash
-npm install @reduxjs/toolkit react-redux
-```
-
-### 1. The slice — your reducer, with the boilerplate deleted
-
-Create `src/store/tasksSlice.ts`:
-
-```ts
-import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit"
-import axios from "axios"
-import { listTasks } from "@/api/tasks"
-import { ApiError } from "@/api/client"
-import type { NewTask, Task } from "@/schemas/task"
-
-interface TasksState {
-  items: Task[]
-  status: "loading" | "ready" | "error"
-  error: string | null
-}
-
-const initialState: TasksState = { items: [], status: "loading", error: null }
-
-/** Build Step 13's API module, as a thunk. Validation already happened inside listTasks. */
-export const loadTasks = createAsyncThunk<Task[], void, { rejectValue: string }>(
-  "tasks/load",
-  async (_arg, { signal, rejectWithValue }) => {
-    try {
-      return await listTasks(signal)
-    } catch (err) {
-      if (axios.isCancel(err)) throw err
-      return rejectWithValue(err instanceof ApiError ? err.message : "Couldn't reach the server")
-    }
-  }
-)
-
-const tasksSlice = createSlice({
-  name: "tasks",
-  initialState,
-  reducers: {
-    added: {
-      reducer(state, action: PayloadAction<Task>) {
-        state.items.unshift(action.payload)
-      },
-      // The impurity lives here, not in the reducer — §13.3
-      prepare({ title, priority }: NewTask) {
-        return {
-          payload: {
-            id: crypto.randomUUID(),
-            title,
-            priority,
-            done: false,
-            createdAt: Date.now(),
-          } as Task,
-        }
-      },
-    },
-    toggled(state, action: PayloadAction<string>) {
-      const task = state.items.find((t) => t.id === action.payload)
-      if (task) task.done = !task.done
-    },
-    updated(state, action: PayloadAction<{ id: string; changes: Partial<NewTask> }>) {
-      const task = state.items.find((t) => t.id === action.payload.id)
-      if (task) Object.assign(task, action.payload.changes)
-    },
-    deleted(state, action: PayloadAction<string>) {
-      state.items = state.items.filter((t) => t.id !== action.payload)
-    },
-    clearedCompleted(state) {
-      state.items = state.items.filter((t) => !t.done)
-    },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(loadTasks.pending, (state) => {
-        state.status = "loading"
-        state.error = null
-      })
-      .addCase(loadTasks.fulfilled, (state, action) => {
-        state.status = "ready"
-        state.items = action.payload
-      })
-      .addCase(loadTasks.rejected, (state, action) => {
-        if (action.meta.aborted) return            // our own abort isn't a failure
-        state.status = "error"
-        state.error = action.payload ?? "Couldn't reach the server"
-      })
-  },
-})
-
-export const { added, toggled, updated, deleted, clearedCompleted } = tasksSlice.actions
-
-// ---- selectors: the state shape lives here, not in components ----
-export const selectTasks = (s: { tasks: TasksState }) => s.tasks.items
-export const selectStatus = (s: { tasks: TasksState }) => s.tasks.status
-export const selectError = (s: { tasks: TasksState }) => s.tasks.error
-export const selectTaskCount = (s: { tasks: TasksState }) => s.tasks.items.length
-export const selectDoneCount = (s: { tasks: TasksState }) =>
-  s.tasks.items.filter((t) => t.done).length
-
-export default tasksSlice.reducer
-```
-
-Compare the five `reducers` entries with Build Step 9's `switch`. Same transitions, same immutability guarantees — and the action-type union, the action creators and the `never` exhaustiveness check are now generated.
-
-### 2. The store, the types, the hooks
-
-Create `src/store/index.ts`:
-
-```ts
-import { configureStore } from "@reduxjs/toolkit"
-import tasksReducer from "@/store/tasksSlice"
-
-export const store = configureStore({
-  reducer: { tasks: tasksReducer },
-})
-
-export type RootState = ReturnType<typeof store.getState>
-export type AppDispatch = typeof store.dispatch
-```
-
-Create `src/store/hooks.ts`:
-
-```ts
-import { useDispatch, useSelector } from "react-redux"
-import type { RootState, AppDispatch } from "@/store"
-
-export const useAppDispatch = useDispatch.withTypes<AppDispatch>()
-export const useAppSelector = useSelector.withTypes<RootState>()
-```
-
-### 3. Persistence, as middleware
-
-Build Step 7's effect had nowhere to live once state left React. Put it in a listener instead — `src/store/persist.ts`:
-
-```ts
-import { createListenerMiddleware, isAnyOf } from "@reduxjs/toolkit"
-import { TaskListSchema } from "@/schemas/task"
-import {
-  added, toggled, updated, deleted, clearedCompleted, loadTasks,
-} from "@/store/tasksSlice"
-import type { RootState } from "@/store"
-
-const STORAGE_KEY = "taskboard.tasks"
-
-export const persistListener = createListenerMiddleware()
-
-persistListener.startListening({
-  matcher: isAnyOf(added, toggled, updated, deleted, clearedCompleted, loadTasks.fulfilled),
-  effect: (_action, api) => {
-    const { tasks } = api.getState() as RootState
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks.items))
-    } catch {
-      /* storage full or blocked */
-    }
-  },
-})
-
-/** Read once at startup. Storage is untrusted input — §17.5. */
-export function loadPersisted(): Task[] | undefined {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (!saved) return undefined
-    const parsed = TaskListSchema.safeParse(JSON.parse(saved))
-    return parsed.success ? parsed.data : undefined
-  } catch {
-    return undefined
-  }
-}
-```
-
-Wire both into the store:
-
-```ts
-import { persistListener, loadPersisted } from "@/store/persist"
-
-const persisted = loadPersisted()
-
-export const store = configureStore({
-  reducer: { tasks: tasksReducer },
-  preloadedState: persisted
-    ? { tasks: { items: persisted, status: "ready" as const, error: null } }
-    : undefined,
-  middleware: (getDefault) => getDefault().prepend(persistListener.middleware),
-})
-```
-
-`preloadedState` replaces the lazy `useState` initialiser; the listener replaces the effect. Both still validate.
-
-### 4. Swap the provider
-
-In `src/main.tsx`, `TaskProvider` goes and `Provider` arrives:
-
-```tsx
-import { Provider } from "react-redux"
-import { store } from "@/store"
-
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </StrictMode>
-)
-```
-
-### 5. Update the consumers
-
-Each component now subscribes to exactly what it needs:
-
-```tsx
-// BoardPage.tsx
-const tasks = useAppSelector(selectTasks)
-const status = useAppSelector(selectStatus)
-const error = useAppSelector(selectError)
-const dispatch = useAppDispatch()
-
-useEffect(() => {
-  if (status === "loading") {
-    const promise = dispatch(loadTasks())
-    return () => promise.abort()      // §17.3, via the thunk
-  }
-}, [status, dispatch])
-```
-
-```tsx
-// TaskCard.tsx — dispatches only, so it subscribes to nothing
-const dispatch = useAppDispatch()
-<Form.Check checked={task.done} onChange={() => dispatch(toggled(task.id))} />
-<Button onClick={() => dispatch(deleted(task.id))}>…</Button>
-```
-
-```tsx
-// AddTaskForm.tsx — onValid dispatches instead of calling a context action
-function onValid(task: NewTask) {
-  dispatch(added(task))               // `prepare` fills in id, done and createdAt
-  reset(emptyTask)
-}
-```
-
-```tsx
-// TaskStats.tsx — two primitives, so no memoisation needed
-const total = useAppSelector(selectTaskCount)
-const completed = useAppSelector(selectDoneCount)
-```
-
-**Delete `src/context/TaskContext.tsx`.** Everything it did now lives in the slice, the store and the hooks.
-
-**Verify:** identical behaviour. Then open **Redux DevTools** and tick a checkbox — you'll see `tasks/toggled` with the state before and after, and you can time-travel. That's new, and it cost nothing.
-
-### What this build step demonstrates
-
-- **The reducer was the durable part.** Build Step 9's transitions moved across almost verbatim; what was thrown away was the plumbing around them.
-- **Selective subscription, at last.** `TaskStats` selects two numbers, so editing a *title* no longer re-renders it. With the Context version every consumer re-rendered on every change — Lab 14.3's finding, fixed in the app.
-- **`prepare` is where `crypto.randomUUID()` belongs**, keeping the reducer pure and Strict-Mode-safe (§13.3).
-- **The load thunk reuses Build Step 13's API module**, so validation still happens once, at the boundary.
-- **Persistence became middleware.** State outside React needs its side effects outside React too — and `meta.aborted` still stops your own cancellation showing as an error.
-
-**Try it yourself:**
-
-1. Add `<RenderBadge>` to `TaskStats` and edit a task's title. It doesn't re-render. Then change `selectDoneCount` to `(s) => s.tasks.items` and read `.filter()` in the component — now it re-renders on every keystroke, because it subscribed to the array. That's §22.4's trap in your own app.
-2. Dispatch from the console: `window.__store = store` in `index.ts`, then `__store.dispatch({ type: "tasks/clearedCompleted" })`. State outside React, which Context couldn't do.
-3. **The Zustand alternative.** §23 does the same job with one file and no provider. Redo this migration with `create()` + `persist` + `devtools` and compare: roughly a third of the code, and you lose the enforced convention. §23.7 is the honest comparison — and for TaskBoard, which one person maintains, Zustand is arguably the better call. The reason RTK is the *built* path here is that it's what you'll meet in a large codebase.
-
----
-
 ✅ **Concept check 22**
 
 1. A Redux store is which two things you've already built, combined?
@@ -25416,7 +22717,7 @@ export const useTaskStore = create<TaskState>()(
 | `immer` | Lets you mutate a draft instead of spreading nested state |
 | `subscribeWithSelector` | `store.subscribe(selector, listener)` outside React |
 
-**`persist` deserves attention**, because it replaces a whole build step. §11's Build Step 7 wrote a lazy `useState` initialiser, a `useEffect`, a `try`/`catch` and a `safeParse` to keep tasks in `localStorage`. `persist` is a wrapper and a `name`.
+**`persist` deserves attention**, because it replaces a whole build step. The hand-rolled version in §11 wrote a lazy `useState` initialiser, a `useEffect`, a `try`/`catch` and a `safeParse` to keep tasks in `localStorage`. `persist` is a wrapper and a `name`.
 
 Two things it doesn't do for you:
 
@@ -25744,7 +23045,7 @@ Register as `{ id: "zustand-counter", chapter: "23 — Zustand", title: "A store
 
 **Level:** core
 
-This lab replaces an entire build step. §11's Build Step 7 wrote a lazy initialiser, an effect, a `try`/`catch` and a `safeParse` to keep tasks in `localStorage`. Here it's a wrapper.
+This lab replaces an entire build step. The hand-rolled version in §11 needed a lazy initialiser, an effect, a `try`/`catch` and a `safeParse` to keep tasks in `localStorage`. Here it's a wrapper.
 
 ### The change
 
@@ -25870,7 +23171,7 @@ export default function TaskStoreLab() {
   return (
     <DemoCard
       title="persist, devtools, immer — and validating on rehydrate"
-      claim="One middleware replaces Build Step 7's lazy initialiser, effect, try/catch and parse. What it does NOT replace is validation — rehydrated storage is untrusted input."
+      claim="One middleware replaces the hand-rolled lazy initialiser, effect, try/catch and parse. What it does NOT replace is validation — rehydrated storage is untrusted input."
       level="core"
       notice={
         <ul className="mb-0">
@@ -26011,7 +23312,7 @@ Register as `{ id: "zustand-tasks", chapter: "23 — Zustand", title: "persist, 
 
 **Experiments — do the third one:**
 
-1. **Add tasks, reload.** Persistence in one wrapper. Then compare with Build Step 7's four moving parts.
+1. **Add tasks, reload.** Persistence in one wrapper. Then compare with the four moving parts the hand-rolled version needed.
 2. **Change the filter and reload.** It resets, because of `partialize`. Remove `partialize` and it persists too — decide which you'd want, and notice the option forced you to think about it.
 3. **Corrupt the storage** with the console line in the footer and reload. `merge`'s `safeParse` saves you. **Now delete the `merge` function and repeat** — `id: 1` lands in state typed as `string`, and you find out when something calls a string method on it. That's §17.5 with a global blast radius.
 4. **Bump `version` to 2** without writing the matching `migrate` branch. Reload and watch what a returning user gets.
@@ -26693,41 +23994,6 @@ export const chapters = (): string[] => [
 ]
 ```
 
-## TaskBoard build steps
-
-| Step | Adds | Concepts applied |
-|---|---|---|
-| 1 | Types and app shell | Components, typed props, unions, `Pick` |
-| 2 | `TaskCard` with a priority badge | Props, `satisfies Record<K,V>` |
-| 3 | `TaskList` with keys and an empty state | Lists, keys, guard clauses |
-| 4 | Toggle and delete | State, updater form, immutable updates, callbacks |
-| 5 | Add-task form + **the shared schema** | react-hook-form `register`, `zodResolver`, types via `z.infer` |
-| 6 | Filters, search, stats | Derived state, two empty states, union-typed props |
-| 7 | `localStorage` persistence | Effects, lazy init, and `safeParse` instead of a cast |
-| 8 | `useLocalStorage` + `useTasks` hooks | Custom hooks, generics, `Partial<T>`, object returns |
-| 9 | Context + reducer refactor | Discriminated unions, `never` check, split contexts |
-| 10 | Edit modal, **reusing the schema** | `key` to reset a form (no props→state effect), `isDirty` |
-| 11 | Profile it (no code changes) | The Profiler, and why *not* to memoise |
-| 12 | Load seed tasks from an API | Fetch, abort, the **same** schema at a third boundary |
-| 13 | An axios API layer | Instance + interceptors, one error shape, `isCancel`, the schema's 4th boundary |
-| 14 | Routing and URL state | Router, `Outlet`, `useSearchParams`, store-the-id |
-| 15 | Layered error boundaries | Error boundaries, containment granularity |
-| 16 | Tests | Reducer tests, schema tests, async validation with `findBy` |
-
-**One schema, four boundaries.** `src/schemas/task.ts` arrives in Build Step 5 and is then imported —
-never redeclared — by the add form (5), `localStorage` (7), the edit modal (10) and the API layer (12).
-That's the thread worth pointing at when teaching this: the form library is a convenience, but the
-schema is what stops four copies of "a valid task" drifting apart.
-
-| 17 | Migrate the store to Redux Toolkit | `createSlice`, typed hooks, selective subscription, `createAsyncThunk`, listener middleware |
-
-**Step 17 is optional for a short workshop.** TaskBoard is complete and correct at Build Step 16;
-step 17 swaps Build Step 9's Context transport for a store, keeping the reducer — worth doing if the
-group will meet Redux at work, and skippable otherwise (§23.7 argues Zustand is the better fit for an
-app this size).
-
----
-
 # Appendix B — Concept check answers
 
 Answer from memory first. If you can answer all of these, you can read and write production React with TypeScript.
@@ -26959,7 +24225,7 @@ You now have every fundamental needed to read and write production React with Ty
 
 - **Testing in depth** — Vitest + React Testing Library beyond §21: MSW for intercepting network requests, and Playwright for end-to-end tests. Test behaviour, not implementation.
 - **Deeper TypeScript** — generic components, `satisfies` in anger, template literal types, conditional types, and the `strict` flags you aren't using yet (`noUncheckedIndexedAccess` is the highest-value one to turn on next).
-- **Accessibility** — semantic HTML, focus management, keyboard navigation, `aria-live` regions. Run `axe` DevTools over TaskBoard and fix what it finds; §21's query priority has already pushed you most of the way.
+- **Accessibility** — semantic HTML, focus management, keyboard navigation, `aria-live` regions. Run `axe` DevTools over your own app and fix what it finds; §21's query priority has already pushed you most of the way.
 - **The React Compiler** — check whether it's available for your setup. Where it is, most manual memoisation becomes unnecessary, and §1.4's purity rules become load-bearing.
 - **Bootstrap theming** — Sass variable overrides, and 5.3's dark mode via `data-bs-theme` (Lab 14.2 is the starting point).
 - **Server-side React** — Next.js or React Router in framework mode: Server Components, streaming, and the data-loading model that follows from them. Everything in this document still applies inside client components.
