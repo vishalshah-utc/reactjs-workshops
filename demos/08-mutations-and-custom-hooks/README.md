@@ -84,7 +84,7 @@ to a different field. `PATCH` sends what changed.
 **Bodies:** pass a plain object; axios serialises it as JSON and sets
 `Content-Type: application/json`. For file uploads you pass a `FormData` and
 **don't** set the header (the browser must add the multipart boundary) —
-Demo 13.
+Demo 14.
 
 **The method signatures**, once more, because it's the most common axios
 mistake: `get(url, config)` and `delete(url, config)` take two arguments;

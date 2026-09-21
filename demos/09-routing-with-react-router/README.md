@@ -233,7 +233,7 @@ also works, for legacy reasons — pick `Component` and be consistent.)
 **A refresh on `/about` 404s in production.** Dev is fine — Vite serves
 `index.html` for every path. A static host needs a rewrite rule
 (`/* /index.html 200` on Netlify, `try_files $uri /index.html` on nginx).
-Demo 13.
+Demo 14.
 
 ### Challenge (2 min)
 

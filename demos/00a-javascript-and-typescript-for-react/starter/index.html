@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShopScope — before React</title>
+  </head>
+  <body>
+    <!-- Static markup. Everything inside #grid is created by src/main.ts at runtime — by hand. -->
+    <header class="toolbar">
+      <h1>ShopScope</h1>
+      <label>
+        Category
+        <select id="category">
+          <option value="all">All categories</option>
+        </select>
+      </label>
+      <label>
+        Search
+        <input id="search" type="search" placeholder="Search products" autocomplete="off" />
+      </label>
+      <span class="badge" aria-live="polite">♥ <span id="wishlist-count">0</span></span>
+    </header>
+    <p id="status" class="status" aria-live="polite"></p>
+    <main id="grid" class="grid"></main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

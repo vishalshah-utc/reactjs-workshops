@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShopScope</title>
+    <meta name="description" content="ShopScope — the product explorer you build across the React demo track." />
+    <!-- Runs BEFORE the stylesheet is applied and before React exists. It reads the same key ThemeProvider
+         writes (shopscope.theme), resolves 'system' against the OS, and sets data-bs-theme — so the first
+         paint is already the right colour. Without it a dark-theme user sees a white page for one frame.
+         Plain ES5 on purpose: nothing here is bundled, transpiled or type-checked. -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('shopscope.theme');
+          var preference = stored === 'light' || stored === 'dark' ? stored : 'system';
+          var dark = preference === 'dark' || (preference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
+        } catch (e) {
+          /* no storage, no matchMedia: Bootstrap's default (light) it is */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- React mounts here. This is the ONLY element the server sends;
+         everything else on the page is created by React at runtime. -->
+    <div id="root"></div>
+    <!-- TODO(lab-4.1): add <div id="dialog-root"></div> here — a SIBLING of #root for createPortal to render dialogs into -->
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

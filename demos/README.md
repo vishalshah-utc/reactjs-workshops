@@ -1,9 +1,13 @@
 # ShopScope — the demo track
 
-Thirteen incremental demos that build **one app** — *ShopScope*, a product
-explorer — from "what is a component" to a routed, authenticated app with
-loaders, actions, protected routes, a global client-state store and a production API layer. TypeScript,
-Vite and `strict: true` from the first file.
+A **25-session ReactJS Developer program** that builds **one app** — *ShopScope*,
+a product explorer — from "what is a variable" to a routed, authenticated,
+tested, profiled, production-ready app. Two language-and-orientation sessions,
+twenty-one incremental demos, and a capstone. TypeScript, Vite and
+`strict: true` from the first file.
+
+The full curriculum, with every lab, its minutes and the reasoning behind the
+order, is in **[COURSE-OUTLINE.md](./COURSE-OUTLINE.md)**.
 
 This track is deliberately different from the [ten-session ShopCrew
 curriculum](../sessions/):
@@ -25,9 +29,19 @@ one click or runs locally with `npm install && npm run dev`. Starter files
 carry `TODO(lab-x.y)` markers that the guide walks through in order.
 
 **The starter of demo N+1 is demo N, finished.** Miss one, join at the next.
-The last demo also ships the complete app in `13-…/solution/`.
+Demo 14 ships the finished SPA in `14-…/solution/`; the final demo, 23, ships
+the finished *program* app in `23-…/solution/`.
 
-## The demos
+## The sessions
+
+### Part 0 — Before React
+
+| # | Session | You build | Open |
+|---|---|---|---|
+| S1 | [JavaScript & TypeScript for React](./00a-javascript-and-typescript-for-react/) | The ShopScope catalogue in plain TypeScript: the `Product` type, `format.ts`, `catalog.ts`, a live DummyJSON fetch and an imperative card grid whose wishlist you sync by hand | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/00a-javascript-and-typescript-for-react/starter) |
+| S2 | [React Introduction, Rendering Architectures & the Toolchain](./00b-react-introduction-and-toolchain/) | What React is and how it updates the screen; CSR/SSR/SSG and why ShopScope is a Vite SPA; then scaffold Demo 1's starter live from `npm create vite` | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/00b-react-introduction-and-toolchain/starter) |
+
+### Parts 1–5 — The SPA (Demos 1–14)
 
 | # | Demo | You build | Open |
 |---|---|---|---|
@@ -42,8 +56,26 @@ The last demo also ships the complete app in `13-…/solution/`.
 | 9 | [Routing with React Router v8](./09-routing-with-react-router/) | Layouts, pages, params, Outlet context, filters in the URL | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/09-routing-with-react-router/starter) |
 | 10 | [Loaders, Actions & Error Boundaries](./10-loaders-actions-and-error-boundaries/) | Data before render, `<Form>` + actions, fetchers, pending UI, scoped boundaries | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/10-loaders-actions-and-error-boundaries/starter) |
 | 11 | [Authentication & Protected Routes](./11-auth-and-protected-routes/) | JWT login, refresh queue, middleware guards, roles | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/11-auth-and-protected-routes/starter) |
-| 12 | [Client State with Zustand](./12-client-state-with-zustand/) | A wishlist store that replaces Outlet context, a real cart with a drawer, `persist`, and a checkout action that reads the store outside React | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/12-client-state-with-zustand/starter) |
-| 13 | [Advanced HTTP & Shipping](./13-advanced-http-and-shipping/) | Optimistic UI, upload progress, retries, lazy routes, deploying an SPA | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/13-advanced-http-and-shipping/starter) · [finished app](./13-advanced-http-and-shipping/solution/) |
+| 12 | [Context & Reducers](./12-context-and-reducers/) | A `useReducer` form status that cannot contradict itself, a theme context, one toast system for the whole app, and the wishlist in a provider — with the re-render bill on screen | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/12-context-and-reducers/starter) |
+| 13 | [Client State with Zustand](./13-client-state-with-zustand/) | A wishlist store that replaces the provider, a real cart with a drawer, `persist`, and a checkout action that reads the store outside React | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/13-client-state-with-zustand/starter) |
+| 14 | [Advanced HTTP & Shipping](./14-advanced-http-and-shipping/) | Optimistic UI, upload progress, retries, lazy routes, deploying an SPA | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/14-advanced-http-and-shipping/starter) · [finished SPA](./14-advanced-http-and-shipping/solution/) |
+
+### Part 6 — Professional practice (Demos 15–23)
+
+Each starts from the finished SPA and adds a slice. Demo 15's starter carries
+the extra dependencies the whole part uses, so you still install once.
+
+| # | Demo | You build | Open |
+|---|---|---|---|
+| 15 | [Refs, the DOM & Keyboard Accessibility](./15-refs-dom-and-accessibility/) | `/` focuses search, failed submits focus the first error, route changes announce, `TextField` exposes `focus()`, a canvas chart drawn by a non-React library, a keyboard pass | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/15-refs-dom-and-accessibility/starter) |
+| 16 | [Styling & Theming in React](./16-styling-and-theming/) | The same component styled five ways, `clsx` variants, a persisted dark theme on `data-bs-theme` with no flash, responsive layout, styled vs headless libraries | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/16-styling-and-theming/starter) |
+| 17 | [Component Patterns, Portals & TypeScript Consolidation](./17-component-patterns-and-portals/) | Compound `<Tabs>`, controlled-or-uncontrolled `Pager`, polymorphic `<Text as>`, generic `<DataTable<T>>`, a `createPortal` dialog, component-level error boundaries, HOC → hook | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/17-component-patterns-and-portals/starter) |
+| 18 | [Performance — Measure, then Fix](./18-performance/) | Profiler first, structural fixes, `memo`/`useMemo`/`useCallback`, `useDeferredValue` + `useTransition`, a virtualised grid, a bundle budget, the React Compiler | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/18-performance/starter) |
+| 19 | [Server State with TanStack Query & Real-time Data](./19-tanstack-query-and-realtime/) | Cached queries beside loaders, mutations with invalidation, optimistic updates, infinite queries, polling, a mock SSE ticker, `useSyncExternalStore` | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/19-tanstack-query-and-realtime/starter) |
+| 20 | [Testing React Applications](./20-testing/) | Vitest + Testing Library, pure tests for reducers and stores, MSW for the four data states and the refresh queue, `createRoutesStub`, one Playwright journey | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/20-testing/starter) |
+| 21 | [React 19 Actions, Suspense & Server Components](./21-react-19-actions-suspense-and-server-components/) | `useActionState`/`useFormStatus`/`useOptimistic`, `<Suspense>` + `use`, per-route metadata, and a Next.js mini-project with one client island | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/21-react-19-actions-suspense-and-server-components/starter) |
+| 22 | [Production Readiness](./22-production-readiness/) | `axe` to zero, sanitising + CSP, SEO metadata and the CSR limit, `Intl`, error reporting + Web Vitals, a GitHub Actions gate with a bundle budget | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/22-production-readiness/starter) |
+| 23 | [Capstone: Architecture, Legacy Code & Interview Readiness](./23-capstone-architecture-legacy-and-interviews/) | Feature-folder refactor with enforced dependency direction, a legacy folder read and mapped to today's React, the capstone brief, the interview drill | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/23-capstone-architecture-legacy-and-interviews/starter) · [finished app](./23-capstone-architecture-legacy-and-interviews/solution/) |
 
 ## Running a demo
 
@@ -61,8 +93,10 @@ cd reactjs-workshops/demos/01-components-jsx-props/starter
 npm install && npm run dev
 ```
 
-**Node 22.22+** (`react-router@8` requires it). Every starter pins the *same*
-dependency set, so you install once and `npm run dev` anywhere. `npm run
+**Node 22.22+** (`react-router@8` requires it). Every starter in Demos 1–14
+pins the *same* dependency set, so you install once and `npm run dev`
+anywhere; Demos 15–23 share a second, larger set (added at Demo 15), so Part 6
+is one more install. Session 1 is a plain Vite + TypeScript project. `npm run
 typecheck` runs the compiler — Vite doesn't while serving; `npm run build` is
 `tsc -b && vite build`, so a type error fails the build.
 
@@ -86,8 +120,11 @@ Append `&delay=2000` to any request to slow it down — you'll use it constantly
 Each starter is the previous demo finished, so you can demo any topic in
 isolation: open starter N, follow the guide, and starter N+1 is your answer
 key. Types grow the same way — `src/types.ts` gains an interface when the
-demo that needs it arrives, never before. The long-form reference for everything in demos 5–11 and 13 is the
-[Axios, HTTP & Routing study guide](../study-guides/React-Axios-HTTP-and-Routing-Study-Guide.md).
+demo that needs it arrives, never before. The long-form reference for everything in demos 5–11 and 14 is the
+[Axios, HTTP & Routing study guide](../study-guides/React-Axios-HTTP-and-Routing-Study-Guide.md);
+the theory track for the whole program is the [study notes](../study-notes/).
+The session-by-session plan, including the reasoning for the order and a
+19-session core-only cut, is [COURSE-OUTLINE.md](./COURSE-OUTLINE.md).
 
 ```bash
 node scripts/verify-demos.mjs   # structure checks: markers, pins, StackBlitz config

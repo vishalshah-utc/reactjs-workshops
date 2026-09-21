@@ -1,0 +1,14 @@
+/*
+ * Intentionally (almost) empty — until today.
+ *
+ * Bootstrap's stylesheet is imported in main.tsx and does all the work. Everything visual in this track
+ * has been a React Bootstrap component or a Bootstrap utility class. Demo 16 replaces "no custom CSS"
+ * with a styling POLICY, and this file becomes the one global stylesheet it allows.
+ */
+
+/* TODO(lab-3.5): theme tokens — --shopscope-accent on :root/[data-bs-theme='light'] and a different value on
+   [data-bs-theme='dark']; override ONE Bootstrap variable (--bs-body-bg, --bs-body-bg-rgb) for dark; and a
+   .text-accent utility that reads the token. */
+
+/* TODO(lab-4.3): a container query — .product-cell { container-type: inline-size } and
+   @container (min-width: 440px) { .product-card { flex-direction: row } … } so a card lays itself out by ITS width. */

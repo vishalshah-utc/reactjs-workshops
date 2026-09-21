@@ -775,7 +775,7 @@ revalidation, while staying exactly where we are.
 
 Each fetcher is independent. Here one fetcher on the page is enough — only
 one delete happens at a time, and `fetcher.formData.get('id')` says which
-card. Demo 13 gives every row its own for optimistic UI.
+card. Demo 14 gives every row its own for optimistic UI.
 
 ### Steps
 
@@ -868,7 +868,7 @@ a timeout, or clear it on navigation.
 
 `fetcher.formData` holds the in-flight submission. Instead of dimming the
 card, *remove* it from the rendered list while `deletingId` matches. That's
-optimistic UI in one line — and Demo 13 shows why it's better than the
+optimistic UI in one line — and Demo 14 shows why it's better than the
 snapshot-and-rollback version.
 
 ---

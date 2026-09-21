@@ -1,0 +1,36 @@
+/*
+ * The headless dialog's LOOK — the part the browser leaves to us. A CSS Module, because `::backdrop` and
+ * `[open]` have no utility class, and because these names belong to one component.
+ * Colours come from Bootstrap's variables, so the box follows data-bs-theme like everything else.
+ */
+.dialog {
+  width: min(500px, calc(100% - 1rem));
+  padding: 0;
+  border: 1px solid var(--bs-border-color-translucent);
+  border-radius: var(--bs-border-radius-lg);
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  box-shadow: var(--bs-box-shadow);
+}
+
+/* The dimmed page behind a modal dialog. Only reachable from CSS — no library, no extra element. */
+.dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.dialog[open] {
+  animation: dialog-in 0.15s ease-out;
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog[open] {
+    animation: none;
+  }
+}

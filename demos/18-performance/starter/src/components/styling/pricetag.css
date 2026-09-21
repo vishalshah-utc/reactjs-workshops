@@ -1,0 +1,40 @@
+/*
+ * Way 1 — a GLOBAL stylesheet. From the moment PriceTag.plain.tsx is imported, `.price` means
+ * THIS everywhere in the app. Bootstrap's own variables (--bs-*) are fair game: they are the
+ * theme, and they flip with data-bs-theme for free.
+ */
+.price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.price__final {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+/* Modifiers: one class per size, on the block, read by a descendant selector. */
+.price--sm .price__final {
+  font-size: 1rem;
+}
+.price--lg .price__final {
+  font-size: calc(1.3rem + 0.6vw);
+}
+
+.price__was {
+  color: var(--bs-secondary-color);
+  font-size: 0.875em;
+}
+
+.price__off {
+  color: var(--bs-success);
+  font-size: 0.875em;
+  font-weight: 500;
+}
+
+/* A pseudo-class — the one thing an inline `style` cannot express. */
+.price:hover .price__final {
+  color: var(--bs-primary);
+}

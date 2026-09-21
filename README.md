@@ -20,7 +20,7 @@ events and file upload.
 | 📋 **[Course plan](./PLAN.md)** | The full curriculum, the technology choices and why |
 | 📚 **[Study notes](./study-notes/)** | Module-wise notes for teaching React from scratch — JavaScript foundations, tooling, rendering architectures, then React itself |
 | 📖 **[Study guides](./study-guides/)** | Standalone guided-project write-ups: React + Tailwind/shadcn, and React + TypeScript/Bootstrap |
-| 🎬 **[Demo track](./demos/)** | Thirteen topic-wise demos (TypeScript · React Bootstrap · axios · react-hook-form + zod · React Router 8 · Zustand · DummyJSON) — each with a guide and a one-click starter; the next starter is the previous demo finished |
+| 🎬 **[Demo track](./demos/)** | A 25-session ReactJS Developer program (TypeScript · React Bootstrap · axios · react-hook-form + zod · React Router 8 · Zustand · TanStack Query · Vitest · DummyJSON) — two language sessions, 21 incremental demos and a capstone, each with a guide and a one-click starter; the next starter is the previous demo finished. Curriculum: [demos/COURSE-OUTLINE.md](./demos/COURSE-OUTLINE.md) |
 | 🔌 **[API reference](./api/README.md)** | The backend every session runs against |
 
 ## The ten sessions

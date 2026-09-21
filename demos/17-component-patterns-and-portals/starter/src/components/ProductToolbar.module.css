@@ -1,0 +1,14 @@
+/*
+ * Two widths that apply only from md up. Bootstrap ships no responsive width utilities (there is w-50,
+ * there is no w-md-50), and an inline style cannot carry a media query — so the honest home is a module
+ * scoped to this component. 768px is Bootstrap's md breakpoint; custom properties are not allowed inside
+ * @media, so the number is repeated here.
+ */
+@media (min-width: 768px) {
+  .search {
+    max-width: 360px;
+  }
+  .sort {
+    max-width: 200px;
+  }
+}

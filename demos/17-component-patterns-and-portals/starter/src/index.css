@@ -1,0 +1,47 @@
+/*
+ * ShopScope's one GLOBAL stylesheet — and, since Demo 16, no longer empty. The styling policy
+ * (Demo 16 guide, Wrap-up): React Bootstrap components and utilities first; a CSS Module where one
+ * component needs CSS that utilities cannot express; and THIS file for the three things that are
+ * global by nature — theme tokens, a utility of our own, and layout rules that reach across components.
+ *
+ * Imported AFTER bootstrap.min.css in main.tsx: at equal specificity, later wins, so these rules do.
+ */
+
+/* ---- 1. Theme tokens. Bootstrap themes itself from --bs-* custom properties set on [data-bs-theme];
+        ours sit beside them and flip with the same attribute. One place decides a colour. ---- */
+:root,
+[data-bs-theme='light'] {
+  --shopscope-accent: #b02a5b;
+}
+
+[data-bs-theme='dark'] {
+  --shopscope-accent: #f28ab5;
+  /* One BOOTSTRAP variable overridden: every component that reads --bs-body-bg (the page, cards, modals,
+     the offcanvas) goes a shade deeper than Bootstrap's default #212529. Change it here, it changes everywhere. */
+  --bs-body-bg: #12161c;
+  --bs-body-bg-rgb: 18, 22, 28;
+}
+
+/* ---- 2. One utility of our own, named the way Bootstrap names its own. ---- */
+.text-accent {
+  color: var(--shopscope-accent);
+}
+
+/* ---- 3. A container query: the product card lays itself out by ITS width, not the viewport's.
+        One column on a wide phone → image beside the text; five columns on a desktop → image on top.
+        The grid cell is the container (a container cannot query itself); the card and its media are queried. ---- */
+.product-cell {
+  container-type: inline-size;
+}
+
+@container (min-width: 440px) {
+  .product-card {
+    flex-direction: row;
+  }
+  .product-card__media {
+    flex: 0 0 40%;
+  }
+  .product-card__media .card-img-top {
+    border-radius: var(--bs-card-inner-border-radius) 0 0 var(--bs-card-inner-border-radius);
+  }
+}

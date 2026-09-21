@@ -1,0 +1,38 @@
+/*
+ * Way 2 — a CSS MODULE. Short names are fine: Vite rewrites `.price` to something like
+ * `_price_1k3j9_1`, and the component reads the rewritten name from the imported object.
+ * The suffix `.module.css` is the only configuration.
+ */
+.price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.final {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.sm .final {
+  font-size: 1rem;
+}
+.lg .final {
+  font-size: calc(1.3rem + 0.6vw);
+}
+
+.was {
+  color: var(--bs-secondary-color);
+  font-size: 0.875em;
+}
+
+.off {
+  color: var(--bs-success);
+  font-size: 0.875em;
+  font-weight: 500;
+}
+
+.price:hover .final {
+  color: var(--bs-primary);
+}

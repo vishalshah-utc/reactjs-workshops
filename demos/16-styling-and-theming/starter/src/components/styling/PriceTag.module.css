@@ -1,0 +1,2 @@
+/* TODO(lab-1.2): the same rules as pricetag.css with SHORT names (.price, .final, .was, .off, .sm, .lg) —
+   Vite hashes them per file, so they cannot collide with anything. The `.module.css` suffix is the only config. */

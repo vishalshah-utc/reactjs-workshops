@@ -1041,10 +1041,14 @@ client checked.
 
 ## Next demo
 
-**Demo 12 — Client State with Zustand.** The wishlist leaves the layout's
-Outlet context for a store any page can read; a real cart with a drawer and
-a live badge; both persisted across reloads; and a checkout action that
-reads the store from outside React — guarded by the middleware you just wrote.
+**Demo 12 — Context & Reducers.** Three "done!" messages built three
+different ways, and a profile check tracked with three flags that can
+contradict each other: you'll replace the flags with a `useReducer` state
+machine, give the app a theme and a toast system through React Context — the
+*other* `createContext`, not the router's `userContext` you just used — and
+move the wishlist out of Outlet context into a `WishlistProvider` with the
+Profiler open, so the cost of that design is measured before Demo 13 swaps it
+for a store.
 
 ---
 

@@ -51,7 +51,7 @@ Bookmark the `stackblitz.com/edit/…` URL once it loads.
 
 ## Finished version
 
-[`../../12-client-state-with-zustand/starter`](../../12-client-state-with-zustand/starter).
+[`../../12-context-and-reducers/starter`](../../12-context-and-reducers/starter).
 
 ## Commands
 

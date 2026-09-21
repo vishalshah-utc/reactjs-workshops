@@ -1,0 +1,7 @@
+/* TODO(lab-1.4): Tailwind v4 next to Bootstrap — WITHOUT preflight, WITH a prefix, scanning ONE file:
+     @layer theme, base, components, utilities;
+     @import 'tailwindcss/theme.css' layer(theme) prefix(tw);
+     @import 'tailwindcss/utilities.css' layer(utilities) prefix(tw) source(none);
+     @source './components/styling/PriceTag.tailwind.tsx';
+   plus a @custom-variant so `tw:dark:` follows [data-bs-theme='dark'] instead of the OS media query.
+   Nothing imports this file until PriceTag.tailwind.tsx does. */
