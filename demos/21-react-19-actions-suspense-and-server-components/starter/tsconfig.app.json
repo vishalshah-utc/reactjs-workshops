@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* vite/client declares `import "./x.css"` and import.meta.env.
+       Without it the CSS import in main.tsx is an error.
+       vitest/globals declares describe/it/expect/vi, which vitest.config.ts's
+       `globals: true` puts in scope — the config and the types must agree. */
+    "types": ["vite/client", "vitest/globals"],
+
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Strict on from day one. Turning strictness ON later means fixing
+       hundreds of errors at once; leaving it on from the start means fixing
+       them one at a time, as you write them. */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "include": ["src"]
+}
