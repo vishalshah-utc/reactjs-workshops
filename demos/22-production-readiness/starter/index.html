@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- NO <title> and NO <meta name="description"> here, on purpose (Demo 21 Block 3).
+         React 19 hoists the ones <PageMeta> renders into this <head> by APPENDING them,
+         and `document.title` is the FIRST <title> in the document — so a static one here
+         would win for ever and every route would be called "ShopScope".
+         The cost: for the few hundred milliseconds before React mounts, the tab shows the
+         URL. That is the CSR trade-off this whole page is made of, and Demo 22 measures it. -->
+    <!-- Runs BEFORE the stylesheet is applied and before React exists. It reads the same key ThemeProvider
+         writes (shopscope.theme), resolves 'system' against the OS, and sets data-bs-theme — so the first
+         paint is already the right colour. Without it a dark-theme user sees a white page for one frame.
+         Plain ES5 on purpose: nothing here is bundled, transpiled or type-checked. -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('shopscope.theme');
+          var preference = stored === 'light' || stored === 'dark' ? stored : 'system';
+          var dark = preference === 'dark' || (preference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
+        } catch (e) {
+          /* no storage, no matchMedia: Bootstrap's default (light) it is */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- React mounts here. This is the ONLY element the server sends;
+         everything else on the page is created by React at runtime. -->
+    <div id="root"></div>
+    <!-- A second mount point, a SIBLING of #root. createPortal renders dialogs here, so no page element's
+         overflow: hidden, transform or z-index can clip or bury them. Empty until a dialog opens. -->
+    <div id="dialog-root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

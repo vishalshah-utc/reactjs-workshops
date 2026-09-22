@@ -63,6 +63,13 @@ describe('productDetailLoader', () => {
     expect(within(alert).getByText('No product with id 9999.')).toBeInTheDocument();
   });
 
+  // TODO(lab-2.6): two tests for the streamed half. Override `/products/:id` with a handler
+  // that `await delay(…)`s only when `select=reviews`, then assert (a) the product heading is
+  // on screen WHILE "Loading reviews" still is, and the fallback is later replaced in place,
+  // and (b) a 503 on the reviews request lands in the widget boundary with the page intact.
+  it.todo('renders the product while the reviews are still loading, then streams them in');
+  it.todo('sends a rejected reviews promise to the widget boundary, not the page');
+
   it('lets a real failure through to the generic branch', async () => {
     server.use(http.get(`${API}/products/:id`, () => HttpResponse.json({ message: 'Database unavailable' }, { status: 503 })));
 

@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    // "node" joins "vite/client" so vite.config.ts may read process.env.ANALYZE (Demo 18 Lab 5).
+    "types": ["vite/client", "node"],
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noUncheckedSideEffectImports": true
+  },
+  /* Everything that runs in NODE rather than in the browser: the Vite config,
+     the Vitest config that extends it, and the Playwright suite (which drives a
+     browser from the outside and never runs inside one). */
+  "include": ["vite.config.ts", "vitest.config.ts", "playwright.config.ts", "e2e", "types"]
+}

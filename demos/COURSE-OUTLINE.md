@@ -1,5 +1,7 @@
 # ShopScope — the 25-session ReactJS Developer Program
 
+*Plus a two-demo state-management pair (24a / 24b) — see Part 7.*
+
 **Status: proposal for review (v2).** One app, *ShopScope*, built across 25
 sessions: two language-and-orientation sessions, the 13 shipped demos plus one
 new demo slotted into the chain, and nine professional-practice sessions that
@@ -52,6 +54,9 @@ expected of a mid-level hire · **Optional** = stretch.
 | S23 | 21 | React 19 Actions, Suspense & Server Components | 130 min | NEW | Recommended |
 | S24 | 22 | Production Readiness | 130 min | NEW | Core |
 | S25 | 23 | Capstone: Architecture, Legacy Code & Interview Readiness | 120 min | NEW | Core |
+| **Part 7 — State management in depth** (a parallel pair, not chain links) | | | | | |
+| — | **24a** | **Advanced Zustand** | 150 min | NEW | Recommended |
+| — | **24b** | **Redux Toolkit (incl. RTK Query)** | 170 min | NEW | Recommended |
 
 ### Why this order
 
@@ -408,6 +413,91 @@ ShopScope code.
 
 ---
 
+---
+
+## Part 7 — State management in depth (Demos 24a and 24b)
+
+**A parallel pair, not chain links.** Both start from the same base — the
+finished SPA in `14-…/solution` — and both build the **same feature**, the
+Inventory Console, once in each library. Each ships its own `starter/` and
+`solution/`. Nothing follows them, so neither writes a next starter, and the
+main chain is untouched.
+
+**Why a pair rather than one demo.** "Which state library should we use" is a
+question every React team argues about and almost nobody answers with evidence.
+Building one non-trivial feature twice, against the same API and the same
+component tree, turns the argument into a measurement: lines written, bundle
+added, DevTools you get, and how each one handles the part that actually hurts —
+asynchronous requests living in a central store.
+
+**When to teach them.** Any time after Demo 13 (Zustand basics). They sit at the
+end of the program because they are alternatives and deep dives, not steps the
+rest of the track depends on. Teach 24a alone for a Zustand shop, 24b alone for a
+Redux shop, or both back to back for the comparison, which is the strongest
+version.
+
+### The shared feature: the Inventory Console
+
+An admin-only route, `/account/inventory`, built deliberately **without** route
+loaders so the store owns the asynchronous work and the learner sees what that
+costs and buys.
+
+| | Requirement | The concept it forces |
+|---|---|---|
+| F1 | Load products through the store, with a status machine | async in a central store; states that cannot contradict |
+| F2 | Normalised entities: `ids` + `entities`, never a nested array | why normalisation exists; selector memoisation |
+| F3 | Debounced filters that refetch, where a slow stale response must be discarded | race conditions, cancellation, request identity |
+| F4 | Inline stock edit that updates instantly and rolls back on rejection | optimistic updates and rollback; per-entity status |
+| F5 | Bulk restock with limited concurrency, partial failure and undo | snapshots, batching, honest failure reporting |
+| F6 | A persisted "recently inspected" list with a version and a migration | persistence, migration, what not to persist |
+| F7 | Sign-out clears user-scoped state in one call | cross-slice coordination, store reset |
+| F8 | Redux DevTools time-travel works in both | the debugging story is a real selection criterion |
+
+### 24a · Advanced Zustand — ~150 min — **Recommended**
+
+Assumes Demo 13. New ground: the slices pattern with typed `StateCreator`; the
+middleware stack and why its order matters, including the TypeScript pain each
+layer causes; `immer` for nested entity updates; `devtools` with named actions so
+time-travel is readable; async actions inside the store with `AbortController` and
+a monotonic request id; `subscribeWithSelector` and transient subscriptions;
+`persist` in depth (`partialize`, `version`, `migrate`, `merge`, hydration);
+selector discipline, `useShallow`, and why a fresh object per call loops; a reset
+registry; testing a store with no React at all. It closes on the honest limits —
+no cache, no dedupe, no invalidation — and the line where TanStack Query (Demo 19)
+takes over.
+
+### 24b · Redux Toolkit — ~170 min — **Recommended**
+
+Assumes no Redux. Modern RTK only; legacy `connect`, hand-written action types and
+sagas appear only as "what you will see in older code". `configureStore` and typed
+hooks; `createSlice` and the Immer illusion; `createAsyncThunk` in full, with
+`rejectWithValue` carrying the `ApiError`, `condition` for dedupe, `signal` for
+abort and `extra` wired to the existing services; `extraReducers` and matchers;
+`createEntityAdapter`; `createSelector` and selector factories;
+`createListenerMiddleware` as the modern replacement for sagas; what the default
+serializability and immutability checks catch; then **RTK Query** rebuilding the
+same fetching on a **custom axios `baseQuery` over the API layer built in Demos 5
+to 8** — tags, invalidation, `onQueryStarted` optimistic updates, polling — with
+the thunk version and the RTK Query version counted side by side.
+
+### Both guides carry
+
+ASCII flow diagrams, in fenced blocks rather than Mermaid so they render in
+StackBlitz and plain editors as well as on GitHub: the library's data flow, the
+async lifecycle, the race with the stale response discarded, the optimistic
+rollback timeline, the normalised shape, the store architecture, the RTK Query
+cache (24b) against the cache-shaped hole (24a), and one shared side-by-side
+architecture comparison.
+
+Links to the official documentation throughout — a `### Further reading` block at
+the end of every lab and a consolidated `## Reference` section, deep-linked to the
+exact page and restricted to official sources.
+
+And the same closing section, **"Zustand or Redux Toolkit?"**, written fairly from
+each side: measured bundle cost, boilerplate, TypeScript ergonomics, DevTools, the
+async story, ecosystem, team size, testing, and a recommendation with its
+conditions attached.
+
 ## Coverage check against the study notes
 
 | Study-notes module | Covered by |
@@ -417,7 +507,7 @@ ShopScope code.
 | 03 Rendering Architectures | S02, S23 |
 | 04 Components & JSX · 05 Props · 06 Conditional & Lists | S03–S04 (Demos 1–2) |
 | 07 State & Events · 08 State Structure | S04–S05, S10 (Demos 2–3, 8) |
-| 09 Reducers & Context | **S14 (Demo 12, NEW)**, S15 |
+| 09 Reducers & Context | **S14 (Demo 12, NEW)**, S15; state at depth in **24a / 24b (NEW)** |
 | 10 Forms | S05–S06, S12 (Demos 3–4, 10); React Actions in S23 |
 | 11 Refs & the DOM | **S17 (Demo 15, NEW)** |
 | 12 Effects | S07, S09, S10 (Demos 5, 7, 8); `useSyncExternalStore` in S21 |

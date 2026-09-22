@@ -1,0 +1,18 @@
+/*
+ * Tailwind v4, configured to coexist with Bootstrap. Three decisions, each one deliberate:
+ *
+ * 1. NO preflight. `@import "tailwindcss"` would also import Tailwind's reset (preflight.css), which
+ *    zeroes margins on h1–h6, unstyles buttons and resets `body` — on top of Bootstrap's reboot.
+ *    Importing theme.css and utilities.css by hand leaves the reset out.
+ * 2. A PREFIX. Both frameworks own `.container`, `.border`, `.rounded`, `.collapse`, `.opacity-50`…
+ *    `prefix(tw)` makes every Tailwind class `tw:something`, so the two vocabularies never share a name.
+ * 3. A NARROW SOURCE. Tailwind generates only the classes it finds in files it scans. `source(none)` turns
+ *    off automatic scanning of the whole project; `@source` points it at the one file that uses it.
+ */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme) prefix(tw);
+@import 'tailwindcss/utilities.css' layer(utilities) prefix(tw) source(none);
+@source './components/styling/PriceTag.tailwind.tsx';
+
+/* Tailwind's `dark:` variant defaults to the OS media query. Ours follows Bootstrap's attribute instead, so one control themes both. */
+@custom-variant dark (&:where([data-bs-theme='dark'], [data-bs-theme='dark'] *));

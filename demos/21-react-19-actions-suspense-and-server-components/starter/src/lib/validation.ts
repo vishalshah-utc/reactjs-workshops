@@ -97,3 +97,27 @@ export const SIGNUP_EMPTY: SignupValues = {
   terms: false,
   avatar: null,
 };
+
+// ---------------------------------------------------------------- Demo 21
+// A React Action is handed the browser's own `FormData`, which holds strings
+// and Files and nothing else. The coercion react-hook-form used to do has to
+// happen somewhere, and "somewhere" is a pure function — testable on its own,
+// and the same code a server would run.
+
+/** One message per field — the shape the form renders. */
+export type SignupErrors = Partial<Record<keyof SignupValues | 'form', string>>;
+
+// TODO(lab-1.1): parseSignupFormData(formData) → SignupValues. Watch the three awkward
+// reads: getAll('interests') for a checkbox GROUP, `get('terms') === 'on'` because an
+// unchecked box sends nothing at all, and a file input that always sends a File — with
+// size 0 when it is empty. An empty age box must become NaN, not 0.
+export function parseSignupFormData(_formData: FormData): SignupValues {
+  return SIGNUP_EMPTY;
+}
+
+// TODO(lab-1.1): validateSignup(values) → the errors to render, or null when it is clean.
+// Run `signupSchema.safeParse`, then flatten with `z.flattenError(...).fieldErrors` and
+// keep the FIRST message per field — the form shows one line, not three.
+export function validateSignup(_values: SignupValues): SignupErrors | null {
+  return null;
+}

@@ -31,6 +31,10 @@ import type { Review } from '../types';
  * this request now, and a loader aborting it mid-flight would leave the cache
  * with a rejected entry that the next visitor inherits.
  */
+// TODO(lab-2.3): return `{ product, reviews }` where `reviews` is a promise this loader
+// never awaits — `queryClient.fetchQuery(productReviewsQuery(productId, REVIEWS_DELAY_MS))`.
+// Start it BEFORE the awaited product call or the two requests queue up behind one another,
+// and attach a bare `.catch(() => {})` so an unobserved rejection is not an unhandled one.
 export async function productDetailLoader({ params }: LoaderFunctionArgs) {
   const productId = params.productId ?? ''; // params are string | undefined — the route guarantees it, TS can't
   try {
@@ -69,6 +73,12 @@ function ReviewList({ reviews }: { reviews: Review[] }) {
   );
 }
 
+// TODO(lab-2.4): add a <ReviewsSkeleton> and a <ReviewsPanel reviews={Promise<Review[]>}> that
+// reads the promise with `use(reviews)`. Then wrap the reviews Tabs.Panel in
+// <WidgetBoundary name="reviews"><Suspense fallback={<ReviewsSkeleton />}>…</Suspense></WidgetBoundary>:
+// Suspense is for pending, a boundary is for rejected, and they are different problems.
+// The count has to leave the tab — nobody knows it yet.
+
 /** No loading state, no error state, no effect: the data is already here on the first render. */
 export function ProductDetailPage() {
   // Typed from the loader itself — change the loader's return and this changes with it.
@@ -96,6 +106,7 @@ export function ProductDetailPage() {
 
   return (
     <>
+      {/* TODO(lab-3.2): <PageMeta title={product.title} description={product.description} /> */}
       <Link to="/products" className="btn btn-link ps-0 mb-3 text-decoration-none">
         <ArrowLeft className="me-1" />
         Back to products
@@ -137,6 +148,9 @@ export function ProductDetailPage() {
                     <Cart3 className="me-1" />
                     {product.stock === 0 ? 'Sold out' : 'Add to cart'}
                   </Button>
+                  {/* TODO(lab-1.6): replace this button with <WishlistButton productId={product.id}
+                      title={product.title} /> and delete the `saved` / `toggleSave` lines above —
+                      the optimistic state belongs to the button, not to the page. */}
                   <Button variant={saved ? 'danger' : 'outline-danger'} aria-pressed={saved} onClick={() => toggleSave(product.id)}>
                     {saved ? <HeartFill className="me-1" /> : <Heart className="me-1" />}
                     {saved ? 'Saved' : 'Save'}

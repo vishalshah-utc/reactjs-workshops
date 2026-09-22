@@ -1,6 +1,6 @@
 import { api } from '../client';
 import { endpoints } from '../endpoints';
-import type { ApiCategory, Product, ProductDraft, ProductListResponse, StockLevel } from '../../types';
+import type { ApiCategory, Product, ProductDraft, ProductListResponse, Review, StockLevel } from '../../types';
 
 /** Only the fields the list UI renders — smaller payload, faster page. */
 const LIST_FIELDS = 'id,title,description,category,price,discountPercentage,rating,stock,brand,thumbnail';
@@ -59,6 +59,14 @@ export async function listProducts({
 export async function getProduct(id: number | string, { signal }: RequestOptions = {}): Promise<Product> {
   const { data } = await api.get<Product>(endpoints.products.detail(id), { signal });
   return data;
+}
+
+/** The reviews for one product, as a request of their OWN. */
+// TODO(lab-2.1): GET the detail endpoint with `select: 'reviews'` and DummyJSON's own
+// `delay` parameter, and return `data.reviews ?? []`. `delayMs` defaults to 0 — it is a
+// teaching switch, so the caller has to ask for it.
+export function getProductReviews(_id: number | string, _options: RequestOptions & { delayMs?: number } = {}): Promise<Review[]> {
+  return Promise.resolve([]);
 }
 
 export async function listCategories({ signal }: RequestOptions = {}): Promise<ApiCategory[]> {

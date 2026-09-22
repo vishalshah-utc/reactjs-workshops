@@ -45,6 +45,11 @@ export function productQuery(id: number | string) {
   });
 }
 
+// TODO(lab-2.2): add `reviews: (id) => [...productKeys.detail(id), 'reviews']` to the key
+// factory above, and a `productReviewsQuery(id, delayMs = 0)` over `getProductReviews`.
+// Nesting the key UNDER detail(id) is what makes one invalidation after an edit enough.
+// staleTime: 5 minutes — reviews are the least volatile thing on the page.
+
 /** The filters that identify a page of the catalogue — and NOTHING else the URL happens to carry. */
 export function listOptionsFrom(searchParams: URLSearchParams): ListProductsOptions {
   const { sortBy, order } = parseSort((searchParams.get('sort') ?? '') as SortKey);

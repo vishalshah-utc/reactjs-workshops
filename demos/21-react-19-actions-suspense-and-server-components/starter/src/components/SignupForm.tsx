@@ -21,6 +21,12 @@ interface SignupFormProps {
   onClose: () => void;
 }
 
+// TODO(lab-1.3): rebuild this form on React 19 Actions. Model the state as a discriminated
+// union (idle | error | success) and drive it with `useActionState(signupAction, IDLE)`; write
+// `signupAction(previous, formData)` OUTSIDE the component (no hooks, no props — the same shape
+// a Server Function has) and RETURN its errors rather than throwing them; give every input a
+// `name` and a `defaultValue` and delete every `value`/`onChange`/`<Field>`; render <SubmitButton>
+// in the footer. The zod schema does not change — it never cared who was calling it.
 /**
  * The SAME field components, driven by react-hook-form + zod.
  *

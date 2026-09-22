@@ -288,6 +288,11 @@ export function ProductsPage() {
 
   return (
     <>
+      {/* TODO(lab-3.2): render <PageMeta> here and on the product detail, login, about and
+          not-found routes — and DELETE the <title> and <meta name="description"> from
+          index.html, because `document.title` is the FIRST title in the document and a
+          static one would win for ever. */}
+
       {/* The page hands the surface three ELEMENTS and its children. The surface owns the price-chart
           disclosure; opening it re-renders the surface and nothing that arrived through these props. */}
       <ProductsSurface

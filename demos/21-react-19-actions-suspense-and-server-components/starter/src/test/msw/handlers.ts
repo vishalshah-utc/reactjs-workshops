@@ -70,6 +70,9 @@ export const handlers = [
     ),
   ),
 
+  // TODO(lab-2.5): the reviews request goes through THIS path with `?select=reviews`, so the
+  // handler has to honour `select` here too — and serve `reviewsFor(product.id)` from the
+  // fixtures. A mock more generous than the real API hides bugs instead of catching them.
   http.get(`${API}/products/:id`, ({ params }) => {
     const product = CATALOGUE.find((item) => String(item.id) === params.id);
     if (!product) return HttpResponse.json({ message: `Product with id '${params.id}' not found` }, { status: 404 });
