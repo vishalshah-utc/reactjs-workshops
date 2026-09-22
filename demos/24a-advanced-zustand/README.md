@@ -1861,7 +1861,7 @@ guessed.
   nothing                            RTK Query: dedupe, tags, invalidation
 
   ONE library, 4 middlewares         TWO libraries, one convention
-  ~6.3 kB gzip added                 ~25.9 kB gzip added
+  ~6.4 kB gzip added                 ~26.5 kB gzip added
 ```
 
 *The same five concerns, solved by code you write versus configuration you
@@ -1874,15 +1874,30 @@ Built with Vite 8, minified, gzip, on top of an identical React 19 baseline
 
 | | gzip added | What was imported |
 |---|---|---|
-| **zustand + immer** | **6.3 kB** | `create`, `useShallow`, `devtools`, `persist`, `subscribeWithSelector`, `createJSONStorage`, `immer` |
-| **@reduxjs/toolkit + react-redux** | **25.9 kB** | `configureStore`, `createSlice`, `createAsyncThunk`, `createEntityAdapter`, `createListenerMiddleware`, `createSelector`, `createApi`, `Provider`, `useSelector`, `useDispatch` |
+| **zustand + immer** | **6.4 kB** | `create`, `useShallow`, `devtools`, `persist`, `subscribeWithSelector`, `createJSONStorage`, `immer` |
+| **@reduxjs/toolkit + react-redux** | **13.2 kB** | `configureStore`, `createSlice`, `createAsyncThunk`, `createEntityAdapter`, `createListenerMiddleware`, `createSelector`, `Provider`, `useSelector`, `useDispatch` |
+| **…and RTK Query as well** | **26.5 kB** | all of the above plus `createApi`, `fetchBaseQuery` and the generated hooks |
+
+Read the second row before you use the first one in an argument. Most of
+Redux Toolkit's weight is RTK Query, and RTK Query is a *cache* — the thing
+this store does not have and cannot pretend to. Comparing 6.4 kB of Zustand
+against 26.5 kB of all-in RTK compares a store against a store plus a cache.
+Against RTK's store alone it is 6.4 against 13.2, and if you add TanStack
+Query to the Zustand column to make the features match, the gap closes
+further still.
 
 And in the real app: ShopScope's total JavaScript went from **200.4 kB** gzip
-(Demo 14) to **216.0 kB** gzip with the whole console — of which the lazily
-loaded `InventoryPage` chunk is **9.8 kB**, downloaded only by admins who open
-the route. Four times the library weight is a real difference; on a screen this
-size it is also 20 kB, and you should weigh it against the rest of the table
-rather than winning the argument with it.
+(Demo 14) to **216.0 kB** with the whole console here, against **242.5 kB**
+for [the Redux build of the same feature](../24b-redux-toolkit/) — +15.6 kB
+versus +42.1 kB. The lazily loaded `InventoryPage` chunk is about the same in
+both, near 9.8 kB, downloaded only by admins who open the route. The
+whole-app gap is wider than the library gap for a structural reason worth
+understanding: `<Provider>` puts the Redux store on the critical path for
+every visitor, while a Zustand store is only pulled in by the code that
+imports it.
+
+None of which settles the question. It is twenty-odd kilobytes on one screen,
+and the rest of this table matters more.
 
 ### Everything else, honestly
 
