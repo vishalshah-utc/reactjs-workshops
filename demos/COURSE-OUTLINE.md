@@ -1,6 +1,6 @@
 # ShopScope — the 25-session ReactJS Developer Program
 
-*Plus a two-demo state-management pair (24a / 24b) — see Part 7.*
+*Plus a three-demo state-management set (24a / 24b / 24c) — see Part 7.*
 
 **Status: proposal for review (v2).** One app, *ShopScope*, built across 25
 sessions: two language-and-orientation sessions, the 13 shipped demos plus one
@@ -57,6 +57,7 @@ expected of a mid-level hire · **Optional** = stretch.
 | **Part 7 — State management in depth** (a parallel pair, not chain links) | | | | | |
 | — | **24a** | **Advanced Zustand** | 150 min | NEW | Recommended |
 | — | **24b** | **Redux Toolkit (incl. RTK Query)** | 170 min | NEW | Recommended |
+| — | **24c** | **Redux-Observable, RxJS & a WebSocket Stream** | 150 min | NEW | Optional |
 
 ### Why this order
 
@@ -480,7 +481,61 @@ same fetching on a **custom axios `baseQuery` over the API layer built in Demos 
 to 8** — tags, invalidation, `onQueryStarted` optimistic updates, polling — with
 the thunk version and the RTK Query version counted side by side.
 
-### Both guides carry
+### 24c · Redux-Observable, RxJS & a WebSocket Stream — ~150 min — **Optional**
+
+**The one demo in the set that is a chain link:** its starter is 24b finished, so
+the store, the typed hooks, the slices and the Inventory Console already exist and
+the demo can spend all its time on the part that is genuinely new — side effects
+as streams.
+
+The console gains a **live feed**: a persistent WebSocket that streams stock and
+price changes for the products on screen. That single feature forces every
+reactive concept into the open. The connection itself becomes a stream, opened
+when the console mounts and torn down with `takeUntil` when it unmounts, so there
+is no listener left behind and no `useEffect` cleanup to forget. A dropped
+connection reconnects with exponential backoff through `retry`, rather than a
+hand-rolled timer and a retry counter in state. Inbound messages become actions
+and land in the entity adapter from 24b. Outbound, the console subscribes and
+unsubscribes to product ids as the visible set changes.
+
+Alongside it, the debounced search from 24b is rebuilt as an epic, which is where
+the operator that matters gets taught properly: `switchMap` cancels the previous
+request, `mergeMap` does not, `concatMap` queues and `exhaustMap` ignores — four
+one-line changes with four visibly different behaviours against a slow endpoint.
+
+Covered: `createEpicMiddleware`, `combineEpics` and the typed `Epic`; `ofType`;
+the operators worth knowing (`switchMap`, `mergeMap`, `concatMap`, `exhaustMap`,
+`debounceTime`, `distinctUntilChanged`, `withLatestFrom`, `catchError`, `retry`,
+`takeUntil`, `startWith`); `webSocket` from `rxjs/webSocket` and multiplexing;
+marble testing epics with `TestScheduler`; and a straight comparison of thunks,
+sagas and epics with the conditions under which each wins.
+
+DummyJSON has no WebSocket endpoint, so the demo ships a small mock server as a
+Vite dev-server plugin and says so plainly, exactly as Demo 19 did for its event
+stream. The guide leans on **ASCII marble diagrams** — the natural notation for
+this material — to show cancellation, backoff and the difference between the
+flattening operators on one timeline.
+
+One honest note the guide makes rather than hides: `redux-observable`'s only
+release compatible with Redux 5, which Redux Toolkit 2 ships, is a release
+candidate. That is a real consideration when choosing this stack, and it belongs
+in the same conversation as the technical merits.
+
+### Every demo in the set also ships a `WALKTHROUGH.md`
+
+A short companion beside the guide. The guide teaches by **building** — labs,
+markers, steps. The walkthrough teaches by **reading and observing** the finished
+solution, for the learner who wants to understand the code without typing it, and
+for the trainer demonstrating it live. It runs to a couple of hundred lines: how to
+run it, the three files to read if you only have five minutes, a file-by-file tour,
+a **concept-to-observation table** giving for each concept what to click and what
+you should actually see, and a short "if you change this line, that breaks" section.
+
+That table is the part that makes the concepts checkable. Rather than asserting that
+a stale response is discarded, it tells the reader which Network throttle to set,
+what to type, and which request to watch being ignored.
+
+### All three guides carry
 
 ASCII flow diagrams, in fenced blocks rather than Mermaid so they render in
 StackBlitz and plain editors as well as on GitHub: the library's data flow, the

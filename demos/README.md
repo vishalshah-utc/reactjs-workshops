@@ -4,7 +4,8 @@ A **25-session ReactJS Developer program** that builds **one app** — *ShopScop
 a product explorer — from "what is a variable" to a routed, authenticated,
 tested, profiled, production-ready app. Two language-and-orientation sessions,
 twenty-one incremental demos, and a capstone — plus a two-demo state-management
-pair that builds one feature in Zustand and again in Redux Toolkit. TypeScript,
+set that builds one feature in Zustand and again in Redux Toolkit, then takes it
+into RxJS streams. TypeScript,
 Vite and `strict: true` from the first file.
 
 The full curriculum, with every lab, its minutes and the reasoning behind the
@@ -80,21 +81,24 @@ the extra dependencies the whole part uses, so you still install once.
 
 ### Part 7 — State management in depth (a parallel pair)
 
-Two demos, **one feature, two libraries**. Both start from the finished SPA and
+Three demos. The first two build **one feature in two libraries**; the third
+takes the Redux version further into reactive side effects. Both start from the finished SPA and
 build the same admin Inventory Console: products loaded through the store,
 normalised entities, debounced filters that must discard a stale response,
 optimistic edits that roll back, bulk updates with undo, persistence with a
 migration, and working DevTools time-travel. Neither is a chain link — each
 ships its own starter and solution, and the main track is untouched.
 
-Teach either one alone, or both back to back, which turns "which state library
-should we use" from an argument into a measurement. Both guides carry ASCII flow
+Teach 24a or 24b alone, or both back to back, which turns "which state library
+should we use" from an argument into a measurement. 24c continues from 24b
+finished, and is the one chain link in the set. Both guides carry ASCII flow
 diagrams and deep links to the official documentation.
 
 | # | Demo | You build | Open |
 |---|---|---|---|
 | 24a | [Advanced Zustand](./24a-advanced-zustand/) | Slices and the middleware stack, async in the store with cancellation and a request id, immer, `subscribeWithSelector`, `persist` with migrations, selector discipline, a reset registry — and the honest limits that send you to TanStack Query | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/24a-advanced-zustand/starter) · [finished](./24a-advanced-zustand/solution/) |
 | 24b | [Redux Toolkit](./24b-redux-toolkit/) | `createSlice`, `createAsyncThunk` in full, `createEntityAdapter`, memoised selectors, `createListenerMiddleware`, then RTK Query rebuilt on a custom axios `baseQuery` over the existing API layer, with tags and optimistic updates | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/24b-redux-toolkit/starter) · [finished](./24b-redux-toolkit/solution/) |
+| 24c | [Redux-Observable, RxJS & a WebSocket Stream](./24c-redux-observable-and-rxjs/) | A persistent WebSocket as a stream — opened on mount, torn down with `takeUntil`, reconnecting with backoff via `retry` — plus the debounced search rebuilt as an epic, where `switchMap` / `mergeMap` / `concatMap` / `exhaustMap` become four visible behaviours, and marble tests | [▶ starter](https://stackblitz.com/fork/github/vishalshah-utc/reactjs-workshops/tree/main/demos/24c-redux-observable-and-rxjs/starter) · [finished](./24c-redux-observable-and-rxjs/solution/) |
 
 ## Running a demo
 
