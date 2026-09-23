@@ -49,10 +49,12 @@ the experiment: by the end of the day you will have felt exactly what it costs
 and exactly what it buys.
 
 **A store built out of slices.** Five typed slices — filters, catalogue, edit,
-bulk, recent — combined into one `create<InventoryStore>()`, under a four-layer
-middleware stack: `devtools(persist(immer(subscribeWithSelector(…))))`. Order
-matters, each layer breaks your types in its own way, and you will meet all four
-failures head on rather than discovering them at 6pm.
+bulk, recent — combined into one `create<InventoryStore>()`. It starts with **no
+middleware at all**, and ends as
+`devtools(persist(immer(subscribeWithSelector(…))))` — but you add those four
+one at a time, each in the lab where something you are trying to do stops being
+possible without it, and each with one more entry in the mutator tuple that
+keeps `set` typed. Four small doses instead of one cliff.
 
 **Async inside the store.** A four-state machine that cannot contradict itself,
 an `AbortController` that cancels the request nobody wants any more, and a
@@ -87,7 +89,7 @@ object and the React binding is optional.
 By the end you will be able to answer, without hesitating:
 
 - When a slice is better than a second store, and when it is not
-- What each of the four middlewares does, why they nest in that order, and which one breaks your types when you reorder them
+- What each of the four middlewares does, which problem buys it its place, and exactly which compiler error you get when the mutator tuple and the stack disagree
 - Why `get()` before an `await` is a photograph, and what to do about it
 - Why cancelling a request is not enough to prevent a stale write
 - What normalisation actually buys, and what it costs
@@ -120,8 +122,9 @@ Three things to set up before Lab 1, all of which you will use all day:
    ([Chrome](https://chromewebstore.google.com/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd),
    [Firefox](https://addons.mozilla.org/en-GB/firefox/addon/reduxdevtools/)).
    It is not only for Redux — Zustand's `devtools` middleware speaks the same
-   protocol, and from Lab 1 C every change to the inventory store will appear in
-   it by name, with time travel that works.
+   protocol, and from Lab 2 A every change to the inventory store will appear in
+   it by name, with time travel that works. Lab 1 deliberately runs without it,
+   so you can feel what it is for.
 2. **Sign in as `emilys` / `emilyspass`.** That is DummyJSON's admin account,
    and `/account/inventory` is behind `requireRole('admin')`. `averyp` /
    `averyppass` is a moderator, and useful later for watching a 403.
@@ -190,9 +193,41 @@ it first; judge it after.
 Six labs. By the end of Lab 2 the table fills. By the end of Lab 4 you will have
 made the server reject an edit and watched the row heal itself.
 
+**And one note on how the store gets built.** The finished store sits under four
+middlewares. They do not all arrive in Lab 1. Each one is added in the lab where
+the thing it solves first hurts — `devtools` when you cannot see what is
+happening, `immer` when the nested write turns ugly, `subscribeWithSelector`
+when a subscription needs a selector, `persist` when something has to survive a
+reload — and each addition is the same two-file diff: one more layer in
+`index.ts`, one more entry in `InventoryMutators` in `types.ts`.
+
+```text
+  Lab 1    create<InventoryStore>()( slices )                       []
+
+  Lab 2 A  devtools( slices )                                       [devtools]
+           you are about to write a request with three outcomes
+           and no way to watch it
+
+  Lab 3 B  devtools( immer( slices ) )                              [devtools,
+           `entities: { ...state.entities, [id]: {...} }` is one     immer]
+           forgotten spread away from a mutation bug
+
+  Lab 6 B  devtools( immer( subscribeWithSelector( slices ) ) )     [devtools,
+           plain `subscribe()` takes ONE argument, and the           immer, sWS]
+           transient listener wants a selector
+
+  Lab 6 C  devtools( persist( immer( subscribeWithSelector(         [devtools,
+                    slices ) ) ) )                                   persist,
+           the recent list has to survive a reload                   immer, sWS]
+```
+
+*The stack, grown one layer at a time. The right-hand column is
+`InventoryMutators` — it gains exactly one entry per layer, and Lab 6 C inserts
+`persist` in the middle rather than appending it.*
+
 ---
 
-## Lab 1 — Slices, and the middleware stack that breaks your types (25 min)
+## Lab 1 — Slices, and one store with no middleware at all (10 min)
 
 ### Problem
 
@@ -236,7 +271,7 @@ catalogue slice. One store, one state object, one subscription list.
          │                changed                 └────────▲─────────┘
          │ calls an action                                 │
          ▼                                                 │
-  ┌──────────────┐        set(recipe, false, name)         │
+  ┌──────────────┐        set(partial | recipe)            │
   │ filters │ catalogue │ edit │ bulk │ recent  ───────────┘
   │   five slice creators, one (set, get)       │
   └─────────────────────────────────────────────┘
@@ -254,127 +289,101 @@ notify subscribers once rather than twice. The cost of slices is that everything
 shares a namespace, so `status` had better mean the catalogue's status and
 nothing else; name keys as though they will collide, because they will.
 
-**Now the middlewares.** A Zustand middleware is a function that wraps the state
-creator and returns a new one, so they nest, and the nesting order is the order
-an update travels through:
+**And that is the entire lab.** No middleware today — the slices pattern is
+enough to learn in one sitting, and every middleware you meet from Lab 2 on is
+easier to understand when you have already seen the store work without it.
 
-```text
-  create<InventoryStore>()(
-    devtools(               ← sees the next state + the action name
-      persist(              ← writes the partialized slice, after
-        immer(              ← turns your draft recipe into a state
-          subscribeWithSelector(   ← selector-aware subscribe()
-            slices ))))     ← your (set, get) => state
-```
-
-*The stack, outside-in. Each layer wraps the one below and hands the result up.*
-
-Two rules of thumb, and one of them has a reason people get wrong:
-
-- **`devtools` outermost.** It must see *every* state change, and the ones it
-  most often misses when it is nested too deep are `persist`'s: rehydration
-  happens inside `persist`, and if `devtools` sits underneath it the store
-  silently changes without an entry in the timeline. The debugging session where
-  you need that entry is the one where the bug *is* rehydration.
-- **`immer` innermost of the four.** Everything above it must receive a real,
-  frozen next state, not a draft. Put `immer` outside `persist` and `persist`
-  serialises a draft proxy.
-
-**And now the TypeScript pain, which is the single most common complaint about
-this library.** A slice creator has to declare, in its type, every middleware
-applied *above* it — because those middlewares change what `set` can do. `immer`
-makes `set` accept a mutating recipe; `devtools` makes `set` accept a third
-"action name" argument. If the type does not know, the call does not compile:
+**The signature a slice creator has, before anything wraps it.** This is the
+line the starter ships, and today it is correct:
 
 ```ts
-// The plain form the starter ships. Fine until something wraps it.
 export type SliceOf<T> = StateCreator<InventoryStore, [], [], T>;
-
-// With the stack above it, `set` loses immer AND devtools:
-//   Argument of type '(state: WritableDraft<InventoryStore>) => void' is not
-//   assignable to parameter of type 'InventoryStore | Partial<InventoryStore>
-//   | ((state: InventoryStore) => …)'.
-//   Expected 1-2 arguments, but got 3.
+//                                    ^^^^^^^^^^^^^^  ^^  ^^  ^
+//                                    the WHOLE store │   │   what THIS
+//                                    (so get() sees  │   │   creator returns
+//                                     every slice)   │   └── mutators this
+//                                                    │       creator applies
+//                                                    └────── mutators applied
+//                                                            ABOVE it
 ```
 
-The fix is one alias, written once:
+Two of those four parameters deserve a sentence each.
 
-```ts
-export type InventoryMutators = [
-  ['zustand/devtools', never],
-  ['zustand/persist', unknown],
-  ['zustand/immer', never],
-  ['zustand/subscribeWithSelector', never],
-];
-export type SliceOf<T> = StateCreator<InventoryStore, InventoryMutators, [], T>;
-```
+- **The first is the whole store, the last is this slice.**
+  `SliceOf<FiltersSlice>` means "a creator that can `get()` all five slices and
+  returns the filters ones". Swapping them is the most common and most confusing
+  mistake in this file.
+- **The two empty arrays are the mutator lists**, and they are empty because
+  nothing is wrapped. `StateCreator`'s job is to work out what `set` looks like,
+  and `set`'s shape is decided entirely by the middlewares above the creator.
+  Plain, it is what Demo 13 used: `set(partial)` or `set((state) => partial)`,
+  with an optional second `replace` argument. That is all.
 
-Three things about that tuple, all of which cost people an afternoon at some
-point:
+**Every middleware from here on changes that signature**, which is the whole
+reason the mutator tuple exists. `devtools` adds a third argument to `set`;
+`immer` swaps the "return a partial" recipe for a "mutate a draft" one; `persist`
+adds a `.persist` API to the store object; `subscribeWithSelector` adds a second
+argument to `subscribe`. A slice creator whose type does not list them loses
+them, and the error always lands on a `set` call in a slice rather than on the
+middleware you actually changed. You will see each of those errors, in the lab
+that adds the middleware that fixes it.
 
-1. **The order is the order of application, outside-in** — the same order as the
-   nesting in `index.ts`. Reverse it and nothing compiles, with an error message
-   about `set` that says nothing about middleware.
-2. **`persist` uses `unknown`, the others use `never`.** That is not a typo you
-   can normalise; it is how each middleware declares whether it contributes a
-   store type. Copy it exactly.
-3. **`create<State>()(…)` — the empty call — is still required**, for the same
-   reason as in Demo 13: currying is what lets the middleware types flow through
-   instead of being inferred away.
-
-**Where the store's action names come from.** `set` takes a third argument under
-`devtools`: `set(recipe, false, 'inventory/setFilter:q')`. The second argument
-is `replace`, and it must stay `false`. Every `set` in this store names itself,
-because Lab 4's rollback and Lab 5's partial failure are almost impossible to
-read in a timeline of thirty entries called `anonymous`.
+**One thing that is required even with no middleware: `create<State>()(…)`, the
+empty call.** Same reason as in Demo 13 — the currying is what lets middleware
+types flow through later instead of being inferred away. Write it now and you
+never have to come back for it.
 
 ### Steps
 
-**A. `src/store/inventory/types.ts` — `TODO(lab-1.1)`**
+**A. Read `src/store/inventory/types.ts`. Change nothing.**
 
-The slice interfaces and the `InventoryStore` intersection are already there —
-read them; they are the whole feature described in types. Replace the temporary
-`SliceOf` at the bottom with the two declarations above: `InventoryMutators` and
-`SliceOf<T>` built on it. Nothing else in the file changes.
+Every slice interface, the `InventoryStore` intersection, `LOW_STOCK`, and the
+bare `SliceOf` from the Concept. This file is the whole feature described in
+types, and it is worth five minutes before you write a line: `LoadStatus` is a
+union of four rather than four booleans, `RowState` is per row rather than per
+page, `recent` is nested on purpose. The comment block above `SliceOf` lists the
+four middlewares that will each add one entry to it — you can ignore it today.
 
-> Write this *before* Step C and `npm run typecheck` will fail until C is done,
-> because the slices now claim middlewares that nothing has applied yet. That is
-> the correct order: the alias is a contract, and C is what honours it.
+**B. Read `src/store/inventory/index.ts`. Change nothing there either.**
 
-**B. `src/store/inventory/filtersSlice.ts` — `TODO(lab-1.2)`**
+```ts
+export const useInventoryStore = create<InventoryStore>()((...args) => ({
+  ...createFiltersSlice(...args),
+  ...createCatalogueSlice(...args),
+  ...createEditSlice(...args),
+  ...createBulkSlice(...args),
+  ...createRecentSlice(...args),
+}));
+```
+
+Five lines, no middleware, and a working store. `(...args)` is the entire trick,
+as in the Concept: same `set`, same `get`, five creators. Everything the rest of
+this guide adds to this file is a wrapper around those five lines.
+
+**C. `src/store/inventory/filtersSlice.ts` — `TODO(lab-1.1)`**
+
+The three actions land as no-ops in the starter. Write them with the plain
+`set` — one argument, no draft, no name:
 
 ```ts
 export const createFiltersSlice: SliceOf<FiltersSlice> = (set) => ({
   ...initialFiltersState,
 
   setFilter: (key, value) =>
-    set(
-      (state) => {
-        state.filters[key] = value;   // an immer draft: assign to it
-      },
-      false,
-      `inventory/setFilter:${key}`,   // the name devtools will show
-    ),
+    set((state) => ({ filters: { ...state.filters, [key]: value } })),
 
-  clearFilters: () =>
-    set(
-      (state) => {
-        state.filters = initialFilters;
-      },
-      false,
-      'inventory/clearFilters',
-    ),
+  clearFilters: () => set({ filters: initialFilters }),
 
-  setDebugDelay: (ms) =>
-    set(
-      (state) => {
-        state.debugDelayMs = ms;
-      },
-      false,
-      'inventory/setDebugDelay',
-    ),
+  setDebugDelay: (ms) => set({ debugDelayMs: ms }),
 });
 ```
+
+Three shapes of `set` in three lines, and all three are plain Zustand:
+`set(updater)` where the updater returns a **partial** and Zustand merges it,
+and `set(partial)` directly where nothing has to be read first. Note the spread
+in `setFilter`: `filters` is nested, so replacing one key means rebuilding the
+object around it. It is one line today. Lab 3's version of that problem is not,
+and that is where `immer` earns its place.
 
 `setFilter` is generic over the key — look at its declaration in `types.ts`:
 
@@ -386,67 +395,46 @@ so `setFilter('sortBy', 'stock')` compiles and `setFilter('sortBy', 'stok')`
 does not, and `setFilter('lowStockOnly', true)` knows it wants a boolean. One
 setter, five filters, no `any`.
 
-**C. `src/store/inventory/index.ts` — `TODO(lab-1.3)`**
-
-Wrap the five slices in the stack. Leave the `persist` options nearly empty for
-now — Lab 6 fills them in — but the `name` is needed today or `persist` throws:
-
-```ts
-export const useInventoryStore = create<InventoryStore>()(
-  devtools(
-    persist(
-      immer(
-        subscribeWithSelector((...args) => ({
-          ...createFiltersSlice(...args),
-          ...createCatalogueSlice(...args),
-          ...createEditSlice(...args),
-          ...createBulkSlice(...args),
-          ...createRecentSlice(...args),
-        })),
-      ),
-      { name: INVENTORY_STORAGE_KEY, partialize: (state) => ({ recent: state.recent }) },
-    ),
-    { name: 'ShopScope · inventory', enabled: env.isDev },
-  ),
-);
-```
-
-`enabled: env.isDev` is not decoration. Without it the devtools middleware ships
-to production, where it serialises every state change into a message the
-extension may not be listening to.
-
 ### Verify
 
-1. `npm run typecheck` — clean. If it is not, the error is on a `set` call and
-   the cause is `InventoryMutators`: check the order, and check `unknown` versus
-   `never`.
+1. `npm run typecheck` — clean.
 2. `npm run dev`, sign in as `emilys`, open **Account → Inventory**. The page
    still shows the "inert until Lab 2" notice — correct. Nothing fetches yet.
-3. Open **Redux DevTools**. There is an instance called **ShopScope ·
-   inventory**. Select it.
-4. Change **Sort by** to *Stock*, then **Order** to *Descending*, then toggle
-   **Low stock only**. Three entries appear, named
-   `inventory/setFilter:sortBy`, `inventory/setFilter:order`,
-   `inventory/setFilter:lowStockOnly`, each with the state after it.
-5. Click the first of the three in the timeline. The right-hand panel shows
-   `filters.sortBy: 'stock'` and `filters.order: 'asc'` — the state as it was.
-   That is time travel, and it works because every `set` is named and `replace`
-   is `false`.
-6. In the **Diff** tab of the last entry you should see exactly one changed key.
-   If you see the whole `filters` object replaced, `immer` is not applied — check
-   the nesting order in `index.ts`.
+3. **One store, five slices.** In the browser console:
+
+   ```js
+   const s = useInventoryStore.getState();
+   Object.keys(s);
+   ```
+
+   Not exported globally? Add `window.useInventoryStore = useInventoryStore` at
+   the bottom of `index.ts` for the day, or use the *Sources* panel. You should
+   see keys from all five slices in one object — `filters`, `status`,
+   `entities`, `rows`, `selected`, `recent` — with every action beside them.
+   That is what "one store" means, and it is why `setFilter` will be able to
+   call `get().fetchPage(0)` in Lab 2.
+4. Change **Sort by** to *Stock* in the toolbar, then run
+   `useInventoryStore.getState().filters` again. `sortBy` is `'stock'` and the
+   other four are untouched.
+5. **Now the honest part.** Do steps 3 and 4 again, but this time answer these
+   without adding a `console.log`: how many times did `set` run? Which action
+   ran first? What did `filters` look like *before* the change? You cannot. The
+   store works and is completely opaque, and in Lab 2 you are about to put a
+   network request inside it with three possible outcomes. That is the problem
+   `devtools` solves, and it is the first thing Lab 2 does.
 
 ### Watch out
 
-- **`create<State>()(…)`, not `create<State>(…)`.** Drop the empty call and the
-  middleware generics collapse; the error appears somewhere else entirely.
-- **`set(recipe, true, name)` deletes your store.** The second argument is
-  `replace`. `true` replaces the whole state object, actions included, and the
-  next click throws `state.setFilter is not a function`. It is always `false`
-  here; Lab 6 is the one place a replace is even considered.
-- **Do not mix draft mutation and returning an object in one recipe.** Under
-  `immer` you either mutate the draft *or* return a new state — never both, and
-  immer will throw if you do.
+- **`create<State>()(…)`, not `create<State>(…)`.** Drop the empty call and it
+  works today and collapses the moment you add a middleware in Lab 2, with an
+  error that appears somewhere else entirely. Write the empty call now.
+- **`set(partial, true)` deletes your store.** The second argument is `replace`.
+  `true` replaces the whole state object, actions included, and the next click
+  throws `state.setFilter is not a function`. It is `false` — or absent —
+  everywhere in this store; Lab 6 is the one place a replace is even considered.
+- **`set` merges one level deep, and one level only.** `set({ filters: {...} })`
+  replaces `filters` wholesale, which is why `setFilter` has to spread. It is
+  not a deep merge and never has been.
 - **A slice that only reads another slice still declares the whole store type.**
   `SliceOf<FiltersSlice>` is `StateCreator<InventoryStore, …, FiltersSlice>`:
   the first parameter is the *whole* store (so `get()` sees everything), the last
@@ -457,34 +445,44 @@ extension may not be listening to.
 
 ### In the real world
 
-The slices pattern is what stops a store becoming a dumping ground, and the
-middleware stack is where most teams' Zustand setup diverges. Write the stack
-and the `SliceOf` alias once, in the first week, and put a comment above the
-mutator tuple saying "keep in step with `index.ts`" — because the day somebody
-adds a fifth middleware, the error they get will point at a `set` call in a file
-they have never opened.
+The slices pattern is what stops a store becoming a dumping ground, and it costs
+nothing: no dependency, no convention beyond a shared namespace, and it is
+reversible in an afternoon if the store turns out to want splitting after all.
 
-The devtools decision is worth making explicitly too. `enabled: env.isDev` is
-the safe default; some teams turn it on in staging behind a flag, and nobody
-should turn it on in production, where it is both a performance cost and a way
-of publishing your application's state shape to anyone with the extension.
+The middleware stack is the other half of most teams' Zustand setup, and the
+mistake worth avoiding is the one this guide is arranged to avoid: writing all
+four on day one because a blog post had all four. Every layer is a cost —
+`devtools` serialises, `persist` writes to disk, `immer` proxies every write,
+`subscribeWithSelector` adds a second subscribe path — and every layer is an
+entry you have to keep in step with a type in another file. Add each one the
+week you need it, and you will be able to say what it is for.
 
 ### Further reading
 
-- Zustand — [Slices Pattern](https://zustand.docs.pmnd.rs/learn/guides/slices-pattern): the official version of Step B, including the typed `StateCreator` form.
+- Zustand — [Slices Pattern](https://zustand.docs.pmnd.rs/learn/guides/slices-pattern): the official version of Step C, including the typed `StateCreator` form.
 - Zustand — [Advanced TypeScript Guide](https://zustand.docs.pmnd.rs/learn/guides/advanced-typescript): the mutator tuple, `create<T>()(…)`, and why the currying exists.
-- Zustand — [`devtools`](https://zustand.docs.pmnd.rs/reference/middlewares/devtools): the `enabled`, `name`, `store` and `anonymousActionType` options.
-- Zustand — [`immer`](https://zustand.docs.pmnd.rs/reference/middlewares/immer): the middleware, and the note about combining it with others.
 - Zustand — [`create`](https://zustand.docs.pmnd.rs/reference/apis/create): the API `create`, `set`, `get` and `subscribe` are defined by.
+- Zustand — [Updating state](https://zustand.docs.pmnd.rs/learn/guides/updating-state): the plain `set` you used today — partial, updater, and the one-level merge.
+- Zustand — [TypeScript guide](https://zustand.docs.pmnd.rs/learn/guides/typescript): why `create<T>()(…)` is curried, in the authors' own words.
 
 ---
 
-## Lab 2 — Async in the store: a status machine, cancellation, and the race (30 min)
+## Lab 2 — `devtools`, then async in the store: a status machine, cancellation, and the race (35 min)
 
 ### Problem
 
-Every other screen in ShopScope gets its data from a loader, and a loader has
-three properties you have been quietly relying on since Demo 10. The router
+**First, the small problem.** You are about to write one action with three
+possible outcomes — it fills the table, or it fails, or it is superseded and
+must write nothing at all — and at the end of Lab 1 you established that you
+cannot see any of them. A `console.log` in each branch would tell you which
+branch ran; it would not tell you what the state looked like on either side of
+it, in what order eleven writes landed, or let you step back to the one before
+the bug. That is `devtools`, it is ten lines, and it goes in first because
+everything else in this lab is easier to debug with it than without it.
+
+**Then the real problem.** Every other screen in ShopScope gets its data from a
+loader, and a loader has three properties you have been quietly relying on since
+Demo 10. The router
 *calls* it, so it runs once per navigation. The router *cancels* it, through
 `request.signal`, when you navigate away. And the router *owns the result*, so
 there is exactly one place the page's data can be.
@@ -501,6 +499,64 @@ follow are the two failures every hand-rolled data layer has:
   — because promises resolve in whatever order the network feels like.
 
 ### Concept
+
+**What a Zustand middleware actually is.** A function that takes your state
+creator and returns another state creator. That is the whole interface. Because
+they are functions, they nest, and the nesting order is the order an update
+travels through on its way out:
+
+```ts
+create<InventoryStore>()(devtools(slices, { /* options */ }));
+//                       ^^^^^^^^ wraps the creator, returns a creator
+```
+
+`devtools` connects the store to the Redux DevTools extension protocol. Every
+`set` becomes an entry in a timeline, with the state after it, a diff against
+the state before it, and a **Jump** button that puts the store back into that
+state. It is a development tool that Zustand borrows wholesale; you install one
+extension and you get the whole Redux debugging experience for a library that
+is not Redux.
+
+**Two options, and both are decisions.** `name` is what the instance is called
+in the extension's dropdown — with three stores in this app (`cart`, `wishlist`,
+`inventory`) an unnamed one is useless. `enabled: env.isDev` is not decoration:
+without it the middleware ships to production, where it serialises every state
+change into a message for an extension that is probably not listening, and
+publishes your application's state shape to anyone who installs one.
+
+**Named actions, which are the point.** Under `devtools`, `set` takes a third
+argument:
+
+```ts
+set(partial, false, 'inventory/setFilter:sortBy');
+//           ^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ the name in the timeline
+//           replace — still false, always
+```
+
+Skip it and the entry is called `anonymous`. Every `set` in this store names
+itself, because Lab 4's rollback and Lab 5's partial failure are almost
+impossible to read in a timeline of thirty entries all called `anonymous`.
+
+**And the type, which is the first instalment of Zustand's best-known
+complaint.** `devtools` changes what `set` can do, so a slice creator whose type
+does not know about it cannot call the three-argument form. Add the middleware
+to `index.ts` alone and `npm run typecheck` says this, once per named `set`:
+
+```
+src/store/inventory/filtersSlice.ts(40,7): error TS2554: Expected 1-2 arguments, but got 3.
+```
+
+Twenty-odd of those by the end of the day, and not one of them mentions
+`devtools`. The fix is the mutator tuple the Lab 1 Concept promised, with
+exactly one entry in it today:
+
+```ts
+export type InventoryMutators = [['zustand/devtools', never]];
+export type SliceOf<T> = StateCreator<InventoryStore, InventoryMutators, [], T>;
+```
+
+That is the pattern for the rest of the day: one middleware in `index.ts`, one
+entry in the tuple, in the same commit.
 
 **A status machine, not booleans.** `status: 'idle' | 'loading' | 'ready' |
 'error'` has four states and no others. There is no way to be loading *and*
@@ -596,7 +652,72 @@ starter's `InventoryFilters` already debounces with `useDebouncedCallback`
 
 ### Steps
 
-**A. `src/store/inventory/catalogueSlice.ts` — `TODO(lab-2.1)`**
+**A. `src/store/inventory/index.ts` and `src/store/inventory/types.ts` —
+`TODO(lab-2.1)`**
+
+One layer, two files, and do them in this order so you see the error.
+
+First `index.ts`. Wrap the five lines from Lab 1 — nothing inside the wrap
+changes:
+
+```ts
+import { devtools } from 'zustand/middleware';
+import { env } from '../../config/env';
+
+export const useInventoryStore = create<InventoryStore>()(
+  devtools(
+    (...args) => ({
+      ...createFiltersSlice(...args),
+      ...createCatalogueSlice(...args),
+      ...createEditSlice(...args),
+      ...createBulkSlice(...args),
+      ...createRecentSlice(...args),
+    }),
+    { name: 'ShopScope · inventory', enabled: env.isDev },
+  ),
+);
+```
+
+`npm run typecheck` is still clean — nothing has tried to use the third
+argument yet. Now `types.ts`, where the tuple starts:
+
+```ts
+export type InventoryMutators = [['zustand/devtools', never]];
+export type SliceOf<T> = StateCreator<InventoryStore, InventoryMutators, [], T>;
+```
+
+Still clean. The two are in step, and neither of them has changed a single line
+of a slice.
+
+**B. `src/store/inventory/filtersSlice.ts` — `TODO(lab-2.2)`**
+
+Now name the three actions you wrote in Lab 1. Same bodies, two more arguments:
+
+```ts
+setFilter: (key, value) =>
+  set(
+    (state) => ({ filters: { ...state.filters, [key]: value } }),
+    false,                          // replace — always false
+    `inventory/setFilter:${key}`,   // the name devtools will show
+  ),
+
+clearFilters: () => set({ filters: initialFilters }, false, 'inventory/clearFilters'),
+
+setDebugDelay: (ms) => set({ debugDelayMs: ms }, false, 'inventory/setDebugDelay'),
+```
+
+> **Skip step A's `types.ts` edit and this is what you get**, once per named
+> `set`, from `npm run typecheck`:
+>
+> ```
+> src/store/inventory/filtersSlice.ts(40,7): error TS2554: Expected 1-2 arguments, but got 3.
+> ```
+>
+> Nothing in that message says `devtools`, or middleware, or `types.ts`. It is
+> worth provoking on purpose now, while you know the cause, because you will
+> meet it again in six months when you do not. Add the tuple entry and it goes.
+
+**C. `src/store/inventory/catalogueSlice.ts` — `TODO(lab-2.3)`**
 
 The initial state is already written. Add the two thin actions:
 
@@ -612,7 +733,7 @@ retry: () => {
 `void` is deliberate: these return `void`, not a promise, and `void` tells both
 the reader and `@typescript-eslint` that the floating promise is intended.
 
-**B. `src/store/inventory/catalogueSlice.ts` — `TODO(lab-2.2)`**
+**D. `src/store/inventory/catalogueSlice.ts` — `TODO(lab-2.4)`**
 
 ```ts
 // NOT state — nothing renders from it.
@@ -626,11 +747,11 @@ fetchPage: async (page) => {
   inFlight = controller;
 
   set(
-    (state) => {
-      state.requestId = requestId;
-      state.status = 'loading';
-      state.error = null;
-      if (page !== undefined) state.page = page;
+    {
+      requestId,
+      status: 'loading',
+      error: null,
+      ...(page !== undefined ? { page } : {}),
     },
     false,
     'inventory/fetchPending',
@@ -654,13 +775,16 @@ fetchPage: async (page) => {
     if (get().requestId !== requestId) return;   // ← latest wins
 
     set(
-      (state) => {
-        state.status = 'ready';
-        state.error = null;
-        state.total = data.total;
-        state.ids = data.products.map((product) => product.id);
-        for (const product of data.products) state.entities[product.id] = product;
-      },
+      (state) => ({
+        status: 'ready' as const,
+        error: null,
+        total: data.total,
+        ids: data.products.map((product) => product.id),
+        entities: {
+          ...state.entities,
+          ...Object.fromEntries(data.products.map((product) => [product.id, product])),
+        },
+      }),
       false,
       'inventory/fetchFulfilled',
     );
@@ -668,14 +792,7 @@ fetchPage: async (page) => {
     if (controller.signal.aborted) return;       // not a failure — us
     if (get().requestId !== requestId) return;
 
-    set(
-      (state) => {
-        state.status = 'error';
-        state.error = ApiError.from(error);
-      },
-      false,
-      'inventory/fetchRejected',
-    );
+    set({ status: 'error', error: ApiError.from(error) }, false, 'inventory/fetchRejected');
   } finally {
     if (inFlight === controller) inFlight = null;
   }
@@ -686,10 +803,14 @@ Note `if (inFlight === controller)` in the `finally`. Without the check, a fast
 request finishing *after* a newer one started would null out the newer one's
 controller and the next `fetchPage` would have nothing to abort.
 
-The `ids`/`entities` write is explained properly in Lab 3; write it now so the
-table fills, and read the diagram there for why it is shaped like that.
+And look at the fulfilled branch before you move on. `ids` and `entities` are
+explained properly in Lab 3 — write them now so the table fills — but the shape
+of the write is the thing to notice: two nested spreads and an
+`Object.fromEntries` to merge a page into a map. It is correct, and it is the
+easiest kind of code to get subtly wrong. Lab 3 replaces those five lines with
+two, and that replacement is the argument for the `immer` middleware.
 
-**C. `src/store/inventory/filtersSlice.ts` — `TODO(lab-2.3)`**
+**E. `src/store/inventory/filtersSlice.ts` — `TODO(lab-2.5)`**
 
 Both `setFilter` and `clearFilters` now end with:
 
@@ -706,7 +827,7 @@ Note what this means for `lowStockOnly`: DummyJSON has no predicate for
 still resets to page 0 here, because it still changes which rows you are looking
 at. One rule, no exceptions, nothing to remember.
 
-**D. `src/routes/account/InventoryPage.tsx` — `TODO(lab-2.4)`**
+**F. `src/routes/account/InventoryPage.tsx` — `TODO(lab-2.6)`**
 
 ```tsx
 const status = useInventoryStore(selectStatus);
@@ -745,14 +866,38 @@ The finished file in `solution/` is the reference if you get tangled.
 
 ### Verify
 
-1. Open **Account → Inventory**. The skeleton flashes, then twelve rows.
+Steps A and B first — they are worth checking on their own, because everything
+below is easier to read once they work.
+
+1. **The instance exists.** `npm run dev`, sign in as `emilys`, open **Account →
+   Inventory**, open **Redux DevTools**. There is an instance called **ShopScope
+   · inventory** in the dropdown. Select it.
+2. **Named actions.** Change **Sort by** to *Stock*, then **Order** to
+   *Descending*, then toggle **Low stock only**. Three entries appear, named
+   `inventory/setFilter:sortBy`, `inventory/setFilter:order`,
+   `inventory/setFilter:lowStockOnly` — not `anonymous`. Delete the third
+   argument from one of them and watch that entry become `anonymous`; put it
+   back.
+3. **Time travel.** Click the first of the three in the timeline, then press
+   **Jump**. The toolbar snaps back to the state as it was, and forward again
+   when you click the last entry. That works because `replace` is `false`: the
+   actions are still in every snapshot.
+4. **The Diff tab** of the last entry shows `filters.lowStockOnly: false →
+   true`, and `filters` rebuilt around it — the spread from Lab 1 C, visible.
+   Lab 3 changes what this diff looks like.
+5. **Production is off.** `npm run build && npm run preview`, open the same page:
+   no instance in the dropdown. That is `enabled: env.isDev`.
+
+Then the rest of the lab.
+
+6. Open **Account → Inventory**. The skeleton flashes, then twelve rows.
    Network shows **one** `GET /products?limit=12&skip=0&select=…&sortBy=title`.
-2. Click **Next**. One request, `skip=12`, the pager says *Page 2 of 17*.
-3. Navigate to a product, press Back. **No request.** The store still has the
+7. Click **Next**. One request, `skip=12`, the pager says *Page 2 of 17*.
+8. Navigate to a product, press Back. **No request.** The store still has the
    page. (Compare that with Demo 19's cold open, where the loader re-fetched
    every time. You have just re-invented the smallest possible cache — hold that
    thought for the last section.)
-4. **The race.** Set **Simulated latency** to `4000 ms`. Type `phone` in the
+9. **The race.** Set **Simulated latency** to `4000 ms`. Type `phone` in the
    search box and wait for the spinner. Now set latency back to `none` and type
    `s` so the box reads `phones`. Watch the network panel:
 
@@ -766,21 +911,32 @@ The finished file in `solution/` is the reference if you get tangled.
    same thing with the `if (get().requestId !== requestId) return;` line
    commented out: the table flips back to `phone`'s results four seconds later,
    under a search box that says `phones`. Put the line back.
-5. **Cancellation.** With latency at `4000 ms`, change the category twice
+10. **Cancellation.** With latency at `4000 ms`, change the category twice
    quickly. The first request shows as *cancelled* in the network panel and
    never reaches the `catch`'s `set` — no error banner appears.
-6. **Errors.** In DevTools → Network, switch to **Offline**, then click
+11. **Errors.** In DevTools → Network, switch to **Offline**, then click
    **Retry** or change a filter. `status` goes to `error`, `ErrorNotice` shows
    *"Can't reach the server…"* with a **Retry** button (it is retryable —
    `ApiError.isRetryable` is true for status 0). Go back online, click Retry,
    the table returns.
-7. **DevTools.** The timeline reads `inventory/fetchPending` →
+12. **DevTools.** The timeline reads `inventory/fetchPending` →
    `inventory/fetchFulfilled`. The pending entry's diff shows `status:
    "idle" → "loading"` and `requestId: 0 → 1`. A cancelled request contributes
    *one* entry, not two — there is no set on the abort path.
 
 ### Watch out
 
+- **`Expected 1-2 arguments, but got 3` is always the same bug.** `devtools` is
+  applied in `index.ts` but missing from `InventoryMutators` in `types.ts`. The
+  error lands on a `set` call in a slice, sometimes twenty of them, and never
+  names the middleware.
+- **The devtools instance is missing entirely?** Either the extension is not
+  installed, or `env.isDev` is false — check which build you are looking at
+  before you go looking at the store.
+- **An entry called `anonymous` is a `set` with no third argument.** Harmless
+  today, unreadable by Lab 5. There is an `anonymousActionType` option if you
+  want them labelled something better than `anonymous`, but naming the `set` is
+  the real fix.
 - **StrictMode fetches twice in development.** React mounts, unmounts and
   remounts every component in dev. You will see two requests on first load and
   the first will be *cancelled* — which is the code working exactly as designed,
@@ -810,8 +966,17 @@ The other thing worth taking away: `status === 'loading'` covering both a
 first load and a refresh is the most common "why does the screen flash" bug in
 front-end code. Distinguish them by what is on screen, not by a second flag.
 
+And the devtools decision is worth making explicitly, once, per project.
+`enabled: env.isDev` is the safe default; some teams turn it on in staging
+behind a flag, and nobody should turn it on in production, where it is both a
+performance cost and a way of publishing your application's state shape to
+anyone with the extension. The naming convention is worth agreeing too —
+`slice/action:detail` here — because a timeline is only as good as its labels.
+
 ### Further reading
 
+- Zustand — [`devtools`](https://zustand.docs.pmnd.rs/reference/middlewares/devtools): the `enabled`, `name`, `store` and `anonymousActionType` options.
+- Zustand — [Advanced TypeScript Guide](https://zustand.docs.pmnd.rs/learn/guides/advanced-typescript): the mutator tuple you started today, and why it exists.
 - MDN — [`AbortController`](https://developer.mozilla.org/en-US/docs/Web/API/AbortController): `signal`, `abort(reason)` and what aborting actually guarantees.
 - MDN — [`AbortSignal`: `abort` event](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal/abort_event): listening for cancellation, and `signal.aborted`.
 - Zustand — [Updating state](https://zustand.docs.pmnd.rs/learn/guides/updating-state): `set`, the updater form, `replace`, and reading with `get`.
@@ -820,7 +985,7 @@ front-end code. Distinguish them by what is on screen, not by a second flag.
 
 ---
 
-## Lab 3 — Normalised entities, immer, and selector discipline (30 min)
+## Lab 3 — Normalised entities, `immer`, and selector discipline (35 min)
 
 ### Problem
 
@@ -894,30 +1059,83 @@ Three consequences worth naming:
   it is overhead. For a list whose individual rows are edited, it pays for itself
   the first time.
 
-**immer is what makes the nested write readable.** Without it:
+**And this is where the second middleware arrives.** Step A asks you to write
+`patchStock` with the plain `set` you have been using since Lab 1. There is
+exactly one way to do it:
 
 ```ts
-set((state) => ({
-  entities: { ...state.entities, [id]: { ...state.entities[id], stock } },
-}));
+patchStock: (id, stock) =>
+  set(
+    (state) => ({
+      entities: { ...state.entities, [id]: { ...state.entities[id], stock } },
+    }),
+    false,
+    `inventory/patchStock:${id}`,
+  ),
 ```
 
-That is correct — and one forgotten spread away from mutating the object two
-components are still rendering, which produces a bug where the data is right and
-the screen is wrong. With `immer`:
+Read that once more before you accept it. Two spreads, two levels, and every
+one of them is load-bearing: drop the inner one and you mutate a product object
+that components are still rendering — a bug where the data is right and the
+screen is wrong, and the hardest kind to find. Drop the outer one and you mutate
+the map. There is no type error for either. And `patchStock` is the *easy* case:
+Lab 4 writes into `rows[id]`, Lab 5 writes twelve entities and a snapshot in one
+`set`, and Lab 2's fulfilled branch already spreads `entities` and merges a page
+into it by hand.
+
+`immer` deletes all of it:
 
 ```ts
-set((state) => {
-  const product = state.entities[id];
-  if (product) product.stock = stock;
-});
+patchStock: (id, stock) =>
+  set(
+    (state) => {
+      const product = state.entities[id];
+      if (product) product.stock = stock;
+    },
+    false,
+    `inventory/patchStock:${id}`,
+  ),
 ```
 
 immer hands you a **draft**: a Proxy that records what you touched and builds
 the next state by structural sharing — the objects you did not touch keep the
-same reference, which is exactly what the selectors below depend on. It is the
-same library, and the same idea, that Redux Toolkit's `createSlice` uses
-internally; Demo 24b's reducers look like this for the same reason.
+same reference, which is exactly what the selectors below depend on, and exactly
+what the hand-written spreads were there to guarantee. It is the same library,
+and the same idea, that Redux Toolkit's `createSlice` uses internally; Demo
+24b's reducers look like this for the same reason.
+
+Note what does *not* change: the third argument is still there, `replace` is
+still `false`, and the recipe is still a function of the state. The only
+difference is that it mutates instead of returning. That is also the one rule
+immer enforces at runtime — **mutate the draft or return a new state, never
+both**; do both and immer throws.
+
+**The type, instalment two.** `immer` goes *inside* `devtools`, so it is
+appended to the tuple:
+
+```ts
+export type InventoryMutators = [
+  ['zustand/devtools', never],
+  ['zustand/immer', never],
+];
+```
+
+Forget it, and this is the error, once per draft recipe — a wall of it, because
+the last three labs are all draft recipes:
+
+```
+src/store/inventory/catalogueSlice.ts(127,7): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(partial: InventoryStore | Partial<InventoryStore> | ((state: InventoryStore) => InventoryStore | Partial<...>), replace?: false | undefined, action?: Action | undefined): unknown', gave the following error.
+    Argument of type '(state: InventoryStore) => void' is not assignable to parameter of type 'InventoryStore | Partial<InventoryStore> | ((state: InventoryStore) => InventoryStore | Partial<InventoryStore>)'.
+      Type '(state: InventoryStore) => void' is not assignable to type '(state: InventoryStore) => InventoryStore | Partial<InventoryStore>'.
+        Type 'void' is not assignable to type 'InventoryStore | Partial<InventoryStore>'.
+```
+
+Worth reading slowly once, because it is the single most-reported Zustand
+TypeScript error and the meaning is buried: *your recipe returns nothing, and
+without immer in the tuple, `set` still wants a recipe that returns the next
+state.* It says nothing about immer, and the file it names is never the file
+you changed.
 
 **Selector discipline, in three rules.**
 
@@ -966,36 +1184,118 @@ calls actions and reads state. No `render`, no Testing Library, no act warnings.
 
 ### Steps
 
-**A. `src/store/inventory/catalogueSlice.ts` — `TODO(lab-3.1)`**
+**A. `src/store/inventory/catalogueSlice.ts` — `TODO(lab-3.1)`, the spread
+version**
 
-Two small actions, both of them nested writes:
+Two small actions, both of them nested writes, both with the plain `set` you
+have used since Lab 1. Write them this way first — you are going to delete them
+in ten minutes, and that is the point:
 
 ```ts
 upsertProduct: (product) =>
   set(
-    (state) => {
-      state.entities[product.id] = product;
-    },
+    (state) => ({ entities: { ...state.entities, [product.id]: product } }),
     false,
     `inventory/upsert:${product.id}`,
   ),
 
 patchStock: (id, stock) =>
   set(
-    (state) => {
-      const product = state.entities[id];
-      if (product) product.stock = stock;
-    },
+    (state) => ({
+      entities: { ...state.entities, [id]: { ...state.entities[id], stock } },
+    }),
     false,
     `inventory/patchStock:${id}`,
   ),
 ```
 
+Run the app. Both work. Then look at what you have: `patchStock` rebuilds the
+whole `entities` map and the whole product object to change one number, in an
+expression where two spreads, two brackets and a shorthand key all have to be
+right, and where getting one wrong produces silence rather than an error. Now
+look at the `entities` line in `fetchPage`, which does the same thing for twelve
+products at once. Then go to Step B.
+
+**B. `src/store/inventory/index.ts` and `src/store/inventory/types.ts` —
+`TODO(lab-3.2)`**
+
+`immer` goes **inside** `devtools` — it is the layer closest to your recipe,
+because it is the layer that turns a recipe into a state:
+
+```ts
+import { immer } from 'zustand/middleware/immer';
+
+export const useInventoryStore = create<InventoryStore>()(
+  devtools(
+    immer((...args) => ({
+      ...createFiltersSlice(...args),
+      // …the other four
+    })),
+    { name: 'ShopScope · inventory', enabled: env.isDev },
+  ),
+);
+```
+
+and the tuple gains its second entry, in the same order:
+
+```ts
+export type InventoryMutators = [
+  ['zustand/devtools', never],
+  ['zustand/immer', never],
+];
+```
+
+Then rewrite Step A as drafts — the version in the Concept — and go back to
+`fetchPage` from Lab 2 D and do the same to its fulfilled branch:
+
+```ts
+set(
+  (state) => {
+    state.status = 'ready';
+    state.error = null;
+    state.total = data.total;
+    state.ids = data.products.map((product) => product.id);
+    for (const product of data.products) state.entities[product.id] = product;
+  },
+  false,
+  'inventory/fetchFulfilled',
+);
+```
+
+Five spread-heavy lines become five plain ones, and the `Object.fromEntries`
+goes with them.
+
+Then finish the job, because a store with two styles of `set` in it is worse
+than a store with either. `fetchPending` and `fetchRejected` become draft
+recipes too — `state.status = 'loading'`, `state.error = null` — and so do all
+three filters actions, where `setFilter` collapses to a single line:
+
+```ts
+set((state) => { state.filters[key] = value; }, false, `inventory/setFilter:${key}`);
+```
+
+From here to the end of the day, every `set` in this store is a draft recipe.
+Labs 4 and 5 assume it.
+
+> Do the `index.ts` half without the `types.ts` half and you get the TS2769
+> wall from the Concept. Do it the other way round — tuple updated, stack not —
+> and you get the other half of the same lesson:
+>
+> ```
+> src/store/inventory/bulkSlice.ts(20,5): error TS2349: This expression is not callable.
+>   Type 'never' has no call signatures.
+> ```
+>
+> `set` has resolved to `never`, because you have described a store that does
+> not exist. Both errors point at a slice; neither points at the two files you
+> have to change together. That is the whole reason the tuple is a named alias
+> with a comment on it.
+
 Labs 4 and 5 are built out of these two. Naming them after what they mean —
 rather than writing the same draft mutation in three places — is what makes the
 devtools timeline readable later.
 
-**B. `src/store/inventory/selectors.ts` — `TODO(lab-3.2)`**
+**C. `src/store/inventory/selectors.ts` — `TODO(lab-3.3)`**
 
 Add the factories and the memoised list:
 
@@ -1014,7 +1314,7 @@ then `selectVisibleIds` and `resetVisibleIdsCache` exactly as in the Concept.
 > React DevTools. Then put it back. Three seconds of work for a rule you will
 > never need to be told again.
 
-**C. `src/components/inventory/InventoryTable.tsx` — `TODO(lab-3.3)`**
+**D. `src/components/inventory/InventoryTable.tsx` — `TODO(lab-3.4)`**
 
 Split the row out. The table now subscribes to **one** thing:
 
@@ -1040,7 +1340,7 @@ unchanged. And `useShallow` is the exception, not the rule: two separate
 `useInventoryStore((s) => s.toggleSelected)` calls would do the same job with no
 import. It is here so you have written it once and know what it compares.
 
-**D. `src/store/inventory/inventory.test.ts` — `TODO(lab-3.4)`**
+**E. `src/store/inventory/inventory.test.ts` — `TODO(lab-3.5)`**
 
 `npm test` runs, and everything in the file is `it.todo`. Fill in the first
 four. The shape:
@@ -1086,23 +1386,37 @@ expect(selectVisibleIds(useInventoryStore.getState())).toBe(first);
 
 ### Verify
 
-1. `npm test` — eight tests in `inventory.test.ts` (four of them yours for now;
+1. **immer is actually on.** In Redux DevTools, change **Sort by** and open the
+   **Diff** tab of that entry. You should see exactly one changed key,
+   `filters.sortBy`. Before Step B the same action showed `filters` replaced
+   wholesale — that was your spread rebuilding the object. If you still see the
+   whole object, `immer` is in the tuple but not in `index.ts`.
+2. `npm test` — eight tests in `inventory.test.ts` (four of them yours for now;
    Labs 4 and 5 fill the rest). They run in about 300 ms and render nothing.
-2. React DevTools → **Highlight updates while components render** → toggle
+3. React DevTools → **Highlight updates while components render** → toggle
    **Low stock only**. The table re-renders and only rows with `stock < 20`
    survive; the pager and the filters do not flash.
-3. In the console: `useInventoryStore.getState().entities` — an object keyed by
+4. In the console: `useInventoryStore.getState().entities` — an object keyed by
    id. `useInventoryStore.getState().ids` — an array of twelve numbers in the
    server's sort order.
-4. Click through to page 2 and back to page 1. `Object.keys(entities).length` is
+5. Click through to page 2 and back to page 1. `Object.keys(entities).length` is
    24, not 12. The store remembers.
-5. In Redux DevTools, run `inventory/fetchFulfilled` and open **Diff**. Only
+6. In Redux DevTools, run `inventory/fetchFulfilled` and open **Diff**. Only
    `ids`, `total`, `status` and the *new* entity keys appear. The entities that
    did not change are not in the diff — that is structural sharing, and it is
    what the memoised selector depends on.
 
 ### Watch out
 
+- **Mutate the draft, or return a new state — never both in one recipe.** immer
+  throws if you do, and the message is clearer than most: *"An immer producer
+  returned a new value *and* modified its draft."* It is an easy accident when
+  you are converting a spread version to a draft one and leave the `return`
+  behind.
+- **The draft is a Proxy, so do not keep it.** Anything you pull out of `state`
+  inside a recipe is only valid inside that recipe. Assigning
+  `const p = state.entities[id]` and using `p` after the `set` returns gives you
+  a revoked proxy.
 - **`Maximum update depth exceeded` after adding a selector** means the selector
   allocates. Find the `{`, the `[`, the `.map`, the `.filter` or the `??
   {default}` and either memoise it or select something smaller.
@@ -1345,7 +1659,7 @@ to decide when. Hold that thought too.
 
 - Immer — [Using `produce`](https://immerjs.github.io/immer/produce): what a draft is, what it records, and structural sharing.
 - Zustand — [`immer` middleware](https://zustand.docs.pmnd.rs/reference/middlewares/immer): the middleware wrapping `produce` around every `set`.
-- React — [`memo`](https://react.dev/reference/react/memo): what it does and does not do, for the row component in Lab 3 C.
+- React — [`memo`](https://react.dev/reference/react/memo): what it does and does not do, for the row component in Lab 3 D.
 - MDN — [`AbortController`](https://developer.mozilla.org/en-US/docs/Web/API/AbortController): an edit is a write, so it is deliberately *not* aborted on a filter change — see Watch out.
 
 ---
@@ -1540,17 +1854,25 @@ outright, because nobody goes looking for the difference.
 
 ---
 
-## Lab 6 — Persistence, migration, and the cross-slice reset (20 min)
+## Lab 6 — `subscribeWithSelector`, `persist`, migration, and the cross-slice reset (25 min)
 
 ### Problem
 
-Two questions, and the interesting one is the second.
+Four questions, and the last two middlewares fall out of the first two.
 
-The easy one: the console should remember the last eight products you opened,
-across reloads. Demo 13 already did persistence — `persist` with a `name` and a
+**One: how do you run a side effect when one slice of state changes, without a
+component?** The console should log the recently-inspected list whenever it
+changes, in development. Nothing renders that log, so no component should
+subscribe for it, and `useEffect` is the wrong tool for something that is not
+part of a render. The store has a `subscribe`, but the plain one fires on
+*every* change and hands you the whole state.
+
+**Two: the console should remember the last eight products you opened, across
+reloads.** Demo 13 already did persistence — `persist` with a `name` and a
 `partialize`.
 
-The hard one: **what happens to that stored data when the code changes?** A
+**Three, and it is the hard one: what happens to that stored data when the code
+changes?** A
 shipped release wrote `{ recentlyViewed: [{ id, title }] }` into
 `localStorage`. Today's code expects `{ recent: { ids: [] } }`. Every user who
 ever used the old version has the old shape sitting on their machine, and it
@@ -1558,10 +1880,92 @@ will be read by the new code, on their next visit, for as long as that browser
 profile exists. Without a plan, the best case is that their list silently
 empties; the worst is a crash on a field that is not there.
 
-And a third, smaller: signing out leaves the previous admin's catalogue page,
+**And four, smaller:** signing out leaves the previous admin's catalogue page,
 selection and recently-inspected list in memory for whoever signs in next.
 
 ### Concept
+
+**The transient subscription, and the middleware it needs.** A Zustand store
+has a `subscribe` whether or not React is involved — the React binding is built
+on it. The plain form takes one argument:
+
+```ts
+useInventoryStore.subscribe((state, previousState) => { /* every change */ });
+```
+
+which is not what you want here. You want *"when `recent.ids` changes, and only
+then"*, so you write the two-argument form:
+
+```ts
+useInventoryStore.subscribe(
+  (state) => state.recent.ids,                    // what to watch
+  (ids) => logger.debug(`recently inspected: ${ids.join(', ')}`),   // what to do
+);
+```
+
+and the compiler stops you:
+
+```
+src/store/inventory/index.ts(135,5): error TS2554: Expected 1 arguments, but got 2.
+src/store/inventory/index.ts(135,6): error TS7006: Parameter 'ids' implicitly has an 'any' type.
+```
+
+That is the entire case for `subscribeWithSelector`: it replaces the store's
+`subscribe` with one that takes a selector, a listener and an options object
+(`fireImmediately`, `equalityFn`), and only calls the listener when the selected
+value actually changes. The listener runs outside React, no component is
+subscribed, and nothing re-renders — which is what "transient" means, and why
+it is the right shape for logging, analytics, a canvas redraw, or anything else
+that is a consequence of state rather than a view of it.
+
+It goes **innermost**, under everything else, because it is the layer that owns
+`subscribe` and it has no opinion about `set`. Fourth entry, third instalment of
+the tuple:
+
+```ts
+export type InventoryMutators = [
+  ['zustand/devtools', never],
+  ['zustand/immer', never],
+  ['zustand/subscribeWithSelector', never],
+];
+```
+
+**Now `persist`, the fourth and last layer.** It goes **between `devtools` and
+`immer`**, and both halves of that matter. Under `devtools`, so that the state
+change rehydration makes is an entry in the timeline — the debugging session
+where you need that entry is the one where the bug *is* rehydration, and the
+closing section of this lab demonstrates it. Above `immer`, so that what it
+serialises is a finished state.
+
+`persist` is also the one of the four that adds an **API to the store object**
+rather than changing `set`: `useInventoryStore.persist.rehydrate()`,
+`.hasHydrated()`, `.clearStorage()`. Lab 6 F's test is written against
+`rehydrate()`, and without the middleware it does not exist:
+
+```
+src/store/inventory/persist.test.ts(51,30): error TS2339: Property 'persist' does not exist on type 'UseBoundStore<Write<WithImmer<WithDevtools<StoreApi<InventoryStore>>>, StoreSubscribeWithSelector<InventoryStore>>>'.
+```
+
+That is also the reason for the one oddity in the tuple. Three of the entries
+say `never`; `persist` says `unknown`:
+
+```ts
+export type InventoryMutators = [
+  ['zustand/devtools', never],
+  ['zustand/persist', unknown],      // ← inserted, not appended
+  ['zustand/immer', never],
+  ['zustand/subscribeWithSelector', never],
+];
+```
+
+The second element of each pair is the middleware's own type argument.
+`never` means "this middleware contributes nothing to the store's type";
+`unknown` is `persist` saying "I add something — the `.persist` API". It is not
+a typo you can normalise. Copy it exactly.
+
+And note **inserted, not appended**. Every previous instalment went on the end,
+because every previous middleware went on the inside. This one goes into the
+middle of the stack, so it goes into the middle of the tuple.
 
 **`partialize` is a decision about what is *yours*.** Only the `recent` slice
 survives. Everything else is deliberately excluded, and each exclusion has a
@@ -1650,13 +2054,72 @@ inspect: (id) =>
 
 Most recent first, no duplicates, capped — three rules, one place.
 
-**B. `src/store/inventory/index.ts` — `TODO(lab-6.2)`**
+**B. `src/store/inventory/index.ts` and `types.ts` — `TODO(lab-6.2)`**
 
-Fill in the `persist` options: `storage: createJSONStorage(() => localStorage)`,
-`version`, `partialize`, `migrate`, `merge`, `onRehydrateStorage` — all as
-above, all commented with *why*, not *what*.
+Write the subscription **first**, at the bottom of `index.ts`, and run
+`npm run typecheck`:
 
-**C. `src/store/registry.ts` — `TODO(lab-6.3)`**
+```ts
+if (env.isDev) {
+  useInventoryStore.subscribe(
+    (state) => state.recent.ids,
+    (ids) => logger.debug(`[inventory] recently inspected: ${ids.join(', ') || '(none)'}`),
+  );
+}
+```
+
+```
+src/store/inventory/index.ts(135,5): error TS2554: Expected 1 arguments, but got 2.
+src/store/inventory/index.ts(135,6): error TS7006: Parameter 'ids' implicitly has an 'any' type.
+```
+
+Then add the middleware that makes it legal — innermost, wrapping the slices
+directly:
+
+```ts
+devtools(
+  immer(
+    subscribeWithSelector((...args) => ({ /* the five slices */ })),
+  ),
+  { name: 'ShopScope · inventory', enabled: env.isDev },
+)
+```
+
+and append the third entry to `InventoryMutators`. Typecheck is clean, and the
+log appears the next time you open a product.
+
+> `subscribe` also takes a third argument: `{ fireImmediately: true }` calls the
+> listener once on subscription, and `equalityFn` replaces `Object.is` for the
+> comparison. Neither is needed here; both are worth knowing exist.
+
+**C. `src/store/inventory/index.ts` and `types.ts` — `TODO(lab-6.3)`**
+
+Now `persist`, between `devtools` and `immer`, with its real options straight
+away — there is nothing to stub, because you know what every one of them is for:
+
+```ts
+devtools(
+  persist(
+    immer(subscribeWithSelector(/* the five slices */)),
+    {
+      name: INVENTORY_STORAGE_KEY,
+      storage: createJSONStorage(() => localStorage),
+      version: INVENTORY_PERSIST_VERSION,
+      partialize: …,
+      migrate: …,
+      merge: …,
+      onRehydrateStorage: …,
+    },
+  ),
+  { name: 'ShopScope · inventory', enabled: env.isDev },
+)
+```
+
+All six as in the Concept, all commented with *why*, not *what*. Then insert
+`['zustand/persist', unknown]` into the tuple **between devtools and immer** —
+not on the end — and you have the finished stack and the finished tuple.
+
+**D. `src/store/registry.ts` — `TODO(lab-6.4)`**
 
 A `Set<() => void>`, a `registerReset`, and a `resetUserScopedStores` that runs
 them all. Then register the inventory reset at the bottom of `index.ts`, with
@@ -1664,11 +2127,11 @@ them all. Then register the inventory reset at the bottom of `index.ts`, with
 this browser, not to this account, and a shopper who signs out expects to still
 have a basket.
 
-**D. `src/routes/RootLayout.tsx` — `TODO(lab-6.4)`**
+**E. `src/routes/RootLayout.tsx` — `TODO(lab-6.5)`**
 
 One line in `handleSignOut`, after `logout()`.
 
-**E. `src/store/inventory/persist.test.ts` — `TODO(lab-6.5)`**
+**F. `src/store/inventory/persist.test.ts` — `TODO(lab-6.6)`**
 
 `useInventoryStore.persist.rehydrate()` is the seam — it re-reads storage and
 runs `migrate` and `merge`, so a test can write a version 1 payload by hand and
@@ -1749,10 +2212,78 @@ expect(useInventoryStore.getState().recent.ids).toEqual([4, 9]);
 
 ---
 
+## The finished stack, and what reordering it actually breaks
+
+All four are now in place, so the order can be *demonstrated* rather than
+asserted. This is where most Zustand guides start; you have arrived at it with
+a reason for every layer.
+
+```text
+  create<InventoryStore>()(
+    devtools(               ← sees the next state + the action name
+      persist(              ← writes the partialized slice, after
+        immer(              ← turns your draft recipe into a state
+          subscribeWithSelector(   ← selector-aware subscribe()
+            slices ))))     ← your (set, get) => state
+
+  InventoryMutators = [devtools, persist, immer, subscribeWithSelector]
+                       └──────── same order, outside-in ────────┘
+```
+
+*The stack, outside-in. Each layer wraps the one below and hands the result up.*
+
+**Three rules of thumb, in decreasing order of how much they matter.**
+
+1. **`devtools` outermost, and this one is real.** It can only record state
+   changes that pass through it, and the ones it misses when it is nested too
+   deep are `persist`'s: rehydration writes state from *inside* `persist`, so a
+   `devtools` underneath never sees it.
+
+   Provable in a minute, with a stubbed extension counting the actions it is
+   sent. With `devtools(persist(…))`, rehydrating and then dispatching one
+   action sends three messages — two for the rehydration, one named `bump`.
+   With `persist(devtools(…))`, the same sequence sends exactly one: `bump`.
+   The rehydration happened; nothing recorded it. The debugging session where
+   you need that entry is the one where the bug *is* rehydration.
+
+2. **`immer` below anything that reads the finished state.** It is the layer
+   that turns a recipe into a state, so everything above it should be handed a
+   state. Keeping it directly above the slices is also the simplest thing to
+   reason about: the `set` your slices receive is the draft-taking one, and
+   there is nothing between them to think about.
+
+3. **`subscribeWithSelector` innermost.** It owns `subscribe` and has no
+   opinion about `set`, so it has nowhere it needs to be relative to the other
+   three. Innermost is convention, and convention is worth having.
+
+**And now the honest part, because it is more useful than the folklore.**
+Reordering this stack mostly does *not* produce a compiler error, and mostly
+does not break at runtime either. Verified on this store:
+
+| What you do | What happens |
+|---|---|
+| Reverse `InventoryMutators` completely, leaving `index.ts` alone | **Compiles clean.** The tuple is used to derive what `set` can do, and devtools' and immer's contributions combine the same way in either order |
+| Drop `['zustand/persist', unknown]` from the tuple, leaving `persist` applied | **Compiles clean** — until something calls `useInventoryStore.persist.…`, which is what makes `TS2339` such a confusing first symptom |
+| Swap `persist` and `immer` in `index.ts` *and* the tuple | **Compiles clean, all eleven tests pass, and storage still receives `{"state":{"recent":{"ids":[…]}},"version":2}`.** `persist` serialises `get()` after the write settles, not the updater you handed in — so it never sees a draft |
+| Move `devtools` under `persist` | Compiles, tests pass, **and rehydration silently disappears from the timeline** |
+| Remove a middleware from `index.ts` but leave it in the tuple | `error TS2349: This expression is not callable. Type 'never' has no call signatures.` — `set` has resolved to `never` |
+| Remove it from the tuple but leave it applied | `TS2554` (devtools) or `TS2769` (immer): the wall of errors from Labs 2 and 3 |
+
+So the two claims worth carrying out of today are narrow ones: **`devtools`
+outermost, for a reason you can watch**; and **the tuple and the stack are one
+contract in two files, and the compiler enforces only about half of it.** Put a
+comment above `InventoryMutators` saying "keep in step with `index.ts`" —
+because the day somebody adds a fifth middleware, the error they get will point
+at a `set` call in a file they have never opened, and the day somebody removes
+one, there may be no error at all.
+
+---
+
 ## Wrap-up — what you can now do
 
 - [x] Split a store into typed slices, combine them with `(...args)`, and say when two stores would be better than one
-- [x] Wrap a store in `devtools(persist(immer(subscribeWithSelector(…))))`, explain why that order, and write the `InventoryMutators` tuple that keeps `set` typed
+- [x] Add each of `devtools`, `immer`, `subscribeWithSelector` and `persist` at the moment it is needed, keep `InventoryMutators` in step one entry at a time, and recognise `TS2554`, `TS2769`, `TS2349` and `TS2339` as four faces of the same drift
+- [x] Say which part of `devtools(persist(immer(subscribeWithSelector(…))))` the order genuinely matters for, and demonstrate it
 - [x] Model a request as a four-state machine that cannot contradict itself
 - [x] Cancel a request with `AbortController` **and** discard a stale answer with a monotonic request id — and say which of the two is the correctness fix
 - [x] Recognise that `get()` before an `await` is a photograph, and read it again afterwards
@@ -2002,7 +2533,7 @@ something on its own.
 - [Prevent rerenders with `useShallow`](https://zustand.docs.pmnd.rs/learn/guides/prevent-rerenders-with-use-shallow) — Lab 3's Problem and its fix
 - [`useShallow`](https://zustand.docs.pmnd.rs/reference/hooks/use-shallow) — what "shallow" compares
 - [Updating state](https://zustand.docs.pmnd.rs/learn/guides/updating-state) — flat, nested, and with immer
-- [How to reset state](https://zustand.docs.pmnd.rs/learn/guides/how-to-reset-state) — the registry in Lab 6 C
+- [How to reset state](https://zustand.docs.pmnd.rs/learn/guides/how-to-reset-state) — the registry in Lab 6 D
 - [Testing](https://zustand.docs.pmnd.rs/learn/guides/testing) — resetting a module singleton between tests
 
 **Immer**
@@ -2053,13 +2584,16 @@ something on its own.
 
 | Symptom | Cause and fix |
 |---|---|
-| `Argument of type '(state: WritableDraft<…>) => void' is not assignable…` | `SliceOf` does not declare `immer`. Add the `InventoryMutators` tuple (Lab 1 A) and keep its order the same as the nesting in `index.ts`. |
-| `Expected 1-2 arguments, but got 3` on a `set` call | Same cause, different middleware: `devtools` is missing from the mutator tuple, so `set` has no third "action name" parameter. |
-| Types break the moment you add a middleware | The tuple in `types.ts` and the nesting in `index.ts` have drifted. They are one contract in two files; change them together. |
+| `TS2769: No overload matches this call` … `Type 'void' is not assignable to type 'InventoryStore \| Partial<InventoryStore>'` | `SliceOf` does not declare `immer`, so `set` still wants a recipe that RETURNS the next state. Append `['zustand/immer', never]` to `InventoryMutators` (Lab 3 B). |
+| `TS2554: Expected 1-2 arguments, but got 3` on a `set` call | Same cause, different middleware: `devtools` is missing from the mutator tuple, so `set` has no third "action name" parameter (Lab 2 A). |
+| `TS2349: This expression is not callable. Type 'never' has no call signatures.` | The opposite drift: the tuple lists a middleware that `index.ts` does not apply, so `set` resolves to `never`. |
+| `TS2339: Property 'persist' does not exist on type 'UseBoundStore<…>'` | `persist` is in the tuple or the test but not in the stack. `.persist.rehydrate()` only exists once the middleware is applied (Lab 6 C). |
+| `TS2554: Expected 1 arguments, but got 2` on `subscribe` | The plain `subscribe` takes a listener and nothing else. `subscribe(selector, listener)` needs `subscribeWithSelector` (Lab 6 B). |
+| Types break the moment you add a middleware | The tuple in `types.ts` and the nesting in `index.ts` have drifted. They are one contract in two files; change them together, in one commit. |
 | `state.setFilter is not a function` after a reset | `setState(next, true)` replaced the state object, and the actions were in it. The second argument is `replace` — it must be `false`. |
-| `Warning: The result of getSnapshot should be cached to avoid an infinite loop` | A selector allocates: an object literal, an array literal, `.map`, `.filter`, or `?? { default }`. Memoise it (Lab 3 B), select something smaller, or wrap it in `useShallow`. |
+| `Warning: The result of getSnapshot should be cached to avoid an infinite loop` | A selector allocates: an object literal, an array literal, `.map`, `.filter`, or `?? { default }`. Memoise it (Lab 3 C), select something smaller, or wrap it in `useShallow`. |
 | `Maximum update depth exceeded` on the inventory page | The same thing, one step further along. Comment out selectors until it stops; the last one you removed is the culprit. |
-| Every row flashes when one stock number changes | The row is subscribed to `entities` rather than `entities[id]`. Use `selectProduct(id)` (Lab 3 C). |
+| Every row flashes when one stock number changes | The row is subscribed to `entities` rather than `entities[id]`. Use `selectProduct(id)` (Lab 3 D). |
 | Two requests on first load, the first cancelled | StrictMode, in development only. React mounts, unmounts and remounts; `fetchPage` aborts its predecessor. Correct behaviour — it does not happen in a build. |
 | The table shows results for the previous search | The `if (get().requestId !== requestId) return;` guard is missing or is comparing a stale `get()`. Read `get()` fresh after every `await`. |
 | An error banner appears after changing a filter quickly | The `catch` is missing `if (controller.signal.aborted) return;`, so a cancellation is being reported as a failure. |
@@ -2072,7 +2606,7 @@ something on its own.
 | Bulk reports "0 of 12" although rows updated | `outcomes` was indexed by iteration order rather than input index. Write results back at `index`. |
 | Undo does nothing | `undoSnapshot` was cleared by a refetch or by `dismissReport` before the click. It is deliberately one-shot. |
 | `localStorage` has no `shopscope.inventory` key | `persist` needs a `name`. Without one it throws at store creation; with one but no writes, check that `partialize` returns something non-empty. |
-| The recently-inspected list empties after a deploy | A `version` bump without a `migrate`, or a shape change without a bump. Ship both in the same commit (Lab 6 B). |
+| The recently-inspected list empties after a deploy | A `version` bump without a `migrate`, or a shape change without a bump. Ship both in the same commit (Lab 6 C). |
 | `[inventory] rehydration failed — starting empty` | A corrupted or hand-edited storage value. The app carries on by design; clear the key to silence it. |
 | Product titles vanish from the recent strip after a reload | Correct: only ids are persisted, and `entities` starts empty. The strip falls back to `#id` until the catalogue loads. |
 | Signing out leaves the table full | `resetUserScopedStores()` is missing from `handleSignOut`, or the store module was never imported, so it never registered (it is behind the lazy `/account/inventory` route). |

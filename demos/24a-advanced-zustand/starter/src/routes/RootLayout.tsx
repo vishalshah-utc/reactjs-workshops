@@ -27,7 +27,7 @@ export function RootLayout() {
     return () => window.removeEventListener(AUTH_CHANGED, onAuthChanged);
   }, [revalidator]);
 
-  // TODO(lab-6.4): signing out must clear USER-scoped state as well as tokens.
+  // TODO(lab-6.5): signing out must clear USER-scoped state as well as tokens.
   // One call — `resetUserScopedStores()` from `src/store/registry` — however
   // many stores register. Decide which ones do: the inventory console holds the
   // previous admin's catalogue page, selection and recently-inspected list; the

@@ -46,32 +46,41 @@ else.
 
 ## What you build
 
-Search for `TODO(lab-` — twenty-two markers.
+Search for `TODO(lab-` — twenty-four markers.
+
+The store starts with **no middleware**. The four arrive one at a time, each in
+the lab where something stops being possible without it, and each as the same
+two-file edit: one layer in `src/store/inventory/index.ts`, one entry in
+`InventoryMutators` in `src/store/inventory/types.ts`. Those two files carry
+several markers each, which is deliberate — the marked rows below are the
+middleware steps.
 
 | Marker | File |
 |---|---|
-| `lab-1.1` | `src/store/inventory/types.ts` — `InventoryMutators` + `SliceOf<T>`: the mutator tuple every slice needs |
-| `lab-1.2` | `src/store/inventory/filtersSlice.ts` — the first slice, with named devtools actions |
-| `lab-1.3` | `src/store/inventory/index.ts` — `devtools(persist(immer(subscribeWithSelector(…))))` |
-| `lab-2.1` | `src/store/inventory/catalogueSlice.ts` — the status machine, `goToPage`, `retry` |
-| `lab-2.2` | `src/store/inventory/catalogueSlice.ts` — `fetchPage`: `AbortController` + a monotonic request id |
-| `lab-2.3` | `src/store/inventory/filtersSlice.ts` — a filter change always refetches page 0 |
-| `lab-2.4` | `src/routes/account/InventoryPage.tsx` — skeleton / error / empty / table, driven by `status` |
-| `lab-3.1` | `src/store/inventory/catalogueSlice.ts` — `upsertProduct` and `patchStock` through immer drafts |
-| `lab-3.2` | `src/store/inventory/selectors.ts` — selector factories, a shared idle constant, a memoised visible list |
-| `lab-3.3` | `src/components/inventory/InventoryTable.tsx` — one row, one subscription, `useShallow` |
-| `lab-3.4` | `src/store/inventory/inventory.test.ts` — the store under test, with no React |
+| `lab-1.1` | `src/store/inventory/filtersSlice.ts` — the first slice, with the plain `set` |
+| **`lab-2.1`** | `src/store/inventory/index.ts`, `src/store/inventory/types.ts` — **`devtools`**, and the tuple's first entry |
+| `lab-2.2` | `src/store/inventory/filtersSlice.ts` — name the three actions for the timeline |
+| `lab-2.3` | `src/store/inventory/catalogueSlice.ts` — the status machine, `goToPage`, `retry` |
+| `lab-2.4` | `src/store/inventory/catalogueSlice.ts` — `fetchPage`: `AbortController` + a monotonic request id |
+| `lab-2.5` | `src/store/inventory/filtersSlice.ts` — a filter change always refetches page 0 |
+| `lab-2.6` | `src/routes/account/InventoryPage.tsx` — skeleton / error / empty / table, driven by `status` |
+| `lab-3.1` | `src/store/inventory/catalogueSlice.ts` — `upsertProduct` and `patchStock`, spread by hand first |
+| **`lab-3.2`** | `src/store/inventory/index.ts`, `src/store/inventory/types.ts` — **`immer`**, and deleting the spreads |
+| `lab-3.3` | `src/store/inventory/selectors.ts` — selector factories, a shared idle constant, a memoised visible list |
+| `lab-3.4` | `src/components/inventory/InventoryTable.tsx` — one row, one subscription, `useShallow` |
+| `lab-3.5` | `src/store/inventory/inventory.test.ts` — the store under test, with no React |
 | `lab-4.1` | `src/store/inventory/editSlice.ts` — optimistic `commitStock` with snapshot and rollback |
 | `lab-4.2` | `src/components/inventory/StockCell.tsx` — the inline editor, pending and per-row error |
 | `lab-4.3` | `src/store/inventory/inventory.test.ts` — the rollback test |
 | `lab-5.1` | `src/lib/concurrency.ts` — `mapWithConcurrency`, four at a time, every outcome reported |
 | `lab-5.2` | `src/store/inventory/bulkSlice.ts` — selection, one snapshot, partial failure, undo |
 | `lab-5.3` | `src/components/inventory/BulkBar.tsx` — the bar and the honest report |
-| `lab-6.1` | `src/store/inventory/recentSlice.ts`, `src/store/inventory/index.ts` — the recent list, and the transient subscription |
-| `lab-6.2` | `src/store/inventory/index.ts` — `persist`: `partialize`, `version`, `migrate`, `merge`, `onRehydrateStorage` |
-| `lab-6.3` | `src/store/registry.ts`, `src/store/inventory/index.ts` — the reset registry, and why `replace` stays `false` |
-| `lab-6.4` | `src/routes/RootLayout.tsx` — sign-out clears user-scoped state |
-| `lab-6.5` | `src/store/inventory/persist.test.ts` — the migration test, through `persist.rehydrate()` |
+| `lab-6.1` | `src/store/inventory/recentSlice.ts` — the recent list: front, no duplicates, capped |
+| **`lab-6.2`** | `src/store/inventory/index.ts`, `src/store/inventory/types.ts` — **`subscribeWithSelector`**, and the transient subscription that needs it |
+| **`lab-6.3`** | `src/store/inventory/index.ts`, `src/store/inventory/types.ts` — **`persist`**: `partialize`, `version`, `migrate`, `merge`, `onRehydrateStorage` |
+| `lab-6.4` | `src/store/registry.ts`, `src/store/inventory/index.ts` — the reset registry, and why `replace` stays `false` |
+| `lab-6.5` | `src/routes/RootLayout.tsx` — sign-out clears user-scoped state |
+| `lab-6.6` | `src/store/inventory/persist.test.ts` — the migration test, through `persist.rehydrate()` |
 
 ## Finished version
 
@@ -83,8 +92,9 @@ screen in Redux Toolkit.
 ## Before you start
 
 Install the **Redux DevTools** browser extension — Zustand's `devtools`
-middleware speaks the same protocol, and from Lab 1 C every change to the
-inventory store appears in it by name, with working time travel.
+middleware speaks the same protocol, and from Lab 2 A every change to the
+inventory store appears in it by name, with working time travel. Lab 1 runs
+without it on purpose, so you can feel what it is for.
 
 Sign in as `emilys` / `emilyspass` (admin). `/account/inventory` is behind
 `requireRole('admin')`.

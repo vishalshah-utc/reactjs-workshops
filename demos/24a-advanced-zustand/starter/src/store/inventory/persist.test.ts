@@ -5,7 +5,7 @@ import { describe, it } from 'vitest';
  * the interesting behaviour happens at REHYDRATION, against whatever shape is
  * already in the browser.
  *
- * TODO(lab-6.5): `useInventoryStore.persist.rehydrate()` is the seam — it
+ * TODO(lab-6.6): `useInventoryStore.persist.rehydrate()` is the seam — it
  * re-reads storage and runs `migrate` and `merge`. Write a version 1 payload
  * into `localStorage` by hand and watch it come back as version 2. Then write
  * rubbish into the same key and prove the store neither throws nor wipes what

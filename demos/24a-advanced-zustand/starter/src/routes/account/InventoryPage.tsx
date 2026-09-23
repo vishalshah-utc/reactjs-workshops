@@ -21,7 +21,7 @@ export function InventoryPage() {
   const { categories } = useLoaderData<typeof inventoryLoader>();
 
   /**
-   * TODO(lab-2.4): drive the page from the store's status machine.
+   * TODO(lab-2.6): drive the page from the store's status machine.
    *   · on mount, `fetchPage(0)` — but only when `status === 'idle'`, because
    *     the store is a module singleton and survives navigation;
    *   · `loading` with nothing on screen → a skeleton; `loading` with rows

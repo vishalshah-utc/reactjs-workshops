@@ -1,6 +1,6 @@
 # Demo 24a — Walkthrough of the finished solution
 
-The [guide](./README.md) teaches by building: six labs, twenty-two markers.
+The [guide](./README.md) teaches by building: six labs, twenty-four markers.
 This file teaches by reading. Open `solution/`, follow along, and you should
 understand both the code and the ideas without doing a single lab.
 
@@ -52,8 +52,10 @@ Three files, in this order. One idea each.
 **`src/store/inventory/types.ts`** — the feature, described in types. Five slice
 interfaces, one `InventoryStore` intersection, and at line 114 the thing that
 matters most: `InventoryMutators`, a tuple naming every middleware applied above
-a slice. **Idea: a slice's type has to know what wraps it, or `set` stops
-compiling.**
+a slice, in the order they are applied. **Idea: a slice's type has to know what
+wraps it, or `set` stops compiling.** The guide builds that tuple one entry at a
+time — `devtools` in Lab 2, `immer` in Lab 3, `subscribeWithSelector` and then
+`persist` in Lab 6 — which is also the order to read it in.
 
 **`src/store/inventory/catalogueSlice.ts`** — the only file that talks to the
 network. Line 40 bumps a request id, line 44 aborts the previous request, line
@@ -63,7 +65,10 @@ saves bandwidth; the request id is what saves correctness.**
 **`src/store/inventory/index.ts`** — line 44 onwards:
 `devtools(persist(immer(subscribeWithSelector(…))))`, then the persist options,
 then the reset registration. **Idea: the middleware order is the order an update
-travels through, and every layer has to be declared in the type from file one.**
+travels through, and every layer has to be declared in `InventoryMutators` to
+match.** Strip the four wrappers away and what is left is five lines spreading
+five slice creators — that is where the guide starts, and everything else here
+is a layer added on top of it for a named reason.
 
 If you have ten minutes, add **`selectors.ts`** (line 43: memoisation in eleven
 lines) and **`editSlice.ts`** (line 22: snapshot before you destroy).
@@ -80,8 +85,11 @@ four, so "loading" and "error" cannot both be true. `RowState` is per row, not
 per page. `InventoryStore` is the intersection of the five slices, which is why
 `get()` in any slice sees all of them.
 *Stop on line 114.* `InventoryMutators` lists `devtools`, `persist`, `immer`,
-`subscribeWithSelector` in the order they are applied. Reorder it and nothing
-compiles, with an error about `set` that never mentions middleware.
+`subscribeWithSelector` in the order they are applied. Note that `persist` is
+`unknown` where the others are `never` — that is how a middleware declares it
+contributes a store type, and `persist` is the one that does (it adds
+`useInventoryStore.persist`). Drop an entry that `index.ts` still applies and
+the error lands on `set` in a slice, never mentioning middleware.
 
 **`src/store/inventory/filtersSlice.ts`** (65 lines)
 Search text, category, sort, order, low-stock, plus a dev-only latency knob.
@@ -239,14 +247,37 @@ these is one edit; undo it afterwards.
 **Delete `InventoryMutators` from `types.ts` and go back to
 `StateCreator<InventoryStore, [], [], T>`.**
 `npm run typecheck` fails on nearly every `set` in the store, with two errors
-that never mention middleware: *"Argument of type '(state: WritableDraft<…>) =>
-void' is not assignable…"* (immer is missing) and *"Expected 1-2 arguments, but
-got 3"* (devtools is missing). This is the Zustand TypeScript complaint, in one
-edit.
+that never mention middleware:
 
-**Reorder the stack in `index.ts` — put `immer` outside `persist`.**
-The types stop matching the tuple, and at runtime `persist` is handed a draft
-proxy to serialise.
+```
+error TS2554: Expected 1-2 arguments, but got 3.          ← devtools is missing
+error TS2769: No overload matches this call.
+  … Type 'void' is not assignable to type
+    'InventoryStore | Partial<InventoryStore>'.           ← immer is missing
+```
+
+This is the Zustand TypeScript complaint, in one edit. Remove just one entry to
+see them separately.
+
+**Remove a middleware from `index.ts` but leave it in the tuple.**
+The other direction, and a different error: `error TS2349: This expression is
+not callable. Type 'never' has no call signatures.` — `set` resolves to `never`
+because you have described a store that does not exist.
+
+**Reorder the stack in `index.ts` — put `immer` outside `persist` (move the
+options with it).**
+Nothing happens. It compiles, all eleven tests pass, and `localStorage` still
+receives `{"state":{"recent":{"ids":[…]}},"version":2}`, because `persist`
+serialises `get()` after the write has settled rather than the updater you
+handed in. Worth doing once, because the folklore says it should break — the
+order that *does* matter is the next one.
+
+**Move `devtools` under `persist`.**
+Also compiles, also passes. But rehydration disappears from the timeline:
+`persist` writes the rehydrated state from above `devtools`, so `devtools`
+never sees it. Reload with a stored `recent` list and watch the strip repopulate
+with no corresponding entry in the DevTools list. That is the one ordering rule
+with teeth.
 
 **Change `false` to `true` in the `setState` call at `index.ts:119`.**
 Sign out, then click anything on the inventory page:

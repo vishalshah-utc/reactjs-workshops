@@ -5,7 +5,7 @@ import { describe, it } from 'vitest';
  * `subscribe`. `useInventoryStore(…)` is only the React BINDING to it — so none
  * of these tests renders anything, and none of them needs Testing Library.
  *
- * TODO(lab-3.4): mock `../../api/services/products` with `vi.mock`, then drive
+ * TODO(lab-3.5): mock `../../api/services/products` with `vi.mock`, then drive
  * the store directly. `beforeEach` must put it back to a known state — it is a
  * module singleton shared by every test in the file. The race test needs a
  * DEFERRED promise (one you resolve by hand), because "two requests overlap" is

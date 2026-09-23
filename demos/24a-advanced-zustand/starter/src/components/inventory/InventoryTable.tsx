@@ -10,7 +10,7 @@ import { StockCell } from './StockCell';
  * by this one component, from one subscription to `entities`, so a single
  * changed stock number re-renders the whole table.
  *
- * TODO(lab-3.3): split a row out into its own component subscribed to its own
+ * TODO(lab-3.4): split a row out into its own component subscribed to its own
  * entity through `selectProduct(id)` / `selectIsSelected(id)`, and take the
  * actions with `useShallow` — an object selector builds a new object on every
  * call, and Zustand compares by reference. Prove it with React DevTools'

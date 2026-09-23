@@ -13,7 +13,7 @@ export const selectPageCount = (state: InventoryStore) => Math.ceil(state.total 
 export const selectSelectedCount = (state: InventoryStore) => state.selected.length;
 
 /**
- * TODO(lab-3.2): the rest of the selector layer, and the discipline behind it.
+ * TODO(lab-3.3): the rest of the selector layer, and the discipline behind it.
  *
  *   · `selectProduct(id)`, `selectIsSelected(id)` and `selectRowState(id)` —
  *     selector FACTORIES, one row, one subscription. `selectRowState` must

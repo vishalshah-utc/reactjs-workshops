@@ -100,16 +100,32 @@ export interface RecentSlice {
 export type InventoryStore = FiltersSlice & CatalogueSlice & EditSlice & BulkSlice & RecentSlice;
 
 /**
- * The plain form: a slice creator over the whole store, with NO middleware
- * declared. It compiles today because nothing is wrapped yet.
+ * THE BARE FORM. A slice creator over the whole store: the first parameter is
+ * the WHOLE store (so `get()` sees every slice), the last is what this creator
+ * RETURNS. The two lists in the middle are mutators — the middlewares applied
+ * above this creator, and the ones it applies itself. Both are empty today,
+ * because `index.ts` wraps the slices in nothing at all.
  *
- * TODO(lab-1.1): once `index.ts` wraps the slices in
- * devtools(persist(immer(subscribeWithSelector(…)))), this alias is wrong and
- * every `set` in every slice loses immer's draft and devtools' action name.
- * Replace it with an `InventoryMutators` tuple that lists those four
- * middlewares in the same order they are applied, and a `SliceOf<T>` built on
- * it. Keep the two in step: the error always lands on `set`, never on the
- * middleware you actually changed.
+ * Every middleware you add from Lab 2 on changes what `set` can do, and a slice
+ * creator that does not declare it loses that ability. So this alias grows one
+ * entry at a time, in step with the stack in `index.ts`:
+ *
+ * TODO(lab-2.1): `devtools` arrives, so `set` gains a third "action name"
+ * argument. Introduce an `InventoryMutators` tuple whose single entry is
+ * `['zustand/devtools', never]`, and build `SliceOf<T>` on it.
+ *
+ * TODO(lab-3.2): `immer` arrives, INSIDE devtools, so `set` gains the draft
+ * recipe. Append `['zustand/immer', never]`.
+ *
+ * TODO(lab-6.2): `subscribeWithSelector` arrives, innermost. Append
+ * `['zustand/subscribeWithSelector', never]`.
+ *
+ * TODO(lab-6.3): `persist` arrives, between devtools and immer. Insert
+ * `['zustand/persist', unknown]` in that position — `unknown`, not `never`,
+ * because persist is the one of the four that contributes a store type.
+ *
+ * The order is the order of application, outside-in — the same order as the
+ * nesting in `index.ts`, which is the source of truth for this list.
  */
 export type SliceOf<T> = StateCreator<InventoryStore, [], [], T>;
 
