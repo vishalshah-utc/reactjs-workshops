@@ -741,3 +741,54 @@ write deliberately so you recognise it for the rest of your career.
 | Everything is unstyled | Is `import 'bootstrap/dist/css/bootstrap.min.css'` still in `main.tsx`? |
 | Console logs appear twice | `<StrictMode>` in development. Working as intended — Demo 5 explains. |
 | StackBlitz feels stuck | Hard-refresh the tab. Failing that, re-open the fork link (and lose your work — so bookmark first). |
+
+
+## Configure the `@` import alias
+
+Optional but strongly recommended, and used by every code sample from here on: it turns `../../components/TaskCard` into `@/components/TaskCard`, which stays correct when you move files.
+
+Add to **`tsconfig.json`**:
+
+```json
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/*"] }
+  }
+}
+```
+
+Add the same block inside `compilerOptions` in **`tsconfig.app.json`** — the editor reads this one:
+
+```json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/*"] }
+  }
+}
+```
+
+Then update **`vite.config.ts`**:
+
+```ts
+import path from "path"
+import { defineConfig } from "vite"
+import react from "@vitejs/plugin-react"
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+})
+```
+
+Both halves are required: **TypeScript** needs `paths` to resolve types, and **Vite** needs `resolve.alias` to resolve the actual module at build time. Configure one without the other and you get either red squiggles or a runtime failure.
