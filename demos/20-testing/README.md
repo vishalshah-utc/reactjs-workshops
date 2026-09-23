@@ -34,7 +34,9 @@ New dependencies: **none today.** `vitest@5.0.1`, `jsdom@30.1.0`,
 `@testing-library/react@16.3.3`, `@testing-library/user-event@14.6.7`,
 `@testing-library/jest-dom@7.0.1`, `msw@2.15.0` and `@playwright/test@1.63.0`
 all arrived with the Part 6 dependency set in Demo 15. They are installed.
-Today is the first time anything imports them.
+Today is the first time anything imports them —
+[the stack, layer by layer](#the-stack-this-demo-uses-layer-by-layer) says
+what each name is for before you meet it.
 
 ## What you ship today
 
@@ -165,6 +167,438 @@ and the rename before you carry on.**
 
 ---
 
+## Groundwork — what a test is, and what one buys you
+
+You are about to wire up a test runner. Before you do, it is worth being
+precise about what a test *is*, because most of the pain teams have with
+testing is not caused by the tools they chose. It is caused by writing the
+wrong kind of test, at the wrong layer, asserting the wrong thing.
+
+This section is the theory, and it assumes you have never written a test.
+Lab 1's Concept applies it to ShopScope specifically — the same trophy,
+with this app's own files in each band. Read this first and that table
+stops being a picture to memorise. (Demo 13's
+[Groundwork](../13-client-state-with-zustand/README.md#groundwork--application-state-and-what-a-store-actually-is)
+does the same job for state: general theory here, applied theory in the lab.)
+
+### What a test actually is
+
+A test is **a small program that runs your program and complains when the
+answer is wrong**.
+
+That is the entire idea. There is no magic in it. You import a function, you
+call it with an input you chose, and you compare what came back with what you
+expected. If the two differ, the test *fails* — which means the process exits
+non-zero and prints the difference. If they match, it passes and says
+nothing.
+
+A test runner is the program that finds those files, runs them, and prints
+the tally. Nothing you write today is cleverer than that.
+
+### Why write one — honestly
+
+Not because testing is virtuous. Because of four things you can actually
+cash in:
+
+1. **You can change code without fear.** This is the big one, and the only
+   one that compounds. A suite is what lets you rename, extract, upgrade a
+   library or replace React Bootstrap with Tailwind and *know* within
+   seconds whether you broke a user-visible behaviour. Without it, every
+   refactor is a gamble, so nobody refactors, so the code rots.
+2. **A bug can be made to never come back.** Fix a bug, write a test that
+   fails before the fix and passes after, and that bug is now structurally
+   impossible to reintroduce. Without the test you will ship it again in
+   eighteen months, because the person who reintroduces it will not be you.
+3. **The feedback loop shrinks.** This morning's cold open took two minutes
+   to find by clicking. The test in Lab 2 finds it in 40 milliseconds,
+   without a browser, and says which behaviour broke.
+4. **It documents the intent.** `it('disables the button and renames it when
+   the product is out of stock')` is a sentence about the product. Comments
+   go stale silently; a test that goes stale goes red.
+
+And honestly, what tests do **not** buy you: proof of correctness, a defence
+against a bad design, or an excuse to skip code review. A green suite means
+"nothing I thought to check is broken", which is weaker than it sounds and
+still worth a great deal.
+
+### The anatomy of a test
+
+Three functions carry almost every test you will ever read.
+
+- **`describe(name, fn)`** groups related tests. It is a folder, nothing
+  more. Its name is usually the thing under test.
+- **`it(name, fn)`** *is* one test. The body runs; if it throws, the test
+  fails. `test()` is the same function under a second name — pick one and
+  stay with it. The name should finish the sentence "it …", in English a
+  stranger could read in a failure report.
+- **`expect(actual).toBe(expected)`** is the claim. `expect()` wraps the
+  value you got; the **matcher** after it (`toBe`, `toEqual`,
+  `toHaveBeenCalled`, `toBeDisabled`) says what you are claiming about it.
+
+Inside the body, arrange the world, do the thing, check the result — the
+pattern is called **arrange–act–assert**, and keeping the three visually
+separate is most of what makes a test readable at 3 a.m.
+
+```text
+  import { describe, it, expect } from 'vitest';
+  import { discountedPrice } from './pricing';
+
+  describe('discountedPrice', () => {      <-- GROUP of related tests
+    it('takes 15% off a round price', () => {   <-- ONE test case
+                                                    name = a sentence
+
+      const price = 100;                  <-- ARRANGE: set the scene
+      const percent = 15;
+
+      const actual = discountedPrice(price, percent);   <-- ACT: once
+
+      expect(actual).toBe(85);            <-- ASSERT: the claim
+    });                                       no claim = no test
+  });
+```
+*One test, annotated by part: group, case, arrange, act, assert.*
+
+That file is complete. Nothing above it knows anything about React, the DOM,
+ShopScope or the network — and it is a real, passing, useful test.
+
+Two habits worth forming now. **One behaviour per `it`.** If the name needs
+an "and", you probably want two tests, because a failure should name one
+thing. **Act once.** Several actions in a row and a red test no longer tells
+you which one broke.
+
+### What "the system under test" means
+
+The **system under test** (SUT) is the thing you are making a claim about.
+Everything else in the file is scenery.
+
+In the example above the SUT is `discountedPrice`. In Lab 2 it is the
+`ProductCard` component. In Lab 4 it is the products page *plus* the axios
+instance *plus* the interceptors, with only the network faked. In Lab 6 it
+is the whole built application.
+
+Naming the SUT out loud before you write anything settles two arguments at
+once: **what you are allowed to fake** (anything outside the boundary) and
+**what you must not fake** (anything inside it). Fake something inside your
+own boundary and the test passes because of your fake, not because of your
+code. That is the single commonest way a suite becomes worthless.
+
+### A test that cannot fail is worse than no test
+
+A test that always passes is not neutral — it is **actively harmful**,
+because it shows up green on a dashboard and buys confidence it has not
+earned. No test at all is honest about the risk; a vacuous test lies about
+it.
+
+They creep in easily:
+
+```ts
+it('renders', () => {
+  render(<ProductCard product={makeProduct()} />);   // no expect at all
+});
+
+it('adds to cart', () => {
+  const onAdd = vi.fn();
+  onAdd(product);                      // calling the mock, not the SUT
+  expect(onAdd).toHaveBeenCalled();     // of course it has
+});
+```
+
+So there is one ritual, and you will do it in step 6 below and again in
+every lab today: **make each new test fail on purpose before you trust it.**
+Break the code it covers, watch it go red, put the code back. A test you
+have never seen fail is a test you have never seen work.
+
+### The kinds of test, and the layers they sit in
+
+The four words people throw around are **unit**, **integration**,
+**component** and **end-to-end**. They are not a quality ranking. They are a
+statement about **how much of the real system is running** — and therefore
+about what the test can catch, what it cannot, and what it costs you in
+seconds and in flakiness.
+
+| Kind | How much is real | Catches | Misses | Cost |
+|---|---|---|---|---|
+| **Unit** | one function, nothing else | rules, edge cases, arithmetic, off-by-ones | anything about how the pieces are joined | microseconds; never flaky |
+| **Component** | one component, a real DOM, real events | rendering, interaction, accessible names, disabled states | anything above the component's props | ~10–100 ms; flaky only if you forget `await` |
+| **Integration** | several real units wired together, only the network faked | **wiring** — the layer most user-visible bugs live in | contract drift with the real server; anything build-specific | ~50–300 ms; mostly stable |
+| **End-to-end** | the built app in a real browser, real network | routing, bundling, env config, the whole journey | nothing — which is why it is slow | seconds to minutes; the flakiest thing you own |
+
+"Component test" is really a *shape* of integration test — the one React
+developers write most — so you will see it drawn inside the integration
+band rather than beside it.
+
+Stack those bands by how much confidence each one buys per second spent and
+you get Kent C. Dodds' **testing trophy**, which replaced the older testing
+pyramid. The change of shape is the whole argument: the widest band is no
+longer unit tests.
+
+```text
+            ┌───────────────────┐
+            │        E2E        │  the real build, a real
+            │                   │  browser: routing, bundling,
+            │                   │  env, the whole journey
+       ┌────┴───────────────────┴────┐
+       │        INTEGRATION          │  several real units, only
+       │   the widest band, and      │  the network faked: WIRING
+       │       that is the point     │  — where users' bugs live
+       └────┐                   ┌────┘
+            │       UNIT        │  one pure function, no DOM:
+            │                   │  rules and edge cases
+       ┌────┴───────────────────┴────┐
+       │          STATIC             │  tsc + eslint: shapes and
+       │                             │  typos, running already
+       └─────────────────────────────┘
+
+       slow, broad, few   ^          confidence per second
+       fast, narrow, many |          is highest in the middle
+```
+*The testing trophy: four bands, widest where the bugs are.*
+
+Read the shape as a **budget, not a ranking**. Every band is worth having.
+You just buy most of your confidence from the middle, because that is where
+this morning's cold open lived: two units that were each perfectly correct,
+joined together wrongly.
+
+> **Lab 1 has this trophy again, applied.** Its table names ShopScope's own
+> files in each band — `validateProduct` and the reducers in unit,
+> `ProductCard` and the MSW-driven products page in integration, the one
+> Playwright journey at the top — and prices them for *this* codebase. This
+> one is the general picture; that one is the instance. If they ever seem to
+> disagree, the applied one wins: these are trade-offs with reasons
+> attached, not laws.
+
+---
+
+## The landscape — the options, and how they fit together
+
+### They are not all alternatives to each other
+
+This is the thing beginners get wrong most often, so it goes first.
+
+**Jest and Vitest compete.** They are both test runners; you pick one.
+**Playwright and Cypress compete.** They both drive a real browser; you pick
+one. **Playwright and Vitest do not compete at all** — they do different
+jobs, and a normal project runs both, as this one does from Lab 6 onwards.
+
+So "should we use Vitest or Playwright?" is not a question. Sort the names
+by **job** and the crowd shrinks to one choice per row.
+
+| Job | The options | Notes |
+|---|---|---|
+| **Test runner** — finds your test files, runs them, reports | **Vitest**, **Jest**, [Node's built-in runner](https://nodejs.org/api/test.html), Mocha / Jasmine | Vitest for Vite projects; Jest everywhere else. Node's own runner is real and dependency-free, but has no jsdom and no transform pipeline, so it suits libraries rather than React apps. Mocha and Jasmine are names you will meet in older codebases, not ones you would start with. |
+| **Rendering and querying React** | **React Testing Library**, Enzyme, `react-test-renderer` | RTL is the only live answer. Enzyme reached into component internals and never supported React 18+; `react-test-renderer` is deprecated by React itself. Inherit them, do not start with them. |
+| **DOM environment** — a `document` without a browser | **jsdom**, happy-dom | jsdom is the compatible default; happy-dom is faster and less complete. Neither is a browser: no layout, no paint, no real event loop for CSS. `getBoundingClientRect()` returns zeros in both. |
+| **End-to-end** — drive a real browser | **Playwright**, Cypress, Selenium / WebdriverIO | Playwright and Cypress are both good; Playwright wins on speed, parallelism, multi-browser and its `page.getByRole` locators matching what you already write in RTL. Selenium and WebdriverIO are the older guard — still the answer for exotic browser or device grids. |
+| **Component tests in a *real* browser** — the missing middle | [Vitest browser mode](https://vitest.dev/guide/browser/), [Cypress component testing](https://docs.cypress.io/app/component-testing/get-started), the Storybook test runner | Same tests as jsdom, run in Chromium, so layout and CSS are real. Worth it when the thing under test depends on real geometry — a virtualised list, a popper, a focus trap. Slower, so not the default. |
+| **Network mocking** | **MSW**, `nock`, `fetch-mock`, a hand-rolled `vi.fn()` over `fetch` | MSW intercepts at the network layer, so your axios instance, interceptors, retries and error mapping all really run. The others (and hand-rolled stubs) replace *your own code*, which is exactly the "faking inside the boundary" mistake above. |
+| **Assertions and matchers** | the runner's own `expect`, plus `@testing-library/jest-dom` | `expect` covers values. `jest-dom` adds DOM matchers — `toBeDisabled()`, `toBeInTheDocument()`, `toHaveAccessibleName()` — that read as English and print useful failures. |
+| **Coverage** | v8, istanbul | Which lines ran while the tests ran. v8 is built into the engine and effectively free; istanbul instruments the source and is slower but slightly more precise. A signal, never a gate. |
+| **Accessibility** | `axe-core` (via `jest-axe` or Playwright's `AxeBuilder`) | Automated rules catch perhaps a third of real issues. The other two thirds is querying by role, which you get for free from RTL. |
+| **Visual regression** | Playwright screenshots, or a hosted service | Pixel diffs of rendered pages. Genuinely useful for design systems, noisy for product UI — fonts and antialiasing differ per machine. |
+
+### Where each name sits in this demo's stack
+
+```text
+  a src/**/*.test.tsx file            an e2e/*.spec.ts file
+          |                                   |
+          v                                   v
+  +-------------------------------+   +----------------------+
+  | vitest     runs it, reports   |   | playwright           |
+  +-------------------------------+   |                      |
+  | jsdom      supplies document  |   |  launches a real     |
+  +-------------------------------+   |  Chromium over a     |
+  | RTL        render, getByRole  |   |  real build, served  |
+  +-------------------------------+   |  by `vite preview`   |
+  | user-event click, type, tab   |   |                      |
+  +-------------------------------+   |  nothing is faked:   |
+  | jest-dom   toBeDisabled(), .. |   |  real browser, real  |
+  +-------------------------------+   |  network, real JS    |
+  | msw        answers the network|   |  bundle              |
+  +-------------------------------+   +----------------------+
+       milliseconds, no browser              ~30 s, a browser
+```
+*The two runtimes today: a jsdom stack, and a browser stack.*
+
+### The stack this demo uses, layer by layer
+
+Every one of these is already installed — they arrived with the Part 6
+dependency set in Demo 15 and nothing has imported them until today. Here is
+what each name is for, before you meet it in a lab.
+
+| Layer | Package | Version | Its one job | Without it |
+|---|---|---|---|---|
+| Runner | [`vitest`](https://vitest.dev/guide/why.html) | 5.0.1 | Finds `*.test.ts(x)`, transforms it through Vite, runs it, reports, watches | No `describe`, no `it`, no test command — Lab 1's first error exactly |
+| DOM | [`jsdom`](https://vitest.dev/guide/environment) | 30.1.0 | A `document` and a `window` implemented in JavaScript, inside Node | `ReferenceError: document is not defined` the moment you `render` |
+| Rendering | [`@testing-library/react`](https://testing-library.com/docs/react-testing-library/intro/) | 16.3.3 | `render()` mounts a component; `screen` queries it the way a user would find things | You would be asserting on `container.querySelector('.btn-primary')` — a test coupled to your CSS |
+| Interaction | [`@testing-library/user-event`](https://testing-library.com/docs/user-event/intro/) | 14.6.7 | Simulates a *person*: a click is pointer + focus + mouse + click, in order | `fireEvent` "clicks" disabled buttons, so the test passes against a button that does nothing |
+| Matchers | [`@testing-library/jest-dom`](https://testing-library.com/docs/ecosystem-jest-dom/) | 7.0.1 | DOM matchers: `toBeInTheDocument`, `toBeDisabled`, `toHaveAccessibleName` | `expect(...).toBeInTheDocument is not a function`, and assertions written as `el !== null` |
+| Network | [`msw`](https://mswjs.io/docs/) | 2.15.0 | Intercepts requests at the network layer and answers with fixtures you control | You would mock your own `api/services` — and stop testing the axios instance, the interceptors and the error mapping |
+| E2E | [`@playwright/test`](https://playwright.dev/docs/intro) | 1.63.0 | Drives a real Chromium against the real build | Nothing tests routing, the bundle, the env file or the service worker path |
+| Routes | `createRoutesStub` (React Router 8) | — | A throwaway router so a loader, an action or middleware can run under test | You would have to render the whole `App` to exercise one loader |
+
+`createRoutesStub` is not a package — it ships inside `react-router`, which
+you have had since Demo 9. It is the piece that makes Lab 5 possible.
+
+### Why Vitest rather than Jest
+
+Not a preference. Four concrete reasons, in order of how much they matter
+*here*:
+
+**1. This is already a Vite project, and the test config extends the build
+config.** `vitest.config.ts` uses `mergeConfig(viteConfig, …)`, so the code
+under test goes through exactly the same transform pipeline as the shipped
+bundle: the same `resolve`, the same aliases, the same JSX handling — and,
+concretely for ShopScope, **the same React Compiler plugin**, which runs as a
+custom Vite plugin in `vite.config.ts`. A hand-built Jest transform would
+have quietly tested *uncompiled* source and told you nothing about what
+ships. One config, one pipeline, no drift.
+
+**2. ESM, without ceremony.** This codebase is ES modules from top to
+bottom, and so are its dependencies. Vitest runs ESM natively because Vite
+does. Jest is CommonJS at heart; running modern ESM under it means
+`transformIgnorePatterns`, `babel-jest`, sometimes
+`--experimental-vm-modules` — a well-known afternoon.
+
+**3. Speed, and a watch mode that means it.** Vite's transform is esbuild,
+the module graph is already warm, and only the files affected by a change
+re-run. That is the difference between a second terminal you leave open all
+day and a command you run before pushing.
+
+**4. The API is nearly identical, so nothing you learn is Vitest-only.**
+`describe`, `it`, `expect`, `beforeEach`, `vi.fn()` where Jest says
+`jest.fn()`, `vi.mock()` where Jest says `jest.mock()`. Everything you learn
+today transfers to a Jest codebase tomorrow, and most migrations between the
+two are a config change plus a find-and-replace.
+
+The one place the similarity bites: the matcher package is called
+`@testing-library/jest-dom`, and under Vitest you must import
+**`@testing-library/jest-dom/vitest`** — with the suffix. The bare entry
+point registers its matchers on *Jest's* `expect`, yours stays
+matcher-less, and you get `expect(...).toBeInTheDocument is not a function`
+with no clue why. Lab 1 step C is where that line lives.
+
+**And in fairness to Jest.** It is not legacy and it is not worse. It is
+still the right answer for a Create React App codebase, for a Next.js app
+that is not on Vite, for React Native, and for any repo where the whole
+team's tooling, CI caching and editor integrations are already built around
+it. Jest has the larger ecosystem and the longer paper trail; Vitest's
+advantage here is specifically that **we already have Vite**.
+
+### What to pick
+
+- **A Vite project** (this one): **Vitest + React Testing Library + MSW +
+  Playwright.** Exactly today's stack, for the reasons above.
+- **Create React App, Next.js, or anything not on Vite**: **Jest + React
+  Testing Library + MSW + Playwright.** Only the runner changes.
+
+Which is the point worth carrying away: **the runner is the least
+consequential of the four choices.** Testing Library, MSW and Playwright are
+all runner-agnostic and move across unchanged. Almost everything you write
+in the next two hours is skill you keep whatever the next codebase picked.
+
+---
+
+## Your first test, in ten minutes
+
+Before Lab 1 turns this into a real configuration for a real app, here is
+the whole loop end to end, small enough to do now. If the project already
+has the packages — this one does — start at step 2.
+
+1. **Install.** `npm i -D vitest jsdom` for the runner and a DOM;
+   `@testing-library/react @testing-library/user-event
+   @testing-library/jest-dom` when you want to render components.
+2. **One config file.** `vitest.config.ts` at the project root:
+   `environment: 'jsdom'`, `globals: true`, `setupFiles`. That is the
+   minimum, and Lab 1 builds it line by line.
+3. **One setup file.** `src/test/setup.ts`, one import to start with:
+   `import '@testing-library/jest-dom/vitest';`.
+4. **One script.** `"test": "vitest run"` for CI, `"test:watch": "vitest"`
+   for you. Both are already in this `package.json`.
+5. **The smallest possible test of a pure function.** Put it next to the
+   code, named `<thing>.test.ts`:
+
+```ts
+// src/lib/pricing.test.ts
+import { describe, expect, it } from 'vitest';
+import { discountedPrice } from './pricing';
+
+describe('discountedPrice', () => {
+  it('takes the percentage off the list price', () => {
+    expect(discountedPrice(100, 15)).toBe(85);
+  });
+});
+```
+
+6. **Run it and watch it pass.** `npm run test:watch`. One green tick.
+7. **Now break it on purpose.** Change `toBe(85)` to `toBe(84)`, or change
+   the function to subtract instead of multiply. Watch the red, and *read
+   the failure*: `expected 85 to be 84`. That message — the diff, the file,
+   the line — is the thing you are actually buying. Put it back.
+
+Step 7 is not optional padding. It is how you find out the test is wired to
+the code at all, and it is the habit that keeps vacuous tests out of the
+suite.
+
+### What to test, and what not to
+
+The rule for today, and the one every lab returns to: **test behaviour and
+contracts, not implementation.**
+
+A good heuristic: you can write the test when you can finish this sentence
+without naming an internal — *"a user (or a caller) should be able to ___
+and see ___"*. "A signed-out visitor should be able to click Add to cart and
+see the cart count go to 1" is a test. "The `useState` should be `true`" is
+not.
+
+**Do assert on:** what is rendered and its accessible name and role; what
+happens after a click, a keystroke or a submit; what a function returns for
+a given input, including the edge cases; what request went out, and what the
+UI did with each of the four answers (loading, data, empty, error); the bug
+you just fixed.
+
+**Do not assert on:** internal state or a hook's return value; that a prop
+was passed down; CSS classes, inline styles or DOM structure; the number of
+renders; third-party library internals; or a whole-component snapshot,
+which turns every intentional change into a diff nobody reads and everybody
+approves.
+
+The test is: **would this test survive a refactor that changed no
+behaviour?** If not, it is not protecting you — it is taxing you.
+
+### Further reading
+
+- [Why Vitest](https://vitest.dev/guide/why.html) and
+  [Vitest vs Jest and others](https://vitest.dev/guide/comparisons.html) —
+  the project's own account of the trade-off
+- [Vitest configuration](https://vitest.dev/config/),
+  [test environments](https://vitest.dev/guide/environment) and
+  [`expect` matchers](https://vitest.dev/api/expect.html)
+- [Testing Library guiding principles](https://testing-library.com/docs/guiding-principles/)
+  — one page, and the whole philosophy behind today
+- [React Testing Library intro](https://testing-library.com/docs/react-testing-library/intro/),
+  [query priority](https://testing-library.com/docs/queries/about/) and
+  [`user-event`](https://testing-library.com/docs/user-event/intro/)
+- [MSW: why intercept the network](https://mswjs.io/docs/philosophy) and
+  [getting started](https://mswjs.io/docs/getting-started)
+- [Playwright: getting started](https://playwright.dev/docs/intro) and its
+  [best practices](https://playwright.dev/docs/best-practices) — read the
+  second one before you write your first spec
+- [Jest: getting started](https://jestjs.io/docs/getting-started) and
+  [Cypress testing types](https://docs.cypress.io/app/core-concepts/testing-types),
+  for the other half of each pair
+- [ARIA roles (MDN)](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
+  — the vocabulary `getByRole` queries
+- [Thinking in React](https://react.dev/learn/thinking-in-react) — the
+  component boundaries you draw here are the ones you will test
+
+Where this goes next: **Labs 1–3** build the runner, the component tests and
+the pure tests; **Labs 4–5** add MSW and the router; **Lab 6** is the one
+Playwright journey. **Demo 22** takes the four commands you end today with —
+typecheck, lint, test, build — and makes them the CI gate that blocks a
+merge.
+
+---
+
 ## Lab 1 — The toolchain (15 min)
 
 ### Problem
@@ -192,10 +626,12 @@ before a single assertion runs.
 
 ### Concept
 
-**The testing trophy, and where the money is.** Kent C. Dodds' picture
-replaced the old pyramid, and the change is the point: the widest band is not
-unit tests, it is **integration** — several real units wired together with
-only the network faked.
+**The testing trophy, applied to this codebase.**
+[Groundwork](#the-kinds-of-test-and-the-layers-they-sit-in) drew the trophy
+in general and argued the shape: the widest band is not unit tests, it is
+**integration** — several real units wired together with only the network
+faked. This is that picture with ShopScope's own files in each band, and
+today's cost for each:
 
 | Layer | What it is here | Cost | What it catches |
 |---|---|---|---|
@@ -205,13 +641,17 @@ only the network faked.
 | **E2E** | one Playwright journey | ~30 s and a browser | the things only a real build can be wrong about |
 
 The trophy is a budget, not a ranking: most of your confidence should come
-from the middle, because that is where the bugs that reach users live.
+from the middle, because that is where the bugs that reach users live. Where
+the general picture and this one seem to disagree, this one wins — it is
+priced against a real codebase.
 
-**What is worth testing, as a rule.** Write a test when you can finish this
-sentence without naming an implementation detail: *"a user (or a caller)
-should be able to ___ and see ___"*. If the only way to express the assertion
-is "the `useState` should be `true`" or "`onAddToCart` should be passed down",
-you are testing the wiring diagram, and the next refactor deletes it.
+**What is worth testing, as a rule.** The short version of
+[what to test, and what not to](#what-to-test-and-what-not-to): write a test
+when you can finish this sentence without naming an implementation detail:
+*"a user (or a caller) should be able to ___ and see ___"*. If the only way
+to express the assertion is "the `useState` should be `true`" or
+"`onAddToCart` should be passed down", you are testing the wiring diagram,
+and the next refactor deletes it.
 
 **And TypeScript says** `test` is not part of Vite's own config type. The
 `defineConfig` you import today comes from **`vitest/config`**, not from
