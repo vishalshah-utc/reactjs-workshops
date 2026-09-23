@@ -1,0 +1,30 @@
+/*
+ * Intentionally (almost) empty.
+ *
+ * Bootstrap's stylesheet is imported in main.jsx and does all the work.
+ * Everything visual in this track is a React Bootstrap component or a
+ * Bootstrap utility class — there is no custom CSS to learn or maintain.
+ */
+
+/* ---------------------------------------------------------------- live feed
+   The highlight that makes an arriving WebSocket message visible.
+
+   The class is applied by `StockCell` from `inventory.flashes[id]`, and
+   removed 1.2 s later by `flashClearEpic` — a `delay` operator inside a
+   `mergeMap`, not a `setTimeout` anybody has to clear. If you never see this
+   animation, the feed is not connected; check the badge above the table. */
+@keyframes feed-flash-up {
+  from { background-color: rgba(25, 135, 84, 0.35); }
+  to   { background-color: transparent; }
+}
+@keyframes feed-flash-down {
+  from { background-color: rgba(220, 53, 69, 0.35); }
+  to   { background-color: transparent; }
+}
+.feed-flash-up   { animation: feed-flash-up 1.2s ease-out; }
+.feed-flash-down { animation: feed-flash-down 1.2s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .feed-flash-up,
+  .feed-flash-down { animation: none; outline: 2px solid var(--bs-secondary); }
+}
