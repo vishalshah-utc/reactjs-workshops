@@ -1,5 +1,20 @@
-import type { AxiosInstance } from 'axios';
+import axios, { type AxiosInstance } from 'axios';
+import { ApiError } from '../../lib/ApiError';
+import { logger } from '../../config/logger';
 
-/** Does nothing yet. Lab 4.3: turn every rejection into an ApiError — except cancellations. */
-// TODO(lab-4.3): response error interceptor → ApiError.from(error); pass axios.isCancel() through untouched
-export function installErrorNormalizer(_instance: AxiosInstance) {}
+export function installErrorNormalizer(instance: AxiosInstance) {
+  instance.interceptors.response.use(
+    (response) => response,
+    (error: unknown) => {
+      if (axios.isCancel(error)) return Promise.reject(error);   // expected; pass through untouched
+
+      const apiError = ApiError.from(error);
+
+      if (apiError.status >= 500 || apiError.isNetwork) {
+        logger.error(`[api] ${apiError.code}: ${apiError.message}`, { requestId: apiError.requestId });
+      }
+
+      return Promise.reject(apiError);
+    },
+  );
+}

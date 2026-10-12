@@ -75,6 +75,19 @@ By the end you will be able to answer, without hesitating:
 
 ---
 
+## Pre-reading
+
+The theory for this demo is in the study notes; the demo assumes you have read it.
+
+| Study notes | Read |
+|---|---|
+| [study-notes 19 — Server Components & Modern React 19](../../study-notes/19-server-components/) | in full |
+| [study-notes 03 — Rendering Architectures: CSR, SSR & SSG](../../study-notes/03-rendering-architectures/) | the RSC vocabulary, as a refresher |
+
+The full demo-to-notes map is in [study-notes/README.md](../../study-notes/README.md#mapping-to-the-shopscope-demos).
+
+---
+
 ## Before the demo (5 minutes)
 
 ```

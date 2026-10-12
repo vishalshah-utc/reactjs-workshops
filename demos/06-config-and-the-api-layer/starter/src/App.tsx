@@ -14,6 +14,8 @@ import { CardSkeletons } from './components/Skeletons';
 import { applySort, buildCategories, filterProducts, PLACEHOLDER_THUMBNAIL } from './lib/catalog';
 import type { SortKey } from './lib/catalog';
 import type { Density, Product, ProductDraft, ProductListResponse } from './types';
+import { listProducts } from './api/services/products';
+import { ApiError } from './lib/ApiError';
 
 /** Only the fields the cards render — a smaller payload is a faster page. */
 const LIST_FIELDS = 'id,title,description,category,price,discountPercentage,rating,stock,brand,thumbnail';
@@ -22,7 +24,7 @@ export default function App() {
   // Seeded from the network now. Empty until the first response lands.
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true); // true from the start: a request WILL happen
-  const [error, setError] = useState<unknown>(null); // a catch block hands you `unknown`; keep it honest
+  const [error, setError] = useState<ApiError | null>(null); // a catch block hands you `unknown`; keep it honest
   const [reloadKey, setReloadKey] = useState(0);
 
   const [query, setQuery] = useState('');
@@ -43,14 +45,11 @@ export default function App() {
         setLoading(true);
         setError(null);
         // The generic types `response.data` — a CLAIM, not a runtime check (Demo 6 says more).
-        const { data } = await axios.get<ProductListResponse>('https://dummyjson.com/products', {
-          params: { limit: 0, select: LIST_FIELDS }, // limit=0 → every product
-          signal: controller.signal,
-        });
-        setProducts(data.products);
+        const {products} = await listProducts({signal: controller.signal});
+        setProducts(products);
       } catch (err) {
-        if (axios.isCancel(err)) return; // a cancelled request is not a failure
-        setError(err);
+        if (axios.isCancel(err)) return;
+        setError(ApiError.from(err));
       } finally {
         // If a NEWER request cancelled this one, it owns the loading flag now.
         if (!controller.signal.aborted) setLoading(false);

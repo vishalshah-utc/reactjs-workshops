@@ -1,7 +1,14 @@
-/** Every URL the app can hit. Lab 2.2 fills it in. Paths are relative to the instance baseURL. */
-// TODO(lab-2.2): products.list/search/byCategory/categories/detail/create/update/remove as FUNCTIONS (ids typed number | string, encoded)
+const enc = (value: string | number) => encodeURIComponent(String(value));
+
 export const endpoints = {
   products: {
     list: () => '/products',
+    search: () => '/products/search',
+    byCategory: (slug: string) => `/products/category/${enc(slug)}`,
+    categories: () => '/products/categories',
+    detail: (id: number | string) => `/products/${enc(id)}`,
+    create: () => '/products/add',
+    update: (id: number | string) => `/products/${enc(id)}`,
+    remove: (id: number | string) => `/products/${enc(id)}`,
   },
 };

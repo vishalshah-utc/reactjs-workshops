@@ -67,6 +67,19 @@ By the end you will be able to answer, without hesitating:
 
 ---
 
+## Pre-reading
+
+The theory for this demo is in the study notes; the demo assumes you have read it.
+
+| Study notes | Read |
+|---|---|
+| [study-notes 11 — Refs & the DOM](../../study-notes/11-refs-and-the-dom/) | in full |
+| [study-notes 26 — Accessibility in React](../../study-notes/26-accessibility/) | keyboard navigation and focus management |
+
+The full demo-to-notes map is in [study-notes/README.md](../../study-notes/README.md#mapping-to-the-shopscope-demos).
+
+---
+
 ## Before the demo (5 minutes)
 
 ```

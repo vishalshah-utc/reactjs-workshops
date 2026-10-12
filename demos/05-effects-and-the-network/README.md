@@ -32,6 +32,20 @@ By the end you will be able to answer, without hesitating:
 
 ---
 
+## Pre-reading
+
+The theory for this demo is in the study notes; the demo assumes you have read it.
+
+| Study notes | Read |
+|---|---|
+| [study-notes 12 — Effects & Synchronisation](../../study-notes/12-effects/) | in full |
+| [study-notes 13 — Data Fetching & Custom Hooks](../../study-notes/13-data-fetching-and-custom-hooks/) | the three states, cancellation, `useFetch` |
+| [study-notes 21 — The API Layer: Configuration, axios & Advanced HTTP](../../study-notes/21-api-layer-and-advanced-http/) | axios vs `fetch`, `ApiError` |
+
+The full demo-to-notes map is in [study-notes/README.md](../../study-notes/README.md#mapping-to-the-shopscope-demos).
+
+---
+
 ## Before the demo (10 minutes)
 
 ```

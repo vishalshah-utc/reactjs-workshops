@@ -61,7 +61,20 @@ By the end you will be able to answer, without hesitating:
 
 > **A cache is a correctness problem, not a performance trick.** Every lab
 > today is about who is allowed to say what the truth is, and when.
-> 📖 [study-notes 13](../../study-notes/13-data-fetching/) is today's theory.
+> 📖 [study-notes 13](../../study-notes/13-data-fetching-and-custom-hooks/) is today's theory.
+
+---
+
+## Pre-reading
+
+The theory for this demo is in the study notes; the demo assumes you have read it.
+
+| Study notes | Read |
+|---|---|
+| [study-notes 24 — Server State: TanStack Query & Real-time Data](../../study-notes/24-server-state-tanstack-query-and-realtime/) | in full |
+| [study-notes 13 — Data Fetching & Custom Hooks](../../study-notes/13-data-fetching-and-custom-hooks/) | what a hand-rolled hook cannot do |
+
+The full demo-to-notes map is in [study-notes/README.md](../../study-notes/README.md#mapping-to-the-shopscope-demos).
 
 ---
 

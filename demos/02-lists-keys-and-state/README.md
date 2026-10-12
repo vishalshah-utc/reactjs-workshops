@@ -32,6 +32,19 @@ By the end you will be able to answer, without hesitating:
 
 ---
 
+## Pre-reading
+
+The theory for this demo is in the study notes; the demo assumes you have read it.
+
+| Study notes | Read |
+|---|---|
+| [study-notes 06 — Conditional Rendering & Lists](../../study-notes/06-conditional-rendering-and-lists/) | lists, `key`, deriving lists |
+| [study-notes 07 — State & Events](../../study-notes/07-state-and-events/) | `useState`, state as a snapshot |
+
+The full demo-to-notes map is in [study-notes/README.md](../../study-notes/README.md#mapping-to-the-shopscope-demos).
+
+---
+
 ## Before the demo (5 minutes)
 
 Open the starter and let it install:

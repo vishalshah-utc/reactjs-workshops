@@ -64,6 +64,20 @@ By the end you will be able to answer, without hesitating:
 
 ---
 
+## Pre-reading
+
+The theory for this demo is in the study notes; the demo assumes you have read it.
+
+| Study notes | Read |
+|---|---|
+| [study-notes 16 — Advanced Patterns, Error Boundaries & Portals](../../study-notes/16-advanced-patterns/) | patterns, portals |
+| [study-notes 17 — TypeScript with React](../../study-notes/17-typescript-with-react/) | generic components, discriminated unions, `satisfies` |
+| [study-notes 05 — Props & Component Composition](../../study-notes/05-props-and-composition/) | composition patterns, as a refresher |
+
+The full demo-to-notes map is in [study-notes/README.md](../../study-notes/README.md#mapping-to-the-shopscope-demos).
+
+---
+
 ## Before the demo (5 minutes)
 
 ```

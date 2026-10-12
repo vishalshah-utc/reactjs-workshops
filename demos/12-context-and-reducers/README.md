@@ -48,6 +48,19 @@ By the end you will be able to answer, without hesitating:
 
 ---
 
+## Pre-reading
+
+The theory for this demo is in the study notes; the demo assumes you have read it.
+
+| Study notes | Read |
+|---|---|
+| [study-notes 09 — Reducers & Context](../../study-notes/09-reducers-and-context/) | in full |
+| [study-notes 08 — Structuring State: Objects, Arrays, Lifting & Resetting](../../study-notes/08-state-structure/) | state that cannot contradict itself |
+
+The full demo-to-notes map is in [study-notes/README.md](../../study-notes/README.md#mapping-to-the-shopscope-demos).
+
+---
+
 ## Before the demo (5 minutes)
 
 ```

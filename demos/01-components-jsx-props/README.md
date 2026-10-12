@@ -21,6 +21,20 @@ By the end you will be able to answer, without hesitating:
 
 ---
 
+## Pre-reading
+
+The theory for this demo is in the study notes; the demo assumes you have read it.
+
+| Study notes | Read |
+|---|---|
+| [study-notes 04 — Describing the UI: Components & JSX](../../study-notes/04-components-and-jsx/) | in full |
+| [study-notes 05 — Props & Component Composition](../../study-notes/05-props-and-composition/) | props, destructuring, defaults, `children` |
+| [study-notes 17 — TypeScript with React](../../study-notes/17-typescript-with-react/) | typing props |
+
+The full demo-to-notes map is in [study-notes/README.md](../../study-notes/README.md#mapping-to-the-shopscope-demos).
+
+---
+
 ## Before the demo (10 minutes)
 
 1. **Open the starter and let it install.** Click this, then leave the tab open:

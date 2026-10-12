@@ -1,8 +1,17 @@
-/** Straight to the console. Lab 1.2 gates it on VITE_LOG_LEVEL so production stays quiet. */
-// TODO(lab-1.2): level-gated logger driven by env.logLevel (a LogLevel union)
+import { env, type LogLevel } from './env';
+
+const LEVELS: Record<LogLevel, number> = { debug: 10, info: 20, warn: 30, error: 40 };
+const threshold = LEVELS[env.logLevel];   // env.logLevel is a LogLevel, so this index can't miss
+
+function log(level: LogLevel, ...args: unknown[]) {
+  if (LEVELS[level] < threshold) return;
+  const method = level === 'debug' ? 'log' : level;
+  console[method](`[${level}]`, ...args);
+}
+
 export const logger = {
-  debug: (...args: unknown[]) => console.log('[debug]', ...args),
-  info: (...args: unknown[]) => console.info('[info]', ...args),
-  warn: (...args: unknown[]) => console.warn('[warn]', ...args),
-  error: (...args: unknown[]) => console.error('[error]', ...args),
+  debug: (...a: unknown[]) => log('debug', ...a),
+  info: (...a: unknown[]) => log('info', ...a),
+  warn: (...a: unknown[]) => log('warn', ...a),
+  error: (...a: unknown[]) => log('error', ...a),
 };

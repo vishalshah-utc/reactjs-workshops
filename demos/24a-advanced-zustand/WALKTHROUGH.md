@@ -330,4 +330,4 @@ explicit — "user-scoped" is a choice, not a default.
 - [Demo 19](../19-tanstack-query-and-realtime/) — the cache this store
   deliberately is not
 - [Demo 24b](../24b-redux-toolkit/) — the same screen in Redux Toolkit
-- [Demo 24c](../24c-redux-observable/) — side effects as RxJS streams
+- [Demo 24c](../24c-redux-observable-and-rxjs/) — side effects as RxJS streams

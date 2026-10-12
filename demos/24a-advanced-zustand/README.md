@@ -106,6 +106,18 @@ By the end you will be able to answer, without hesitating:
 
 ---
 
+## Pre-reading
+
+The theory for this demo is in the study notes; the demo assumes you have read it.
+
+| Study notes | Read |
+|---|---|
+| [study-notes 23 — Client State Libraries: Zustand, Redux Toolkit & RxJS](../../study-notes/23-client-state-libraries/) | the Zustand half and the comparison |
+
+The full demo-to-notes map is in [study-notes/README.md](../../study-notes/README.md#mapping-to-the-shopscope-demos).
+
+---
+
 ## Before the demo (5 minutes)
 
 ```
@@ -2501,7 +2513,7 @@ before you argue about either.
 
 > For the wider landscape — Jotai, Valtio, MobX, XState, and which combinations
 > actually work — see [Demo 13's *The landscape*](../13-client-state-with-zustand/).
-> For side effects as streams, [Demo 24c](../24c-redux-observable/) takes the
+> For side effects as streams, [Demo 24c](../24c-redux-observable-and-rxjs/) takes the
 > RTK store and puts RxJS over it.
 
 ---
@@ -2575,7 +2587,7 @@ something on its own.
 - [Demo 13 — Client State with Zustand](../13-client-state-with-zustand/) — the basics today builds on, plus *Groundwork* and *The landscape*
 - [Demo 19 — TanStack Query & Real-time](../19-tanstack-query-and-realtime/) — server state, and the argument this guide hands off to
 - [Demo 24b — Redux Toolkit](../24b-redux-toolkit/) — the same screen, the other library
-- [Demo 24c — Redux-Observable & RxJS](../24c-redux-observable/) — side effects as streams, over a WebSocket
+- [Demo 24c — Redux-Observable & RxJS](../24c-redux-observable-and-rxjs/) — side effects as streams, over a WebSocket
 - [WALKTHROUGH.md](./WALKTHROUGH.md) — read the finished solution instead of building it
 
 ---

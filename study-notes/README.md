@@ -16,8 +16,9 @@ as ten two-hour workshops against the ShopCrew product and API.
 | 📋 **[`../PLAN.md`](../PLAN.md)** | The workshop curriculum plan |
 
 **References are from the official React documentation ([react.dev](https://react.dev))
-only.** No third-party blogs, no videos — everything cited is something the
-React team maintains, so it stays correct as React moves.
+only** — and, in the Part 7 library modules, that library's own official docs.
+No third-party blogs, no videos — everything cited is something its maintainers
+keep correct as the software moves.
 
 ---
 
@@ -99,21 +100,38 @@ writing them; and data fetching, where hand-rolling stops being viable — build
 
 | # | Module | Time | Status |
 |---|---|---|---|
-| 14 | **[Routing & Application Architecture](./14-routing/)** | 2.5h | 📝 outline |
-| 15 | **[Performance & Optimisation](./15-performance/)** | 2.5h | 📝 outline |
-| 16 | **[Advanced Patterns, Error Boundaries & Portals](./16-advanced-patterns/)** | 2.5h | 📝 outline |
+| 14 | **[Routing & Application Architecture](./14-routing/)** | 2.5h | ✅ complete |
+| 15 | **[Performance & Optimisation](./15-performance/)** | 2.5h | ✅ complete |
+| 16 | **[Advanced Patterns, Error Boundaries & Portals](./16-advanced-patterns/)** | 2.5h | ✅ complete |
 
 ### Part 6 — Professional practice
 
 | # | Module | Time | Status |
 |---|---|---|---|
-| 17 | **[TypeScript with React](./17-typescript-with-react/)** | 2.5h | 📝 outline |
-| 18 | **[Testing React Applications](./18-testing/)** | 2.5h | 📝 outline |
-| 19 | **[Server Components & Modern React 19](./19-server-components/)** | 2.5h | 📝 outline |
-| 20 | **[Shipping to Production](./20-production/)** | 2h | 📝 outline |
+| 17 | **[TypeScript with React](./17-typescript-with-react/)** | 2.5h | ✅ complete |
+| 18 | **[Testing React Applications](./18-testing/)** | 2.5h | ✅ complete |
+| 19 | **[Server Components & Modern React 19](./19-server-components/)** | 2.5h | ✅ complete |
+| 20 | **[Shipping to Production](./20-production/)** | 2h | ✅ complete |
 
-**Status key:** ✅ full notes written · 📝 outline with objectives, topic
-breakdown, exercises and references; prose and examples still to be written.
+### Part 7 — The application stack (written for the ShopScope demo track)
+
+| # | Module | Time | Status |
+|---|---|---|---|
+| 21 | **[The API Layer: Configuration, axios & Advanced HTTP](./21-api-layer-and-advanced-http/)** | 3h | ✅ complete |
+| 22 | **[Authentication & Protected Routes](./22-authentication-and-protected-routes/)** | 2.5h | ✅ complete |
+| 23 | **[Client State Libraries: Zustand, Redux Toolkit & RxJS](./23-client-state-libraries/)** | 3.5h | ✅ complete |
+| 24 | **[Server State: TanStack Query & Real-time Data](./24-server-state-tanstack-query-and-realtime/)** | 3h | ✅ complete |
+| 25 | **[Styling & Theming in React](./25-styling-and-theming/)** | 2.5h | ✅ complete |
+| 26 | **[Accessibility in React](./26-accessibility/)** | 2.5h | ✅ complete |
+| 27 | **[Architecture, Legacy Code & Interview Readiness](./27-architecture-legacy-code-and-interviews/)** | 3h | ✅ complete |
+
+Modules 1–20 are the React curriculum. Part 7 is the rest of a professional
+front-end stack as the demo track uses it — the HTTP layer, auth, the state
+libraries, the server-state cache, styling, accessibility, and how to organise
+and defend the result. Where a module is about a library rather than React, its
+references are that library's official documentation.
+
+**Status key:** ✅ full notes written.
 
 ---
 
@@ -148,7 +166,7 @@ the concept early so the vocabulary exists; Module 19 goes deep.
 2. **Type the examples.** Reading code is not learning code.
 3. **Do the self-check** at the end. If you cannot answer a question, that
    section did not land — go back to it before moving on.
-4. **Build the matching session lab** in [`../sessions/`](../sessions/).
+4. **Build the matching demo** from the [demo track](../demos/) (or the session lab in [`../sessions/`](../sessions/)).
 5. **Keep react.dev open.** These notes are a curated path through it, not a
    replacement for it.
 
@@ -159,6 +177,79 @@ don't:
   Profiler for renders. Guessing is slower than looking.
 - **Take `react-hooks/exhaustive-deps` seriously.** When the linter complains
   about an effect, it has found a real bug roughly nine times out of ten.
+
+---
+
+## Mapping to the ShopScope demos
+
+The [demo track](../demos/) builds one app, ShopScope, over 25 sessions. Each demo
+guide opens with a **Pre-reading** section that names the modules below; this is the
+same map in both directions. Several modules can feed one demo.
+
+**Demo → study notes** (in session order)
+
+| Demo | Read |
+|---|---|
+| [S1 · JavaScript & TypeScript for React](../demos/00a-javascript-and-typescript-for-react/) | [01](./01-javascript-foundations/) in full · [17](./17-typescript-with-react/) the tsconfig and typed-props sections |
+| [S2 · React Introduction & the Toolchain](../demos/00b-react-introduction-and-toolchain/) | [02](./02-react-introduction/) in full · [03](./03-rendering-architectures/) in full |
+| [Demo 1 · Components, JSX & Props](../demos/01-components-jsx-props/) | [04](./04-components-and-jsx/) in full · [05](./05-props-and-composition/) props, destructuring, defaults, `children` · [17](./17-typescript-with-react/) typing props |
+| [Demo 2 · Lists, Keys & State](../demos/02-lists-keys-and-state/) | [06](./06-conditional-rendering-and-lists/) lists, `key`, deriving lists · [07](./07-state-and-events/) `useState`, state as a snapshot |
+| [Demo 3 · Events, Forms & Lifting State](../demos/03-events-forms-and-lifting-state/) | [07](./07-state-and-events/) events, handlers, updater functions · [08](./08-state-structure/) lifting state, immutable updates, derived values · [10](./10-forms/) controlled inputs, the first form |
+| [Demo 4 · Forms: Reusable Fields, Manual Validation & react-hook-form](../demos/04-forms-manual-and-react-hook-form/) | [10](./10-forms/) in full · [17](./17-typescript-with-react/) inference from zod schemas |
+| [Demo 5 · Effects & the Network](../demos/05-effects-and-the-network/) | [12](./12-effects/) in full · [13](./13-data-fetching-and-custom-hooks/) the three states, cancellation, `useFetch` · [21](./21-api-layer-and-advanced-http/) axios vs `fetch`, `ApiError` |
+| [Demo 6 · Configuration & the API Layer](../demos/06-config-and-the-api-layer/) | [21](./21-api-layer-and-advanced-http/) configuration, instances, services, interceptors · [02](./02-react-introduction/) §20 environment variables in Vite |
+| [Demo 7 · Search, Filters & Pagination](../demos/07-search-filters-and-pagination/) | [21](./21-api-layer-and-advanced-http/) cancellation, debounce, parallel requests, pagination · [13](./13-data-fetching-and-custom-hooks/) request state and race conditions |
+| [Demo 8 · Mutations & Custom Hooks](../demos/08-mutations-and-custom-hooks/) | [13](./13-data-fetching-and-custom-hooks/) custom hooks · [21](./21-api-layer-and-advanced-http/) mutations, `useApi` and its limits |
+| [Demo 9 · Routing with React Router v8](../demos/09-routing-with-react-router/) | [14](./14-routing/) Data Mode, layouts, params, the URL as state |
+| [Demo 10 · Loaders, Actions & Error Boundaries](../demos/10-loaders-actions-and-error-boundaries/) | [14](./14-routing/) loaders, actions, fetchers, pending UI · [16](./16-advanced-patterns/) error boundaries |
+| [Demo 11 · Authentication & Protected Routes](../demos/11-auth-and-protected-routes/) | [22](./22-authentication-and-protected-routes/) in full · [14](./14-routing/) route middleware and `redirect` |
+| [Demo 12 · Context & Reducers](../demos/12-context-and-reducers/) | [09](./09-reducers-and-context/) in full · [08](./08-state-structure/) state that cannot contradict itself |
+| [Demo 13 · Client State with Zustand](../demos/13-client-state-with-zustand/) | [23](./23-client-state-libraries/) the decision and the Zustand half · [09](./09-reducers-and-context/) the re-render cost of Context |
+| [Demo 14 · Advanced HTTP & Shipping](../demos/14-advanced-http-and-shipping/) | [21](./21-api-layer-and-advanced-http/) optimistic UI, upload progress, retries · [14](./14-routing/) lazy routes · [20](./20-production/) the production build and deploying a SPA |
+| [Demo 15 · Refs, the DOM & Keyboard Accessibility](../demos/15-refs-dom-and-accessibility/) | [11](./11-refs-and-the-dom/) in full · [26](./26-accessibility/) keyboard navigation and focus management |
+| [Demo 16 · Styling & Theming in React](../demos/16-styling-and-theming/) | [25](./25-styling-and-theming/) in full |
+| [Demo 17 · Component Patterns, Portals & TypeScript Consolidation](../demos/17-component-patterns-and-portals/) | [16](./16-advanced-patterns/) patterns, portals · [17](./17-typescript-with-react/) generic components, discriminated unions, `satisfies` · [05](./05-props-and-composition/) composition patterns, as a refresher |
+| [Demo 18 · Performance: Measure, then Fix](../demos/18-performance/) | [15](./15-performance/) in full |
+| [Demo 19 · Server State with TanStack Query & Real-time Data](../demos/19-tanstack-query-and-realtime/) | [24](./24-server-state-tanstack-query-and-realtime/) in full · [13](./13-data-fetching-and-custom-hooks/) what a hand-rolled hook cannot do |
+| [Demo 20 · Testing React Applications](../demos/20-testing/) | [18](./18-testing/) in full |
+| [Demo 21 · React 19 Actions, Suspense & Server Components](../demos/21-react-19-actions-suspense-and-server-components/) | [19](./19-server-components/) in full · [03](./03-rendering-architectures/) the RSC vocabulary, as a refresher |
+| [Demo 22 · Production Readiness](../demos/22-production-readiness/) | [20](./20-production/) in full · [26](./26-accessibility/) the audit and the screen-reader pass |
+| [Demo 23 · Capstone: Architecture, Legacy Code & Interview Readiness](../demos/23-capstone-architecture-legacy-and-interviews/) | [27](./27-architecture-legacy-code-and-interviews/) in full |
+| [Demo 24a · Advanced Zustand](../demos/24a-advanced-zustand/) | [23](./23-client-state-libraries/) the Zustand half and the comparison |
+| [Demo 24b · Redux Toolkit](../demos/24b-redux-toolkit/) | [23](./23-client-state-libraries/) the Redux Toolkit half and the comparison |
+| [Demo 24c · Redux-Observable, RxJS & a WebSocket Stream](../demos/24c-redux-observable-and-rxjs/) | [23](./23-client-state-libraries/) the RxJS half and the comparison |
+
+**Study notes → demos**
+
+| Module | Built in |
+|---|---|
+| 01 · JavaScript Foundations for React | [S1](../demos/00a-javascript-and-typescript-for-react/) |
+| 02 · Introduction to React & Getting Started | [S2](../demos/00b-react-introduction-and-toolchain/) · [Demo 6](../demos/06-config-and-the-api-layer/) |
+| 03 · Rendering Architectures: CSR, SSR & SSG | [S2](../demos/00b-react-introduction-and-toolchain/) · [Demo 21](../demos/21-react-19-actions-suspense-and-server-components/) |
+| 04 · Describing the UI: Components & JSX | [Demo 1](../demos/01-components-jsx-props/) |
+| 05 · Props & Component Composition | [Demo 1](../demos/01-components-jsx-props/) · [Demo 17](../demos/17-component-patterns-and-portals/) |
+| 06 · Conditional Rendering & Lists | [Demo 2](../demos/02-lists-keys-and-state/) |
+| 07 · State & Events | [Demo 2](../demos/02-lists-keys-and-state/) · [Demo 3](../demos/03-events-forms-and-lifting-state/) |
+| 08 · Structuring State: Objects, Arrays, Lifting & Resetting | [Demo 3](../demos/03-events-forms-and-lifting-state/) · [Demo 12](../demos/12-context-and-reducers/) |
+| 09 · Reducers & Context | [Demo 12](../demos/12-context-and-reducers/) · [Demo 13](../demos/13-client-state-with-zustand/) |
+| 10 · Forms & Controlled Components | [Demo 3](../demos/03-events-forms-and-lifting-state/) · [Demo 4](../demos/04-forms-manual-and-react-hook-form/) |
+| 11 · Refs & the DOM | [Demo 15](../demos/15-refs-dom-and-accessibility/) |
+| 12 · Effects & Synchronisation | [Demo 5](../demos/05-effects-and-the-network/) |
+| 13 · Data Fetching & Custom Hooks | [Demo 5](../demos/05-effects-and-the-network/) · [Demo 7](../demos/07-search-filters-and-pagination/) · [Demo 8](../demos/08-mutations-and-custom-hooks/) · [Demo 19](../demos/19-tanstack-query-and-realtime/) |
+| 14 · Routing & Application Architecture | [Demo 9](../demos/09-routing-with-react-router/) · [Demo 10](../demos/10-loaders-actions-and-error-boundaries/) · [Demo 11](../demos/11-auth-and-protected-routes/) · [Demo 14](../demos/14-advanced-http-and-shipping/) |
+| 15 · Performance & Optimisation | [Demo 18](../demos/18-performance/) |
+| 16 · Advanced Patterns, Error Boundaries & Portals | [Demo 10](../demos/10-loaders-actions-and-error-boundaries/) · [Demo 17](../demos/17-component-patterns-and-portals/) |
+| 17 · TypeScript with React | [S1](../demos/00a-javascript-and-typescript-for-react/) · [Demo 1](../demos/01-components-jsx-props/) · [Demo 4](../demos/04-forms-manual-and-react-hook-form/) · [Demo 17](../demos/17-component-patterns-and-portals/) |
+| 18 · Testing React Applications | [Demo 20](../demos/20-testing/) |
+| 19 · Server Components & Modern React 19 | [Demo 21](../demos/21-react-19-actions-suspense-and-server-components/) |
+| 20 · Shipping to Production | [Demo 14](../demos/14-advanced-http-and-shipping/) · [Demo 22](../demos/22-production-readiness/) |
+| 21 · The API Layer: Configuration, axios & Advanced HTTP | [Demo 5](../demos/05-effects-and-the-network/) · [Demo 6](../demos/06-config-and-the-api-layer/) · [Demo 7](../demos/07-search-filters-and-pagination/) · [Demo 8](../demos/08-mutations-and-custom-hooks/) · [Demo 14](../demos/14-advanced-http-and-shipping/) |
+| 22 · Authentication & Protected Routes | [Demo 11](../demos/11-auth-and-protected-routes/) |
+| 23 · Client State Libraries: Zustand, Redux Toolkit & RxJS | [Demo 13](../demos/13-client-state-with-zustand/) · [Demo 24a](../demos/24a-advanced-zustand/) · [Demo 24b](../demos/24b-redux-toolkit/) · [Demo 24c](../demos/24c-redux-observable-and-rxjs/) |
+| 24 · Server State: TanStack Query & Real-time Data | [Demo 19](../demos/19-tanstack-query-and-realtime/) |
+| 25 · Styling & Theming in React | [Demo 16](../demos/16-styling-and-theming/) |
+| 26 · Accessibility in React | [Demo 15](../demos/15-refs-dom-and-accessibility/) · [Demo 22](../demos/22-production-readiness/) |
+| 27 · Architecture, Legacy Code & Interview Readiness | [Demo 23](../demos/23-capstone-architecture-legacy-and-interviews/) |
 
 ---
 

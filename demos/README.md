@@ -138,6 +138,46 @@ Append `&delay=2000` to any request to slow it down — you'll use it constantly
 | `emilys` | `emilyspass` | admin |
 | `averyp` | `averyppass` | user |
 
+## Study notes for each demo
+
+Every demo guide opens with a **Pre-reading** section naming the study-notes modules it
+assumes. Several modules can feed one demo, and one module can serve several demos.
+The notes are the theory track; the demos are where it is built.
+
+| Demo | Study notes |
+|---|---|
+| [S1 · JavaScript & TypeScript for React](./00a-javascript-and-typescript-for-react/) | [01](../study-notes/01-javascript-foundations/) · [17](../study-notes/17-typescript-with-react/) |
+| [S2 · React Introduction & the Toolchain](./00b-react-introduction-and-toolchain/) | [02](../study-notes/02-react-introduction/) · [03](../study-notes/03-rendering-architectures/) |
+| [Demo 1 · Components, JSX & Props](./01-components-jsx-props/) | [04](../study-notes/04-components-and-jsx/) · [05](../study-notes/05-props-and-composition/) · [17](../study-notes/17-typescript-with-react/) |
+| [Demo 2 · Lists, Keys & State](./02-lists-keys-and-state/) | [06](../study-notes/06-conditional-rendering-and-lists/) · [07](../study-notes/07-state-and-events/) |
+| [Demo 3 · Events, Forms & Lifting State](./03-events-forms-and-lifting-state/) | [07](../study-notes/07-state-and-events/) · [08](../study-notes/08-state-structure/) · [10](../study-notes/10-forms/) |
+| [Demo 4 · Forms: Reusable Fields, Manual Validation & react-hook-form](./04-forms-manual-and-react-hook-form/) | [10](../study-notes/10-forms/) · [17](../study-notes/17-typescript-with-react/) |
+| [Demo 5 · Effects & the Network](./05-effects-and-the-network/) | [12](../study-notes/12-effects/) · [13](../study-notes/13-data-fetching-and-custom-hooks/) · [21](../study-notes/21-api-layer-and-advanced-http/) |
+| [Demo 6 · Configuration & the API Layer](./06-config-and-the-api-layer/) | [21](../study-notes/21-api-layer-and-advanced-http/) · [02](../study-notes/02-react-introduction/) |
+| [Demo 7 · Search, Filters & Pagination](./07-search-filters-and-pagination/) | [21](../study-notes/21-api-layer-and-advanced-http/) · [13](../study-notes/13-data-fetching-and-custom-hooks/) |
+| [Demo 8 · Mutations & Custom Hooks](./08-mutations-and-custom-hooks/) | [13](../study-notes/13-data-fetching-and-custom-hooks/) · [21](../study-notes/21-api-layer-and-advanced-http/) |
+| [Demo 9 · Routing with React Router v8](./09-routing-with-react-router/) | [14](../study-notes/14-routing/) |
+| [Demo 10 · Loaders, Actions & Error Boundaries](./10-loaders-actions-and-error-boundaries/) | [14](../study-notes/14-routing/) · [16](../study-notes/16-advanced-patterns/) |
+| [Demo 11 · Authentication & Protected Routes](./11-auth-and-protected-routes/) | [22](../study-notes/22-authentication-and-protected-routes/) · [14](../study-notes/14-routing/) |
+| [Demo 12 · Context & Reducers](./12-context-and-reducers/) | [09](../study-notes/09-reducers-and-context/) · [08](../study-notes/08-state-structure/) |
+| [Demo 13 · Client State with Zustand](./13-client-state-with-zustand/) | [23](../study-notes/23-client-state-libraries/) · [09](../study-notes/09-reducers-and-context/) |
+| [Demo 14 · Advanced HTTP & Shipping](./14-advanced-http-and-shipping/) | [21](../study-notes/21-api-layer-and-advanced-http/) · [14](../study-notes/14-routing/) · [20](../study-notes/20-production/) |
+| [Demo 15 · Refs, the DOM & Keyboard Accessibility](./15-refs-dom-and-accessibility/) | [11](../study-notes/11-refs-and-the-dom/) · [26](../study-notes/26-accessibility/) |
+| [Demo 16 · Styling & Theming in React](./16-styling-and-theming/) | [25](../study-notes/25-styling-and-theming/) |
+| [Demo 17 · Component Patterns, Portals & TypeScript Consolidation](./17-component-patterns-and-portals/) | [16](../study-notes/16-advanced-patterns/) · [17](../study-notes/17-typescript-with-react/) · [05](../study-notes/05-props-and-composition/) |
+| [Demo 18 · Performance: Measure, then Fix](./18-performance/) | [15](../study-notes/15-performance/) |
+| [Demo 19 · Server State with TanStack Query & Real-time Data](./19-tanstack-query-and-realtime/) | [24](../study-notes/24-server-state-tanstack-query-and-realtime/) · [13](../study-notes/13-data-fetching-and-custom-hooks/) |
+| [Demo 20 · Testing React Applications](./20-testing/) | [18](../study-notes/18-testing/) |
+| [Demo 21 · React 19 Actions, Suspense & Server Components](./21-react-19-actions-suspense-and-server-components/) | [19](../study-notes/19-server-components/) · [03](../study-notes/03-rendering-architectures/) |
+| [Demo 22 · Production Readiness](./22-production-readiness/) | [20](../study-notes/20-production/) · [26](../study-notes/26-accessibility/) |
+| [Demo 23 · Capstone: Architecture, Legacy Code & Interview Readiness](./23-capstone-architecture-legacy-and-interviews/) | [27](../study-notes/27-architecture-legacy-code-and-interviews/) |
+| [Demo 24a · Advanced Zustand](./24a-advanced-zustand/) | [23](../study-notes/23-client-state-libraries/) |
+| [Demo 24b · Redux Toolkit](./24b-redux-toolkit/) | [23](../study-notes/23-client-state-libraries/) |
+| [Demo 24c · Redux-Observable, RxJS & a WebSocket Stream](./24c-redux-observable-and-rxjs/) | [23](../study-notes/23-client-state-libraries/) |
+
+Module titles and the reverse map (module → demos) are in
+[study-notes/README.md](../study-notes/README.md#mapping-to-the-shopscope-demos).
+
 ## For trainers
 
 Each starter is the previous demo finished, so you can demo any topic in

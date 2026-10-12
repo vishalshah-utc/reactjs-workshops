@@ -35,6 +35,20 @@ By the end you will be able to answer, without hesitating:
 
 ---
 
+## Pre-reading
+
+The theory for this demo is in the study notes; the demo assumes you have read it.
+
+| Study notes | Read |
+|---|---|
+| [study-notes 21 — The API Layer: Configuration, axios & Advanced HTTP](../../study-notes/21-api-layer-and-advanced-http/) | optimistic UI, upload progress, retries |
+| [study-notes 14 — Routing & Application Architecture](../../study-notes/14-routing/) | lazy routes |
+| [study-notes 20 — Shipping to Production](../../study-notes/20-production/) | the production build and deploying a SPA |
+
+The full demo-to-notes map is in [study-notes/README.md](../../study-notes/README.md#mapping-to-the-shopscope-demos).
+
+---
+
 ## Before the demo (5 minutes)
 
 ```

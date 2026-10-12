@@ -42,6 +42,19 @@ By the end you will be able to answer, without hesitating:
 
 ---
 
+## Pre-reading
+
+The theory for this demo is in the study notes; the demo assumes you have read it.
+
+| Study notes | Read |
+|---|---|
+| [study-notes 14 — Routing & Application Architecture](../../study-notes/14-routing/) | loaders, actions, fetchers, pending UI |
+| [study-notes 16 — Advanced Patterns, Error Boundaries & Portals](../../study-notes/16-advanced-patterns/) | error boundaries |
+
+The full demo-to-notes map is in [study-notes/README.md](../../study-notes/README.md#mapping-to-the-shopscope-demos).
+
+---
+
 ## Before the demo (5 minutes)
 
 ```
